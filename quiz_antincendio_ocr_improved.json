@@ -56,7 +56,7 @@
     },
     {
         "qnum": 6,
-        "instruction": "Qual è l'effetto più grave del Monossido di Carbonio ($\text{CO}$) sull'organismo?",
+        "instruction": "Qual è l'effetto più grave del Monossido di Carbonio (CO) sull'organismo?",
         "options": {
             "A": "Irritazione della pelle",
             "B": "Intossicazione del sangue",
@@ -78,7 +78,7 @@
     },
     {
         "qnum": 8,
-        "instruction": "L'azione estinguente del $\text{CO}_2$ (Anidride Carbonica) è prevalentemente:",
+        "instruction": "L'azione estinguente del CO}_2$ (Anidride Carbonica) è prevalentemente:",
         "options": {
             "A": "Raffreddamento e soffocamento",
             "B": "Soffocamento e inibizione chimica",
@@ -100,7 +100,7 @@
     },
     {
         "qnum": 10,
-        "instruction": "L'Idrante a muro ($\text{UNI EN 671-2}$) è composto essenzialmente da:",
+        "instruction": "L'Idrante a muro (UNI EN 671-2) è composto essenzialmente da:",
         "options": {
             "A": "Una saracinesca e una manichetta avvolta su un naspo",
             "B": "Una cassetta, una valvola di intercettazione, una manichetta flessibile e una lancia",
@@ -265,7 +265,7 @@
     },
     {
         "qnum": 25,
-        "instruction": "Quale tra le seguenti è la funzione della valvola di sicurezza in una bombola per gas compressi (ad esempio un estintore a $\text{CO}_2$)?",
+        "instruction": "Quale tra le seguenti è la funzione della valvola di sicurezza in una bombola per gas compressi (ad esempio un estintore a CO}_2$)?",
         "options": {
             "A": "Impedire che il gas fuoriesca durante il trasporto",
             "B": "Rilasciare gas in eccesso per evitare il rischio di scoppio della bombola per sovrapressione",
@@ -331,7 +331,7 @@
     },
     {
         "qnum": 31,
-        "instruction": "La $\text{CO}_2$ (Anidride Carbonica) contenuta negli estintori è immagazzinata come:",
+        "instruction": "La CO}_2$ (Anidride Carbonica) contenuta negli estintori è immagazzinata come:",
         "options": {
             "A": "Gas compresso ad alta pressione",
             "B": "Liquido ad alta pressione",
@@ -397,7 +397,7 @@
     },
     {
         "qnum": 37,
-        "instruction": "Qual è la funzione del naspo (avvolgitore) in un impianto a naspi ($\text{UNI EN 671-1}$)?",
+        "instruction": "Qual è la funzione del naspo (avvolgitore) in un impianto a naspi (UNI EN 671-1)?",
         "options": {
             "A": "Ridurre la pressione dell'acqua",
             "B": "Mantenere la manichetta sempre piegata a fisarmonica",
@@ -485,7 +485,7 @@
     },
     {
         "qnum": 45,
-        "instruction": "I gas infiammabili (es. metano, $\text{GPL}$, idrogeno) sono classificati come:",
+        "instruction": "I gas infiammabili (es. metano, GPL, idrogeno) sono classificati come:",
         "options": {
             "A": "Fuochi di Classe C",
             "B": "Fuochi di Classe D",
@@ -521,11 +521,11 @@
         "instruction": "Quale tra i seguenti gas presenti nei fumi di combustione è il principale responsabile della perdita di coscienza?",
         "options": {
             "A": "Ossigeno",
-            "B": "Anidride Carbonica ($\text{CO}_2$)",
-            "C": "Monossido di Carbonio ($\text{CO}$)"
+            "B": "Anidride Carbonica (CO}_2$)",
+            "C": "Monossido di Carbonio (CO)"
         },
         "correct_label": "C",
-        "correct_text": "Monossido di Carbonio ($\text{CO}$)"
+        "correct_text": "Monossido di Carbonio (CO)"
     },
     {
         "qnum": 49,
@@ -551,7 +551,7 @@
     },
     {
         "qnum": 51,
-        "instruction": "Il $\text{CO}_2$ (Anidride Carbonica) è un estinguente non conduttore di elettricità, il che lo rende indicato per fuochi di:",
+        "instruction": "Il CO}_2$ (Anidride Carbonica) è un estinguente non conduttore di elettricità, il che lo rende indicato per fuochi di:",
         "options": {
             "A": "Classe F (oli da cucina)",
             "B": "Apparecchiature elettriche in tensione",
@@ -566,7 +566,7 @@
         "options": {
             "A": "Polvere",
             "B": "Acqua/Schiuma",
-            "C": "Anidride Carbonica ($\text{CO}_2$)"
+            "C": "Anidride Carbonica (CO}_2$)"
         },
         "correct_label": "B",
         "correct_text": "Acqua/Schiuma"
@@ -575,12 +575,12 @@
         "qnum": 53,
         "instruction": "La Risposta di una struttura al fuoco (Resistenza al fuoco) è definita dalla capacità di mantenere:",
         "options": {
-            "A": "Stabilità ($\text{R}$), Tenuta ($\text{E}$) e Irraggiamento",
-            "B": "Stabilità ($\text{R}$), Tenuta ($\text{E}$) e Isolamento termico ($\text{I}$)",
-            "C": "Reazione al fuoco ($\text{A1}$), Tenuta ($\text{E}$) e Stabilità ($\text{R}$)"
+            "A": "Stabilità (R), Tenuta (E) e Irraggiamento",
+            "B": "Stabilità (R), Tenuta (E) e Isolamento termico (I)",
+            "C": "Reazione al fuoco (A1), Tenuta (E) e Stabilità (R)"
         },
         "correct_label": "B",
-        "correct_text": "Stabilità ($\text{R}$), Tenuta ($\text{E}$) e Isolamento termico ($\text{I}$)"
+        "correct_text": "Stabilità (R), Tenuta (E) e Isolamento termico (I)"
     },
     {
         "qnum": 54,
@@ -598,11 +598,11 @@
         "instruction": "Si definisce 'compartimento antincendio':",
         "options": {
             "A": "Una zona con densità di affollamento molto bassa",
-            "B": "Un volume delimitato da elementi costruttivi con resistenza al fuoco predefinita (es. $\text{REI 120}$)",
+            "B": "Un volume delimitato da elementi costruttivi con resistenza al fuoco predefinita (es. REI 120)",
             "C": "Un'area esterna all'edificio adibita a punto di raccolta"
         },
         "correct_label": "B",
-        "correct_text": "Un volume delimitato da elementi costruttivi con resistenza al fuoco predefinita (es. $\text{REI 120}$)"
+        "correct_text": "Un volume delimitato da elementi costruttivi con resistenza al fuoco predefinita (es. REI 120)"
     },
     {
         "qnum": 56,
@@ -650,7 +650,7 @@
     },
     {
         "qnum": 60,
-        "instruction": "La $\text{REI}$ di una porta tagliafuoco in un compartimento $\text{REI 60}$ indica la capacità di resistere per un tempo massimo di:",
+        "instruction": "La REI di una porta tagliafuoco in un compartimento REI 60 indica la capacità di resistere per un tempo massimo di:",
         "options": {
             "A": "30 minuti",
             "B": "60 minuti",
@@ -683,7 +683,7 @@
     },
     {
         "qnum": 63,
-        "instruction": "Il $\text{GPL}$ (Gas di Petrolio Liquefatto) è un gas più pesante dell'aria. In caso di dispersione, esso tenderà a:",
+        "instruction": "Il GPL (Gas di Petrolio Liquefatto) è un gas più pesante dell'aria. In caso di dispersione, esso tenderà a:",
         "options": {
             "A": "Salire e disperdersi velocemente nell'atmosfera",
             "B": "Stratificarsi negli ambienti bassi (es. scantinati e cavedi)",
@@ -705,10 +705,10 @@
     },
     {
         "qnum": 65,
-        "instruction": "L'estintore più adatto per un incendio di Classe $\text{D}$ (metalli combustibili) è:",
+        "instruction": "L'estintore più adatto per un incendio di Classe D (metalli combustibili) è:",
         "options": {
             "A": "Estintore ad acqua a getto pieno",
-            "B": "Estintore a $\text{CO}_2$",
+            "B": "Estintore a CO}_2$",
             "C": "Estintore a polvere speciale"
         },
         "correct_label": "C",
@@ -793,7 +793,7 @@
     },
     {
         "qnum": 73,
-        "instruction": "La Reazione al Fuoco (classificazione da $\text{A1}$ a $\text{F}$) si applica a:",
+        "instruction": "La Reazione al Fuoco (classificazione da A1 a F) si applica a:",
         "options": {
             "A": "I prodotti da costruzione (es. pavimenti, rivestimenti, isolanti)",
             "B": "Gli elementi strutturali portanti (es. pilastri, solai)",
@@ -848,7 +848,7 @@
     },
     {
         "qnum": 78,
-        "instruction": "La manutenzione degli estintori prevede la verifica del serbatoio (collaudo) per gli estintori a $\text{CO}_2$ con cadenza massima di:",
+        "instruction": "La manutenzione degli estintori prevede la verifica del serbatoio (collaudo) per gli estintori a CO}_2$ con cadenza massima di:",
         "options": {
             "A": "5 anni",
             "B": "10 anni",
@@ -940,7 +940,7 @@
         "options": {
             "A": "Polvere",
             "B": "Acqua",
-            "C": "Anidride Carbonica ($\text{CO}_2$)"
+            "C": "Anidride Carbonica (CO}_2$)"
         },
         "correct_label": "A",
         "correct_text": "Polvere"
@@ -958,7 +958,7 @@
     },
     {
         "qnum": 88,
-        "instruction": "I gas inerti (es. $\text{Argon}$, $\text{Azoto}$) utilizzati negli impianti di estinzione fissi agiscono prevalentemente per:",
+        "instruction": "I gas inerti (es. Argon, Azoto) utilizzati negli impianti di estinzione fissi agiscono prevalentemente per:",
         "options": {
             "A": "Raffreddamento e inibizione chimica",
             "B": "Inibizione chimica",
@@ -980,10 +980,10 @@
     },
     {
         "qnum": 90,
-        "instruction": "Il $\text{D.Lgs. 81/08}$ (Testo Unico sulla Sicurezza) stabilisce che le procedure di esodo devono essere previste dal:",
+        "instruction": "Il D.Lgs. 81/08 (Testo Unico sulla Sicurezza) stabilisce che le procedure di esodo devono essere previste dal:",
         "options": {
             "A": "Manuale d'uso degli estintori",
-            "B": "Certificato di Prevenzione Incendi ($\text{CPI}$)",
+            "B": "Certificato di Prevenzione Incendi (CPI)",
             "C": "Piano di Emergenza e di Evacuazione"
         },
         "correct_label": "C",
@@ -1013,7 +1013,7 @@
     },
     {
         "qnum": 93,
-        "instruction": "L'inalazione di basse concentrazioni di $\text{CO}_2$ (Anidride Carbonica) provoca principalmente:",
+        "instruction": "L'inalazione di basse concentrazioni di CO}_2$ (Anidride Carbonica) provoca principalmente:",
         "options": {
             "A": "Asfissia chimica",
             "B": "Stimolazione del ritmo respiratorio e tachicardia",
@@ -1123,7 +1123,7 @@
     },
     {
         "qnum": 103,
-        "instruction": "L'effetto tossico del $\text{CO}$ (Monossido di Carbonio) sul corpo umano è dovuto alla sua capacità di legarsi a quale componente del sangue?",
+        "instruction": "L'effetto tossico del CO (Monossido di Carbonio) sul corpo umano è dovuto alla sua capacità di legarsi a quale componente del sangue?",
         "options": {
             "A": "Piastrine",
             "B": "Leucociti (globuli bianchi)",
@@ -1158,7 +1158,7 @@
         "qnum": 106,
         "instruction": "Quale tra i seguenti estinguenti è più indicato per l'estinzione di un fuoco di Classe F (olii da cucina) in una friggitrice?",
         "options": {
-            "A": "Estintore a $\text{CO}_2$",
+            "A": "Estintore a CO}_2$",
             "B": "Estintore a schiuma con additivo specifico",
             "C": "Estintore a polvere"
         },
@@ -1167,7 +1167,7 @@
     },
     {
         "qnum": 107,
-        "instruction": "La verifica (controllo periodico) degli estintori a $\text{CO}_2$ da parte di personale qualificato deve essere effettuata ogni:",
+        "instruction": "La verifica (controllo periodico) degli estintori a CO}_2$ da parte di personale qualificato deve essere effettuata ogni:",
         "options": {
             "A": "3 anni",
             "B": "5 anni",
@@ -1213,12 +1213,12 @@
         "qnum": 111,
         "instruction": "Un'attività di 'Categoria C' (alto rischio) è soggetta a controllo VVF. Quale documento finale viene rilasciato se tutto è conforme?",
         "options": {
-            "A": "Documento di Valutazione dei Rischi ($\text{DVR}$)",
-            "B": "Certificato di Prevenzione Incendi ($\text{CPI}$)",
-            "C": "Segnalazione Certificata di Inizio Attività ($\text{SCIA}$)"
+            "A": "Documento di Valutazione dei Rischi (DVR)",
+            "B": "Certificato di Prevenzione Incendi (CPI)",
+            "C": "Segnalazione Certificata di Inizio Attività (SCIA)"
         },
         "correct_label": "B",
-        "correct_text": "Certificato di Prevenzione Incendi ($\text{CPI}$)"
+        "correct_text": "Certificato di Prevenzione Incendi (CPI)"
     },
     {
         "qnum": 112,
@@ -1233,7 +1233,7 @@
     },
     {
         "qnum": 113,
-        "instruction": "La $\text{REI}$ di un elemento costruttivo (es. $\text{REI 90}$) indica il tempo in minuti durante il quale l'elemento mantiene le sue prestazioni.",
+        "instruction": "La REI di un elemento costruttivo (es. REI 90) indica il tempo in minuti durante il quale l'elemento mantiene le sue prestazioni.",
         "options": {
             "A": "Solo in condizioni di temperatura normale",
             "B": "In condizioni di incendio standard",
@@ -1246,12 +1246,12 @@
         "qnum": 114,
         "instruction": "Quale tra i seguenti materiali ha la più alta Reazione al Fuoco (cioè, partecipa meno all'incendio)?",
         "options": {
-            "A": "Classe $\text{A2}$",
-            "B": "Classe $\text{B}$",
-            "C": "Classe $\text{C}$"
+            "A": "Classe A2",
+            "B": "Classe B",
+            "C": "Classe C"
         },
         "correct_label": "A",
-        "correct_text": "Classe $\text{A2}$"
+        "correct_text": "Classe A2"
     },
     {
         "qnum": 115,
@@ -1321,7 +1321,7 @@
     },
     {
         "qnum": 121,
-        "instruction": "Il $\text{D.Lgs. 81/08}$ prevede che il Datore di Lavoro debba fornire ai lavoratori:",
+        "instruction": "Il D.Lgs. 81/08 prevede che il Datore di Lavoro debba fornire ai lavoratori:",
         "options": {
             "A": "Solo l'addestramento teorico in aula",
             "B": "Adeguata informazione, formazione e addestramento (ove necessario)",
@@ -1343,7 +1343,7 @@
     },
     {
         "qnum": 123,
-        "instruction": "L'effetto tossico del $\text{CO}_2$ (Anidride Carbonica) sull'uomo, in alte concentrazioni, è dovuto principalmente a:",
+        "instruction": "L'effetto tossico del CO}_2$ (Anidride Carbonica) sull'uomo, in alte concentrazioni, è dovuto principalmente a:",
         "options": {
             "A": "Irritazione delle mucose",
             "B": "Asfissia (per riduzione dell'ossigeno nell'aria)",
@@ -1358,14 +1358,14 @@
         "options": {
             "A": "Deve essere tenuta sempre aperta per le vie di esodo",
             "B": "Deve essere tenuta sempre chiusa, o dotata di dispositivo di richiusura automatica",
-            "C": "Non è un elemento strutturale soggetto a $\text{REI}$"
+            "C": "Non è un elemento strutturale soggetto a REI"
         },
         "correct_label": "B",
         "correct_text": "Deve essere tenuta sempre chiusa, o dotata di dispositivo di richiusura automatica"
     },
     {
         "qnum": 125,
-        "instruction": "Il limite di esplosività inferiore ($\text{LIE}$) di un gas o vapore combustibile è:",
+        "instruction": "Il limite di esplosività inferiore (LIE) di un gas o vapore combustibile è:",
         "options": {
             "A": "La concentrazione massima in aria al di sopra della quale non è possibile l'accensione",
             "B": "La concentrazione minima in aria al di sotto della quale non è possibile l'accensione",
@@ -1376,7 +1376,7 @@
     },
     {
         "qnum": 126,
-        "instruction": "I cartelli che indicano l'obbligo di indossare un $\text{DPI}$ (Dispositivo di Protezione Individuale) sono segnali di:",
+        "instruction": "I cartelli che indicano l'obbligo di indossare un DPI (Dispositivo di Protezione Individuale) sono segnali di:",
         "options": {
             "A": "Salvataggio",
             "B": "Divieto",
@@ -1442,7 +1442,7 @@
     },
     {
         "qnum": 132,
-        "instruction": "Il Certificato di Prevenzione Incendi ($\text{CPI}$) ha una validità massima di:",
+        "instruction": "Il Certificato di Prevenzione Incendi (CPI) ha una validità massima di:",
         "options": {
             "A": "5 anni",
             "B": "10 anni",
@@ -1475,14 +1475,14 @@
     },
     {
         "qnum": 135,
-        "instruction": "Il Datore di Lavoro ha l'obbligo di consultare e coinvolgere quale figura nella stesura del $\text{DVR}$ e del Piano di Emergenza?",
+        "instruction": "Il Datore di Lavoro ha l'obbligo di consultare e coinvolgere quale figura nella stesura del DVR e del Piano di Emergenza?",
         "options": {
             "A": "Il Medico Competente",
-            "B": "Il Rappresentante dei Lavoratori per la Sicurezza ($\text{RLS}$)",
+            "B": "Il Rappresentante dei Lavoratori per la Sicurezza (RLS)",
             "C": "Gli Addetti al Primo Soccorso"
         },
         "correct_label": "B",
-        "correct_text": "Il Rappresentante dei Lavoratori per la Sicurezza ($\text{RLS}$)"
+        "correct_text": "Il Rappresentante dei Lavoratori per la Sicurezza (RLS)"
     },
     {
         "qnum": 136,
@@ -1497,7 +1497,7 @@
     },
     {
         "qnum": 137,
-        "instruction": "Un elemento con classificazione $\text{RE 60}$ è un elemento costruttivo che garantisce:",
+        "instruction": "Un elemento con classificazione RE 60 è un elemento costruttivo che garantisce:",
         "options": {
             "A": "Solo Tenuta e Isolamento per 60 minuti",
             "B": "Stabilità, Tenuta e Isolamento per 60 minuti",
@@ -1508,7 +1508,7 @@
     },
     {
         "qnum": 138,
-        "instruction": "I materiali classificati in Classe $\text{A1}$ di Reazione al Fuoco:",
+        "instruction": "I materiali classificati in Classe A1 di Reazione al Fuoco:",
         "options": {
             "A": "Sono altamente combustibili",
             "B": "Sono inorganici e non combustibili",
@@ -1519,7 +1519,7 @@
     },
     {
         "qnum": 139,
-        "instruction": "La revisione (o manutenzione periodica) di un estintore a $\text{CO}_2$ deve essere eseguita ogni:",
+        "instruction": "La revisione (o manutenzione periodica) di un estintore a CO}_2$ deve essere eseguita ogni:",
         "options": {
             "A": "24 mesi",
             "B": "60 mesi",
@@ -1585,7 +1585,7 @@
     },
     {
         "qnum": 145,
-        "instruction": "Il limite di esplosività superiore ($\text{LSE}$) di un gas o vapore combustibile è:",
+        "instruction": "Il limite di esplosività superiore (LSE) di un gas o vapore combustibile è:",
         "options": {
             "A": "La concentrazione minima in aria necessaria per l'accensione",
             "B": "La concentrazione massima in aria al di sopra della quale la miscela non è più esplosiva",
@@ -1607,7 +1607,7 @@
     },
     {
         "qnum": 147,
-        "instruction": "Il $\text{D.Lgs. 81/08}$ prevede che l'Addetto Antincendio debba ricevere un aggiornamento della formazione con periodicità:",
+        "instruction": "Il D.Lgs. 81/08 prevede che l'Addetto Antincendio debba ricevere un aggiornamento della formazione con periodicità:",
         "options": {
             "A": "Biennale",
             "B": "Quinquennale",
@@ -1662,7 +1662,7 @@
     },
     {
         "qnum": 152,
-        "instruction": "Il limite inferiore di esplosività ($\text{LIE}$) è un parametro importante per la valutazione del rischio di incendio/esplosione di:",
+        "instruction": "Il limite inferiore di esplosività (LIE) è un parametro importante per la valutazione del rischio di incendio/esplosione di:",
         "options": {
             "A": "Metalli combustibili",
             "B": "Gas e vapori infiammabili",
@@ -1684,7 +1684,7 @@
     },
     {
         "qnum": 154,
-        "instruction": "Il $\text{CO}$ (Monossido di Carbonio) è un gas:",
+        "instruction": "Il CO (Monossido di Carbonio) è un gas:",
         "options": {
             "A": "Tossico e inodore",
             "B": "Irritante e di colore giallo",
@@ -1706,7 +1706,7 @@
     },
     {
         "qnum": 156,
-        "instruction": "Qual è il limite massimo di validità temporale del Certificato di Prevenzione Incendi ($\text{CPI}$) per le attività a basso rischio di incendio?",
+        "instruction": "Qual è il limite massimo di validità temporale del Certificato di Prevenzione Incendi (CPI) per le attività a basso rischio di incendio?",
         "options": {
             "A": "5 anni",
             "B": "10 anni",
@@ -1717,7 +1717,7 @@
     },
     {
         "qnum": 157,
-        "instruction": "La manutenzione degli estintori a $\text{CO}_2$ prevede la revisione (controllo dell'agente estinguente e delle valvole) con cadenza massima di:",
+        "instruction": "La manutenzione degli estintori a CO}_2$ prevede la revisione (controllo dell'agente estinguente e delle valvole) con cadenza massima di:",
         "options": {
             "A": "18 mesi",
             "B": "36 mesi",
@@ -1752,23 +1752,23 @@
         "qnum": 160,
         "instruction": "Quale dei seguenti composti chimici è un esempio di comburente?",
         "options": {
-            "A": "Azoto ($\text{N}_2$)",
-            "B": "Vapore acqueo ($\text{H}_2\text{O}$)",
-            "C": "Ossigeno ($\text{O}_2$)"
+            "A": "Azoto (N}_2$)",
+            "B": "Vapore acqueo (H}_2\text{O)",
+            "C": "Ossigeno (O}_2$)"
         },
         "correct_label": "C",
-        "correct_text": "Ossigeno ($\text{O}_2$)"
+        "correct_text": "Ossigeno (O}_2$)"
     },
     {
         "qnum": 161,
         "instruction": "I materiali tessili e i rivestimenti di pareti e pavimenti sono soggetti alla classificazione di:",
         "options": {
-            "A": "Resistenza al fuoco ($\text{REI}$)",
-            "B": "Reazione al fuoco (Classe $\text{A1}$ - $\text{F}$)",
+            "A": "Resistenza al fuoco (REI)",
+            "B": "Reazione al fuoco (Classe A1 - F)",
             "C": "Densità di carico di incendio"
         },
         "correct_label": "B",
-        "correct_text": "Reazione al fuoco (Classe $\text{A1}$ - $\text{F}$)"
+        "correct_text": "Reazione al fuoco (Classe A1 - F)"
     },
     {
         "qnum": 162,
@@ -1785,12 +1785,12 @@
         "qnum": 163,
         "instruction": "Quale tra i seguenti gas è il più dannoso in termini di intossicazione del sangue?",
         "options": {
-            "A": "Anidride Carbonica ($\text{CO}_2$)",
-            "B": "Ossigeno ($\text{O}_2$)",
-            "C": "Monossido di Carbonio ($\text{CO}$)"
+            "A": "Anidride Carbonica (CO}_2$)",
+            "B": "Ossigeno (O}_2$)",
+            "C": "Monossido di Carbonio (CO)"
         },
         "correct_label": "C",
-        "correct_text": "Monossido di Carbonio ($\text{CO}$)"
+        "correct_text": "Monossido di Carbonio (CO)"
     },
     {
         "qnum": 164,
@@ -1805,7 +1805,7 @@
     },
     {
         "qnum": 165,
-        "instruction": "Il metano ha un $\text{LIE}$ (Limite Inferiore di Esplosività) di circa il 5%. Al di sotto di questa percentuale, in caso di dispersione, il gas:",
+        "instruction": "Il metano ha un LIE (Limite Inferiore di Esplosività) di circa il 5%. Al di sotto di questa percentuale, in caso di dispersione, il gas:",
         "options": {
             "A": "Esplode violentemente",
             "B": "Non è in grado di incendiarsi o esplodere",
@@ -1816,7 +1816,7 @@
     },
     {
         "qnum": 166,
-        "instruction": "Le pompe antincendio di un impianto idrico ($\text{UNI EN 12845}$) servono a:",
+        "instruction": "Le pompe antincendio di un impianto idrico (UNI EN 12845) servono a:",
         "options": {
             "A": "Garantire che l'acqua defluisca dopo l'uso",
             "B": "Mantenere la pressione e la portata necessarie per l'estinzione",
@@ -1864,7 +1864,7 @@
         "options": {
             "A": "L'assenza del combustibile",
             "B": "La presenza della Reazione a catena",
-            "C": "La presenza del $\text{CO}_2$"
+            "C": "La presenza del CO}_2$"
         },
         "correct_label": "B",
         "correct_text": "La presenza della Reazione a catena"
@@ -1904,7 +1904,7 @@
     },
     {
         "qnum": 174,
-        "instruction": "La corretta modalità di utilizzo di un estintore a $\text{CO}_2$ su un fuoco di Classe B (liquidi) è:",
+        "instruction": "La corretta modalità di utilizzo di un estintore a CO}_2$ su un fuoco di Classe B (liquidi) è:",
         "options": {
             "A": "Dirigere il getto da lontano, in alto, per raffreddare l'aria",
             "B": "Dirigere il getto velocemente verso la base del fuoco, spazzando la superficie",
@@ -1937,7 +1937,7 @@
     },
     {
         "qnum": 177,
-        "instruction": "Si definisce $\text{REI 120}$ un elemento costruttivo che garantisce Stabilità, Tenuta e Isolamento termico per:",
+        "instruction": "Si definisce REI 120 un elemento costruttivo che garantisce Stabilità, Tenuta e Isolamento termico per:",
         "options": {
             "A": "12 minuti",
             "B": "60 minuti",
@@ -1948,7 +1948,7 @@
     },
     {
         "qnum": 178,
-        "instruction": "Il $\text{GPL}$ (Gas di Petrolio Liquefatto) è un gas infiammabile che, in caso di dispersione, tende ad accumularsi:",
+        "instruction": "Il GPL (Gas di Petrolio Liquefatto) è un gas infiammabile che, in caso di dispersione, tende ad accumularsi:",
         "options": {
             "A": "Vicino al soffitto",
             "B": "A terra, in luoghi confinati e bassi",
@@ -1970,7 +1970,7 @@
     },
     {
         "qnum": 180,
-        "instruction": "Il $\text{D.Lgs. 81/08}$ prevede che l'Addetto Antincendio debba ricevere la formazione iniziale specifica in base:",
+        "instruction": "Il D.Lgs. 81/08 prevede che l'Addetto Antincendio debba ricevere la formazione iniziale specifica in base:",
         "options": {
             "A": "Solo alle sue competenze pregresse",
             "B": "Al livello di rischio dell'attività (Basso, Medio, Alto)",
@@ -1981,7 +1981,7 @@
     },
     {
         "qnum": 181,
-        "instruction": "I materiali classificati in Classe $\text{F}$ di Reazione al Fuoco:",
+        "instruction": "I materiali classificati in Classe F di Reazione al Fuoco:",
         "options": {
             "A": "Sono materiali strutturali non combustibili",
             "B": "Sono materiali altamente combustibili che non rispettano i requisiti di sicurezza",
@@ -2091,7 +2091,7 @@
     },
     {
         "qnum": 191,
-        "instruction": "Il limite superiore di esplosività ($\text{LSE}$) di un gas o vapore combustibile è la concentrazione massima in aria al di sopra della quale:",
+        "instruction": "Il limite superiore di esplosività (LSE) di un gas o vapore combustibile è la concentrazione massima in aria al di sopra della quale:",
         "options": {
             "A": "Si verifica il Flashover",
             "B": "La miscela è troppo ricca di combustibile e non è in grado di incendiarsi",
@@ -2102,7 +2102,7 @@
     },
     {
         "qnum": 192,
-        "instruction": "I fuochi da gas (es. metano, $\text{GPL}$) sono classificati come:",
+        "instruction": "I fuochi da gas (es. metano, GPL) sono classificati come:",
         "options": {
             "A": "Classe A",
             "B": "Classe C",
@@ -2124,7 +2124,7 @@
     },
     {
         "qnum": 194,
-        "instruction": "Il $\text{D.Lgs. 81/08}$ impone l'obbligo di aggiornamento della formazione per gli Addetti Antincendio di rischio 'Medio' e 'Alto' ogni:",
+        "instruction": "Il D.Lgs. 81/08 impone l'obbligo di aggiornamento della formazione per gli Addetti Antincendio di rischio 'Medio' e 'Alto' ogni:",
         "options": {
             "A": "5 anni",
             "B": "3 anni",
@@ -2135,7 +2135,7 @@
     },
     {
         "qnum": 195,
-        "instruction": "La principale differenza tra Idroscivoli ($\text{UNI EN 671-1}$) e Idranti a muro ($\text{UNI EN 671-2}$) riguarda:",
+        "instruction": "La principale differenza tra Idroscivoli (UNI EN 671-1) e Idranti a muro (UNI EN 671-2) riguarda:",
         "options": {
             "A": "La lunghezza della manichetta",
             "B": "Il tipo di agente estinguente",
@@ -2168,7 +2168,7 @@
     },
     {
         "qnum": 198,
-        "instruction": "La 'Resistenza al fuoco' (es. $\text{REI}$) si applica a:",
+        "instruction": "La 'Resistenza al fuoco' (es. REI) si applica a:",
         "options": {
             "A": "I materiali di finitura (pavimenti, vernici)",
             "B": "Gli elementi strutturali portanti (pilastri, solai, muri)",
@@ -2190,7 +2190,7 @@
     },
     {
         "qnum": 200,
-        "instruction": "La valvola di sicurezza in un estintore a $\text{CO}_2$ serve per evitare:",
+        "instruction": "La valvola di sicurezza in un estintore a CO}_2$ serve per evitare:",
         "options": {
             "A": "La corrosione della bombola",
             "B": "La sovrapressione e la potenziale rottura del serbatoio",
@@ -2204,7 +2204,7 @@
         "instruction": "Quale tra le seguenti è una misura di Protezione Attiva?",
         "options": {
             "A": "Controllo degli impianti di ventilazione",
-            "B": "Soffitto e pareti in materiale $\text{A1}$",
+            "B": "Soffitto e pareti in materiale A1",
             "C": "Impianti idrici antincendio (idranti/naspi)"
         },
         "correct_label": "C",
@@ -2212,7 +2212,7 @@
     },
     {
         "qnum": 202,
-        "instruction": "Il $\text{D.Lgs. 81/08}$ prevede che i lavoratori debbano ricevere una formazione specifica sul rischio incendio proporzionata:",
+        "instruction": "Il D.Lgs. 81/08 prevede che i lavoratori debbano ricevere una formazione specifica sul rischio incendio proporzionata:",
         "options": {
             "A": "Solo alla loro anzianità aziendale",
             "B": "Al livello di rischio dell'attività (Basso, Medio, Alto)",
@@ -2249,14 +2249,14 @@
         "options": {
             "A": "Solo ustioni esterne della pelle",
             "B": "Edema polmonare e necrosi del tessuto respiratorio",
-            "C": "L'eccessiva diluizione del $\text{CO}_2$"
+            "C": "L'eccessiva diluizione del CO}_2$"
         },
         "correct_label": "B",
         "correct_text": "Edema polmonare e necrosi del tessuto respiratorio"
     },
     {
         "qnum": 206,
-        "instruction": "La revisione (manutenzione periodica) di un estintore a $\text{CO}_2$ prevede la sostituzione dell'agente estinguente ogni:",
+        "instruction": "La revisione (manutenzione periodica) di un estintore a CO}_2$ prevede la sostituzione dell'agente estinguente ogni:",
         "options": {
             "A": "36 mesi",
             "B": "60 mesi (5 anni)",
@@ -2267,7 +2267,7 @@
     },
     {
         "qnum": 207,
-        "instruction": "Il limite di esplosività è l'intervallo di concentrazione tra $\text{LIE}$ e $\text{LSE}$ in cui la miscela aria/gas o vapore:",
+        "instruction": "Il limite di esplosività è l'intervallo di concentrazione tra LIE e LSE in cui la miscela aria/gas o vapore:",
         "options": {
             "A": "Non è in grado di incendiarsi o esplodere",
             "B": "È infiammabile o esplosiva in presenza di innesco",
@@ -2337,10 +2337,10 @@
         "options": {
             "A": "L'aumento di temperatura",
             "B": "La presenza di fumo (particelle)",
-            "C": "L'emissione di radiazioni $\text{UV}$ o $\text{IR}$ (ultraviolette o infrarosse)"
+            "C": "L'emissione di radiazioni UV o IR (ultraviolette o infrarosse)"
         },
         "correct_label": "C",
-        "correct_text": "L'emissione di radiazioni $\text{UV}$ o $\text{IR}$ (ultraviolette o infrarosse)"
+        "correct_text": "L'emissione di radiazioni UV o IR (ultraviolette o infrarosse)"
     },
     {
         "qnum": 214,
@@ -2355,10 +2355,10 @@
     },
     {
         "qnum": 215,
-        "instruction": "Il $\text{REI}$ degli elementi costruttivi (Resistenza al fuoco) è misurato in:",
+        "instruction": "Il REI degli elementi costruttivi (Resistenza al fuoco) è misurato in:",
         "options": {
-            "A": "Gradi Celsius ($\text{°C}$)",
-            "B": "MegaPascal ($\text{MPa}$)",
+            "A": "Gradi Celsius (°C)",
+            "B": "MegaPascal (MPa)",
             "C": "Minuti (es. 30, 60, 120)"
         },
         "correct_label": "C",
@@ -2366,7 +2366,7 @@
     },
     {
         "qnum": 216,
-        "instruction": "Qual è il principale vantaggio di un estintore a $\text{CO}_2$ (Anidride Carbonica) rispetto a uno a polvere?",
+        "instruction": "Qual è il principale vantaggio di un estintore a CO}_2$ (Anidride Carbonica) rispetto a uno a polvere?",
         "options": {
             "A": "È più economico",
             "B": "È più efficace sui fuochi di Classe A",
@@ -2388,7 +2388,7 @@
     },
     {
         "qnum": 218,
-        "instruction": "Quale tra i seguenti presidi antincendio è un Dispositivo di Protezione Collettiva ($\text{DPC}$)?",
+        "instruction": "Quale tra i seguenti presidi antincendio è un Dispositivo di Protezione Collettiva (DPC)?",
         "options": {
             "A": "Estintore portatile",
             "B": "Maniglione antipanico su porta di esodo",
@@ -2465,7 +2465,7 @@
     },
     {
         "qnum": 225,
-        "instruction": "Il limite superiore di esplosività ($\text{LSE}$) è la concentrazione massima di vapore in aria oltre la quale la miscela è troppo ricca e:",
+        "instruction": "Il limite superiore di esplosività (LSE) è la concentrazione massima di vapore in aria oltre la quale la miscela è troppo ricca e:",
         "options": {
             "A": "Non è in grado di incendiarsi o esplodere",
             "B": "Esplode con maggiore violenza",
@@ -2520,7 +2520,7 @@
     },
     {
         "qnum": 230,
-        "instruction": "Un Idroscivolo (naspo, $\text{UNI EN 671-1}$) è dotato di una manichetta:",
+        "instruction": "Un Idroscivolo (naspo, UNI EN 671-1) è dotato di una manichetta:",
         "options": {
             "A": "Rigida e non pieghevole",
             "B": "Semirigida e che può essere utilizzata parzialmente srotolata",
@@ -2531,7 +2531,7 @@
     },
     {
         "qnum": 231,
-        "instruction": "Il $\text{CO}$ (Monossido di Carbonio) è pericoloso perché si lega all'emoglobina del sangue, formando:",
+        "instruction": "Il CO (Monossido di Carbonio) è pericoloso perché si lega all'emoglobina del sangue, formando:",
         "options": {
             "A": "Metaemoglobina",
             "B": "Carbossiemoglobina",
@@ -2564,7 +2564,7 @@
     },
     {
         "qnum": 234,
-        "instruction": "I materiali con classe di Reazione al Fuoco $\text{A1}$ sono:",
+        "instruction": "I materiali con classe di Reazione al Fuoco A1 sono:",
         "options": {
             "A": "Ignifughi",
             "B": "Incombustibili",
@@ -2608,7 +2608,7 @@
     },
     {
         "qnum": 238,
-        "instruction": "Il $\text{LSE}$ (Limite Superiore di Esplosività) di una miscela infiammabile è:",
+        "instruction": "Il LSE (Limite Superiore di Esplosività) di una miscela infiammabile è:",
         "options": {
             "A": "Il punto in cui la miscela è troppo magra per bruciare",
             "B": "Il punto in cui la miscela è troppo ricca per bruciare",
@@ -2652,7 +2652,7 @@
     },
     {
         "qnum": 242,
-        "instruction": "La manutenzione degli estintori a $\text{CO}_2$ prevede il collaudo della bombola con cadenza massima di:",
+        "instruction": "La manutenzione degli estintori a CO}_2$ prevede il collaudo della bombola con cadenza massima di:",
         "options": {
             "A": "5 anni",
             "B": "10 anni",
@@ -2696,7 +2696,7 @@
     },
     {
         "qnum": 246,
-        "instruction": "La normativa $\text{UNI EN 671-1}$ si riferisce agli impianti a:",
+        "instruction": "La normativa UNI EN 671-1 si riferisce agli impianti a:",
         "options": {
             "A": "Estintori a polvere",
             "B": "Idroscivoli (naspi)",
@@ -2707,7 +2707,7 @@
     },
     {
         "qnum": 247,
-        "instruction": "Quale tra le seguenti è la funzione principale del $\text{D.Lgs. 81/08}$ in materia di sicurezza antincendio?",
+        "instruction": "Quale tra le seguenti è la funzione principale del D.Lgs. 81/08 in materia di sicurezza antincendio?",
         "options": {
             "A": "Stabilire le caratteristiche costruttive dei presidi antincendio",
             "B": "Definire gli obblighi del datore di lavoro in materia di valutazione del rischio, formazione e misure di emergenza",
@@ -2729,7 +2729,7 @@
     },
     {
         "qnum": 249,
-        "instruction": "Un estintore a polvere $(\text{ABC})$ è sconsigliato per lo spegnimento di fuochi di Classe $\text{F}$ (olii da cucina) perché:",
+        "instruction": "Un estintore a polvere $(\text{ABC})$ è sconsigliato per lo spegnimento di fuochi di Classe F (olii da cucina) perché:",
         "options": {
             "A": "Non ha potere raffreddante",
             "B": "Potrebbe provocare lo spargimento e l'aumento della superficie in fiamme",
@@ -2740,7 +2740,7 @@
     },
     {
         "qnum": 250,
-        "instruction": "La Resistenza al Fuoco ($\text{REI}$) di un elemento costruttivo si valuta in base:",
+        "instruction": "La Resistenza al Fuoco (REI) di un elemento costruttivo si valuta in base:",
         "options": {
             "A": "Al materiale di finitura (pavimenti, vernici)",
             "B": "Al carico di incendio specifico del compartimento",
@@ -2784,7 +2784,7 @@
     },
     {
         "qnum": 254,
-        "instruction": "La Reazione al Fuoco di un materiale (classificazione $\text{A1}$ - $\text{F}$) misura la sua capacità di:",
+        "instruction": "La Reazione al Fuoco di un materiale (classificazione A1 - F) misura la sua capacità di:",
         "options": {
             "A": "Mantenere la stabilità strutturale",
             "B": "Ritardare l'emissione di calore e fumo",
@@ -2795,7 +2795,7 @@
     },
     {
         "qnum": 255,
-        "instruction": "Il $\text{CO}_2$ (Anidride Carbonica) estingue principalmente per:",
+        "instruction": "Il CO}_2$ (Anidride Carbonica) estingue principalmente per:",
         "options": {
             "A": "Raffreddamento e diluizione del comburente",
             "B": "Sottrazione del combustibile",
@@ -2817,7 +2817,7 @@
     },
     {
         "qnum": 257,
-        "instruction": "Qual è il principale effetto tossico dell'Acido Cianidrico ($\text{HCN}$) prodotto durante gli incendi di materiali plastici (es. poliuretano)?",
+        "instruction": "Qual è il principale effetto tossico dell'Acido Cianidrico (HCN) prodotto durante gli incendi di materiali plastici (es. poliuretano)?",
         "options": {
             "A": "Irritazione della pelle",
             "B": "Avvelenamento cellulare rapido e paralisi respiratoria",
@@ -2853,11 +2853,11 @@
         "instruction": "Quale tra i seguenti impianti è classificato come impianto di 'Protezione Passiva'?",
         "options": {
             "A": "Impianto di ventilazione e controllo fumi",
-            "B": "Pareti e solai con resistenza al fuoco $\text{REI}$",
+            "B": "Pareti e solai con resistenza al fuoco REI",
             "C": "Impianto Sprinkler"
         },
         "correct_label": "B",
-        "correct_text": "Pareti e solai con resistenza al fuoco $\text{REI}$"
+        "correct_text": "Pareti e solai con resistenza al fuoco REI"
     },
     {
         "qnum": 261,
@@ -2872,7 +2872,7 @@
     },
     {
         "qnum": 262,
-        "instruction": "Il $\text{LIE}$ (Limite Inferiore di Esplosività) di un gas è il valore minimo di concentrazione che, in presenza di un innesco, è in grado di:",
+        "instruction": "Il LIE (Limite Inferiore di Esplosività) di un gas è il valore minimo di concentrazione che, in presenza di un innesco, è in grado di:",
         "options": {
             "A": "Bruciare con fiamma viva",
             "B": "Esplodere",
@@ -2905,7 +2905,7 @@
     },
     {
         "qnum": 265,
-        "instruction": "Il limite di esplosività è l'intervallo di concentrazione di un gas combustibile in aria, tra $\text{LIE}$ e $\text{LSE}$, in cui:",
+        "instruction": "Il limite di esplosività è l'intervallo di concentrazione di un gas combustibile in aria, tra LIE e LSE, in cui:",
         "options": {
             "A": "La combustione è impossibile",
             "B": "Si verifica il raffreddamento del materiale",
@@ -2927,7 +2927,7 @@
     },
     {
         "qnum": 267,
-        "instruction": "L'azione estinguente del $\text{CO}_2$ sul fuoco di apparecchiature elettriche in tensione è legata alla sua proprietà di:",
+        "instruction": "L'azione estinguente del CO}_2$ sul fuoco di apparecchiature elettriche in tensione è legata alla sua proprietà di:",
         "options": {
             "A": "Essere un gas infiammabile",
             "B": "Essere non conduttore di elettricità",
@@ -2960,7 +2960,7 @@
     },
     {
         "qnum": 270,
-        "instruction": "Il $\text{D.Lgs. 81/08}$ richiede che il Datore di Lavoro nomini gli Addetti Antincendio in numero sufficiente, tenendo conto:",
+        "instruction": "Il D.Lgs. 81/08 richiede che il Datore di Lavoro nomini gli Addetti Antincendio in numero sufficiente, tenendo conto:",
         "options": {
             "A": "Solo del piano terra dell'attività",
             "B": "Dell'ubicazione, del livello di rischio e del numero di lavoratori",
@@ -2982,7 +2982,7 @@
     },
     {
         "qnum": 272,
-        "instruction": "Qual è il principale effetto tossico del $\text{CO}$ (Monossido di Carbonio) sul corpo umano?",
+        "instruction": "Qual è il principale effetto tossico del CO (Monossido di Carbonio) sul corpo umano?",
         "options": {
             "A": "Irritazione degli occhi e della pelle",
             "B": "Asfissia chimica per l'assorbimento dell'ossigeno nel sangue",
@@ -3015,7 +3015,7 @@
     },
     {
         "qnum": 275,
-        "instruction": "I fuochi che coinvolgono gas (es. metano, $\text{GPL}$) sono classificati come:",
+        "instruction": "I fuochi che coinvolgono gas (es. metano, GPL) sono classificati come:",
         "options": {
             "A": "Classe B",
             "B": "Classe C",
@@ -3050,16 +3050,16 @@
         "qnum": 278,
         "instruction": "Quale tra le seguenti è una misura di Protezione Passiva contro l'incendio?",
         "options": {
-            "A": "Sistema di evacuazione fumi e calore ($\text{SEFC}$)",
-            "B": "Porte e vetri con resistenza al fuoco $\text{REI}$",
+            "A": "Sistema di evacuazione fumi e calore (SEFC)",
+            "B": "Porte e vetri con resistenza al fuoco REI",
             "C": "Sistema di allarme sonoro"
         },
         "correct_label": "B",
-        "correct_text": "Porte e vetri con resistenza al fuoco $\text{REI}$"
+        "correct_text": "Porte e vetri con resistenza al fuoco REI"
     },
     {
         "qnum": 279,
-        "instruction": "L'Idrante a Muro ($\text{UNI EN 671-2}$) è dotato di una manichetta:",
+        "instruction": "L'Idrante a Muro (UNI EN 671-2) è dotato di una manichetta:",
         "options": {
             "A": "Semirigida",
             "B": "Piatta, flessibile e che deve essere completamente srotolata",
@@ -3103,7 +3103,7 @@
     },
     {
         "qnum": 283,
-        "instruction": "Il $\text{D.Lgs. 81/08}$ stabilisce l'obbligo di effettuare la prova di evacuazione almeno:",
+        "instruction": "Il D.Lgs. 81/08 stabilisce l'obbligo di effettuare la prova di evacuazione almeno:",
         "options": {
             "A": "Una volta ogni 6 mesi",
             "B": "Una volta all'anno",
@@ -3118,14 +3118,14 @@
         "options": {
             "A": "Estintore ad acqua a pressione permanente",
             "B": "Estintore a polvere a pressione permanente",
-            "C": "Estintore a $\text{CO}_2$"
+            "C": "Estintore a CO}_2$"
         },
         "correct_label": "C",
-        "correct_text": "Estintore a $\text{CO}_2$"
+        "correct_text": "Estintore a CO}_2$"
     },
     {
         "qnum": 285,
-        "instruction": "Un elemento costruttivo con classificazione $\text{EI 90}$ garantisce:",
+        "instruction": "Un elemento costruttivo con classificazione EI 90 garantisce:",
         "options": {
             "A": "Solo Stabilità per 90 minuti",
             "B": "Tenuta e Isolamento per 90 minuti, ma non la Stabilità",
@@ -3136,7 +3136,7 @@
     },
     {
         "qnum": 286,
-        "instruction": "Il $\text{GPL}$ (Gas di Petrolio Liquefatto) è un gas più pesante dell'aria che tende a:",
+        "instruction": "Il GPL (Gas di Petrolio Liquefatto) è un gas più pesante dell'aria che tende a:",
         "options": {
             "A": "Disperdersi rapidamente",
             "B": "Accumularsi in basso, creando sacche pericolose",
@@ -3149,12 +3149,12 @@
         "qnum": 287,
         "instruction": "I materiali combustibili con la più bassa partecipazione al fuoco sono classificati in Reazione al Fuoco come:",
         "options": {
-            "A": "Classe $\text{D}$",
-            "B": "Classe $\text{A1}$",
-            "C": "Classe $\text{B}$"
+            "A": "Classe D",
+            "B": "Classe A1",
+            "C": "Classe B"
         },
         "correct_label": "B",
-        "correct_text": "Classe $\text{A1}$"
+        "correct_text": "Classe A1"
     },
     {
         "qnum": 288,
@@ -3194,11 +3194,11 @@
         "instruction": "Quale tra i seguenti agenti estinguenti agisce primariamente per 'Inibizione Chimica'?",
         "options": {
             "A": "Acqua",
-            "B": "Polvere (BC o $\text{ABC}$)",
-            "C": "Gas inerti ($\text{CO}_2$)"
+            "B": "Polvere (BC o ABC)",
+            "C": "Gas inerti (CO}_2$)"
         },
         "correct_label": "B",
-        "correct_text": "Polvere (BC o $\text{ABC}$)"
+        "correct_text": "Polvere (BC o ABC)"
     },
     {
         "qnum": 292,
@@ -3235,7 +3235,7 @@
     },
     {
         "qnum": 295,
-        "instruction": "L'obiettivo principale dell'evacuazione fumi e calore ($\text{SEFC}$) è:",
+        "instruction": "L'obiettivo principale dell'evacuazione fumi e calore (SEFC) è:",
         "options": {
             "A": "Spegnere l'incendio",
             "B": "Mantenere le vie di esodo libere dai fumi e facilitare l'intervento",
@@ -3272,7 +3272,7 @@
         "options": {
             "A": "Distanze di sicurezza esterne",
             "B": "Sistema di rivelazione incendi e allarme",
-            "C": "Rivestimenti protettivi a $\text{REI}$"
+            "C": "Rivestimenti protettivi a REI"
         },
         "correct_label": "B",
         "correct_text": "Sistema di rivelazione incendi e allarme"
@@ -3290,7 +3290,7 @@
     },
     {
         "qnum": 300,
-        "instruction": "La classificazione di Reazione al Fuoco $\text{A1}$ secondo la normativa europea indica un materiale:",
+        "instruction": "La classificazione di Reazione al Fuoco A1 secondo la normativa europea indica un materiale:",
         "options": {
             "A": "Altamente combustibile",
             "B": "Che contribuisce in modo significativo al fuoco",
@@ -3304,15 +3304,15 @@
         "instruction": "Quale tra le seguenti è una misura di Protezione Attiva?",
         "options": {
             "A": "Controllo degli accessi",
-            "B": "Impianti $\text{Sprinkler}$ e idranti",
+            "B": "Impianti Sprinkler e idranti",
             "C": "Vie di esodo a prova di fumo"
         },
         "correct_label": "B",
-        "correct_text": "Impianti $\text{Sprinkler}$ e idranti"
+        "correct_text": "Impianti Sprinkler e idranti"
     },
     {
         "qnum": 302,
-        "instruction": "L'ispezione visiva e il controllo di un estintore ($\text{Sorveglianza}$) devono essere effettuati da personale interno (anche non specializzato) con cadenza:",
+        "instruction": "L'ispezione visiva e il controllo di un estintore (Sorveglianza) devono essere effettuati da personale interno (anche non specializzato) con cadenza:",
         "options": {
             "A": "Annuale",
             "B": "Mensile",
@@ -3323,7 +3323,7 @@
     },
     {
         "qnum": 303,
-        "instruction": "Il $\text{D.Lgs. 81/08}$ prevede che l'Addetto Antincendio debba ricevere un aggiornamento della formazione con periodicità massima di:",
+        "instruction": "Il D.Lgs. 81/08 prevede che l'Addetto Antincendio debba ricevere un aggiornamento della formazione con periodicità massima di:",
         "options": {
             "A": "2 anni",
             "B": "3 anni",
@@ -3358,7 +3358,7 @@
         "qnum": 306,
         "instruction": "La temperatura minima alla quale i vapori di un liquido infiammabile prendono fuoco e mantengono la combustione si chiama:",
         "options": {
-            "A": "Punto di infiammabilità ($\text{Flash Point}$)",
+            "A": "Punto di infiammabilità (Flash Point)",
             "B": "Temperatura di autoaccensione",
             "C": "Punto di ebollizione"
         },
@@ -3367,7 +3367,7 @@
     },
     {
         "qnum": 307,
-        "instruction": "I rivelatori puntiformi di fumo ottici ($\text{scattering}$/dispersione di luce) sono i più comuni per rilevare incendi in fase:",
+        "instruction": "I rivelatori puntiformi di fumo ottici (scattering/dispersione di luce) sono i più comuni per rilevare incendi in fase:",
         "options": {
             "A": "Avanzata (alta temperatura)",
             "B": "Iniziale (fumi visibili e opachi)",
@@ -3381,11 +3381,11 @@
         "instruction": "Quale tra le seguenti è una misura di Protezione Passiva?",
         "options": {
             "A": "Impianto di spegnimento a gas",
-            "B": "Materiali con Reazione al Fuoco $\text{A1}$ o $\text{A2}$",
+            "B": "Materiali con Reazione al Fuoco A1 o A2",
             "C": "Pulsante di allarme manuale"
         },
         "correct_label": "B",
-        "correct_text": "Materiali con Reazione al Fuoco $\text{A1}$ o $\text{A2}$"
+        "correct_text": "Materiali con Reazione al Fuoco A1 o A2"
     },
     {
         "qnum": 309,
@@ -3393,14 +3393,14 @@
         "options": {
             "A": "Bassa densità",
             "B": "Alta conducibilità termica (es. metalli)",
-            "C": "Alta resistenza al fuoco ($\text{REI}$)"
+            "C": "Alta resistenza al fuoco (REI)"
         },
         "correct_label": "B",
         "correct_text": "Alta conducibilità termica (es. metalli)"
     },
     {
         "qnum": 310,
-        "instruction": "Un estintore a polvere è generalmente efficace su fuochi di Classe $\text{A, B, C}$. La polvere $\text{ABC}$ agisce principalmente per:",
+        "instruction": "Un estintore a polvere è generalmente efficace su fuochi di Classe A, B, C. La polvere ABC agisce principalmente per:",
         "options": {
             "A": "Raffreddamento e diluizione",
             "B": "Inibizione chimica",
@@ -3422,7 +3422,7 @@
     },
     {
         "qnum": 312,
-        "instruction": "L'effetto tossico del $\text{CO}_2$ (Anidride Carbonica) in un incendio in ambiente confinato è dovuto principalmente a:",
+        "instruction": "L'effetto tossico del CO}_2$ (Anidride Carbonica) in un incendio in ambiente confinato è dovuto principalmente a:",
         "options": {
             "A": "L'irritazione delle vie respiratorie",
             "B": "La sostituzione dell'ossigeno nell'aria (Asfissia)",
@@ -3447,15 +3447,15 @@
         "instruction": "Il manutentore degli estintori ha l'obbligo di registrare gli interventi (controllo, revisione, collaudo) su un documento chiamato:",
         "options": {
             "A": "Registro Antincendio",
-            "B": "Documento di Valutazione dei Rischi ($\text{DVR}$)",
-            "C": "Certificato di Prevenzione Incendi ($\text{CPI}$)"
+            "B": "Documento di Valutazione dei Rischi (DVR)",
+            "C": "Certificato di Prevenzione Incendi (CPI)"
         },
         "correct_label": "A",
         "correct_text": "Registro Antincendio"
     },
     {
         "qnum": 315,
-        "instruction": "Si definisce $\text{REI 60}$ un elemento costruttivo che, in caso di incendio standard, mantiene Stabilità, Tenuta e Isolamento termico per:",
+        "instruction": "Si definisce REI 60 un elemento costruttivo che, in caso di incendio standard, mantiene Stabilità, Tenuta e Isolamento termico per:",
         "options": {
             "A": "15 minuti",
             "B": "60 minuti",
@@ -3490,16 +3490,16 @@
         "qnum": 318,
         "instruction": "I materiali classificati in Reazione al Fuoco con la sigla 'D0' indicano che il materiale in combustione produce:",
         "options": {
-            "A": "Nessuna gocciolatura ($\text{dripping}$)",
+            "A": "Nessuna gocciolatura (dripping)",
             "B": "Massima emissione di fumo",
             "C": "Alta emissione di calore"
         },
         "correct_label": "A",
-        "correct_text": "Nessuna gocciolatura ($\text{dripping}$)"
+        "correct_text": "Nessuna gocciolatura (dripping)"
     },
     {
         "qnum": 319,
-        "instruction": "La Resistenza al Fuoco ($\text{REI}$) di una struttura è una misura di Protezione:",
+        "instruction": "La Resistenza al Fuoco (REI) di una struttura è una misura di Protezione:",
         "options": {
             "A": "Attiva",
             "B": "Passiva",
@@ -3510,7 +3510,7 @@
     },
     {
         "qnum": 320,
-        "instruction": "Il $\text{LIE}$ (Limite Inferiore di Esplosività) di un gas indica che al di sotto di tale concentrazione:",
+        "instruction": "Il LIE (Limite Inferiore di Esplosività) di un gas indica che al di sotto di tale concentrazione:",
         "options": {
             "A": "La miscela è troppo ricca di gas",
             "B": "La miscela è troppo povera di gas per bruciare",
@@ -3521,25 +3521,25 @@
     },
     {
         "qnum": 321,
-        "instruction": "La $\text{UNI EN 671-2}$ si riferisce agli impianti a:",
+        "instruction": "La UNI EN 671-2 si riferisce agli impianti a:",
         "options": {
             "A": "Naspi antincendio",
             "B": "Idranti a muro (manichetta piatta)",
-            "C": "Impianti $\text{Sprinkler}$"
+            "C": "Impianti Sprinkler"
         },
         "correct_label": "B",
         "correct_text": "Idranti a muro (manichetta piatta)"
     },
     {
         "qnum": 322,
-        "instruction": "Quale tra i seguenti tipi di estintore non è adatto per spegnere fuochi di Classe $\text{F}$?",
+        "instruction": "Quale tra i seguenti tipi di estintore non è adatto per spegnere fuochi di Classe F?",
         "options": {
             "A": "Estintore a schiuma con additivi specifici",
-            "B": "Estintore a $\text{CO}_2$",
-            "C": "Estintore a polvere $\text{ABC}$"
+            "B": "Estintore a CO}_2$",
+            "C": "Estintore a polvere ABC"
         },
         "correct_label": "C",
-        "correct_text": "Estintore a polvere $\text{ABC}$"
+        "correct_text": "Estintore a polvere ABC"
     },
     {
         "qnum": 323,
@@ -3547,10 +3547,10 @@
         "options": {
             "A": "Bassa temperatura",
             "B": "Mancanza di combustibile",
-            "C": "Combustione latente (incendio spento per mancanza di $\text{O}_2$)"
+            "C": "Combustione latente (incendio spento per mancanza di O}_2$)"
         },
         "correct_label": "C",
-        "correct_text": "Combustione latente (incendio spento per mancanza di $\text{O}_2$)"
+        "correct_text": "Combustione latente (incendio spento per mancanza di O}_2$)"
     },
     {
         "qnum": 324,
@@ -3565,7 +3565,7 @@
     },
     {
         "qnum": 325,
-        "instruction": "L'azione estinguente della schiuma sul fuoco di Classe $\text{B}$ (liquidi) è di:",
+        "instruction": "L'azione estinguente della schiuma sul fuoco di Classe B (liquidi) è di:",
         "options": {
             "A": "Raffreddamento e inibizione",
             "B": "Sola inibizione chimica",
@@ -3578,27 +3578,27 @@
         "qnum": 326,
         "instruction": "Quale tra i seguenti gas è il più tossico in un incendio, agendo sul trasporto di ossigeno nel sangue?",
         "options": {
-            "A": "Anidride Carbonica ($\text{CO}_2$)",
-            "B": "Ossigeno ($\text{O}_2$)",
-            "C": "Monossido di Carbonio ($\text{CO}$)"
+            "A": "Anidride Carbonica (CO}_2$)",
+            "B": "Ossigeno (O}_2$)",
+            "C": "Monossido di Carbonio (CO)"
         },
         "correct_label": "C",
-        "correct_text": "Monossido di Carbonio ($\text{CO}$)"
+        "correct_text": "Monossido di Carbonio (CO)"
     },
     {
         "qnum": 327,
         "instruction": "I fuochi che coinvolgono apparecchiature elettriche in tensione sono generalmente estinti con agenti estinguenti:",
         "options": {
             "A": "A base acquosa (acqua, schiuma)",
-            "B": "Non conduttori di elettricità (polvere, $\text{CO}_2$)",
+            "B": "Non conduttori di elettricità (polvere, CO}_2$)",
             "C": "Solo a base acquosa nebulizzata"
         },
         "correct_label": "B",
-        "correct_text": "Non conduttori di elettricità (polvere, $\text{CO}_2$)"
+        "correct_text": "Non conduttori di elettricità (polvere, CO}_2$)"
     },
     {
         "qnum": 328,
-        "instruction": "La manutenzione degli estintori a $\text{CO}_2$ prevede la revisione ($\text{controllo del peso}$) ogni:",
+        "instruction": "La manutenzione degli estintori a CO}_2$ prevede la revisione (controllo del peso) ogni:",
         "options": {
             "A": "12 mesi",
             "B": "36 mesi",
@@ -3620,7 +3620,7 @@
     },
     {
         "qnum": 330,
-        "instruction": "In caso di incendio, il $\text{D.Lgs. 81/08}$ prevede che i lavoratori debbano:",
+        "instruction": "In caso di incendio, il D.Lgs. 81/08 prevede che i lavoratori debbano:",
         "options": {
             "A": "Attendere l'arrivo dei Vigili del Fuoco senza agire",
             "B": "Seguire le istruzioni del Piano di Emergenza e collaborare",
@@ -3631,7 +3631,7 @@
     },
     {
         "qnum": 331,
-        "instruction": "Quale tra i seguenti materiali è classificato in $\text{Classe D}$?",
+        "instruction": "Quale tra i seguenti materiali è classificato in Classe D?",
         "options": {
             "A": "Legno",
             "B": "Gasolio",
@@ -3653,7 +3653,7 @@
     },
     {
         "qnum": 333,
-        "instruction": "Il $\text{LSE}$ (Limite Superiore di Esplosività) di un gas è il valore massimo di concentrazione che, in presenza di un innesco, è in grado di:",
+        "instruction": "Il LSE (Limite Superiore di Esplosività) di un gas è il valore massimo di concentrazione che, in presenza di un innesco, è in grado di:",
         "options": {
             "A": "Esplodere",
             "B": "Bruciare con fiamma viva",
@@ -3730,7 +3730,7 @@
     },
     {
         "qnum": 340,
-        "instruction": "Qual è il significato del parametro 'S' (Smoke) nella classificazione di Reazione al Fuoco (es. $\text{s1}$)?",
+        "instruction": "Qual è il significato del parametro 'S' (Smoke) nella classificazione di Reazione al Fuoco (es. s1)?",
         "options": {
             "A": "Stabilità strutturale",
             "B": "Produzione di fumo",
@@ -3741,7 +3741,7 @@
     },
     {
         "qnum": 341,
-        "instruction": "Il $\text{REI}$ di un elemento costruttivo (Resistenza al fuoco) è misurato in:",
+        "instruction": "Il REI di un elemento costruttivo (Resistenza al fuoco) è misurato in:",
         "options": {
             "A": "Metri cubi",
             "B": "Minuti",
@@ -3763,7 +3763,7 @@
     },
     {
         "qnum": 343,
-        "instruction": "La $\text{UNI EN 671-3}$ riguarda la:",
+        "instruction": "La UNI EN 671-3 riguarda la:",
         "options": {
             "A": "Classificazione dei materiali",
             "B": "Manutenzione degli Idroscivoli e Idranti a muro",
@@ -3785,7 +3785,7 @@
     },
     {
         "qnum": 345,
-        "instruction": "Il $\text{CO}$ (Monossido di Carbonio) è un gas che in caso di incendio è:",
+        "instruction": "Il CO (Monossido di Carbonio) è un gas che in caso di incendio è:",
         "options": {
             "A": "Non pericoloso",
             "B": "Inodore, incolore e molto tossico",
@@ -3796,7 +3796,7 @@
     },
     {
         "qnum": 346,
-        "instruction": "Il principale metodo estinguente dell'acqua a getto pieno sui fuochi di Classe $\text{A}$ (solidi) è:",
+        "instruction": "Il principale metodo estinguente dell'acqua a getto pieno sui fuochi di Classe A (solidi) è:",
         "options": {
             "A": "Soffocamento",
             "B": "Inibizione chimica",
@@ -3807,7 +3807,7 @@
     },
     {
         "qnum": 347,
-        "instruction": "I liquidi infiammabili (Classe $\text{B}$) sono definiti tali se il loro punto di infiammabilità ($\text{Flash Point}$) è:",
+        "instruction": "I liquidi infiammabili (Classe B) sono definiti tali se il loro punto di infiammabilità (Flash Point) è:",
         "options": {
             "A": "Inferiore a 21°",
             "B": "Inferiore a 65°",
@@ -3820,12 +3820,12 @@
         "qnum": 348,
         "instruction": "Quale tra i seguenti materiali ha la peggiore (più alta) partecipazione al fuoco (Reazione al Fuoco)?",
         "options": {
-            "A": "Classe $\text{A1}$",
-            "B": "Classe $\text{B}$",
-            "C": "Classe $\text{F}$"
+            "A": "Classe A1",
+            "B": "Classe B",
+            "C": "Classe F"
         },
         "correct_label": "C",
-        "correct_text": "Classe $\text{F}$"
+        "correct_text": "Classe F"
     },
     {
         "qnum": 349,
