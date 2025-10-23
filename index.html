@@ -19,107 +19,43 @@
     <meta name="apple-mobile-web-app-title" content="Quiz Antincendio">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <style>
-        /* BASE STYLES */
-        body {
-            transition: background-color 0.3s, color 0.3s;
-            /* Aggiungi min-h-screen, flex e justify-center al body per centrare */
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column; /* Importante per allineare correttamente il loading e il container */
-            align-items: center; /* Centra orizzontalmente il container */
-        }
-        
-        /* Definizione del contenitore per la larghezza massima e la centratura */
-        .container {
-            width: 100%; /* Occupare l'intera larghezza disponibile */
-            max-width: 600px; /* Limita la larghezza massima sui desktop */
-            padding: 1rem; /* Padding sui lati per non attaccare ai bordi */
-        }
-
-        /* DARK MODE - Variabili e Sfondo */
-        html {
-            /* Colori di default per Light Mode */
-            --bg-start: #f3f4f6; /* gray-100 */
-            --text-primary: #1f2937; /* gray-800 */
-            background-color: var(--bg-start);
-        }
-        html.dark {
-            --bg-start: #1f2937; /* gray-800 */
-            --text-primary: #f9fafb; /* gray-50 */
-            background-color: var(--bg-start);
-        }
-
-        /* ANIMAZIONE FEEDBACK VISIVO AVANZATO */
-        /* Animazione: espande una bolla di colore per dare un feedback visivo immediato */
-        @keyframes pulse-correct {
-            0% { transform: scale(0); opacity: 1; }
-            100% { transform: scale(1.5); opacity: 0; }
-        }
-        @keyframes pulse-incorrect {
-            0% { transform: scale(0); opacity: 1; }
-            100% { transform: scale(1.5); opacity: 0; }
-        }
-
-        .pulse-correct, .pulse-incorrect {
-            position: relative;
-        }
-        .pulse-correct::after, .pulse-incorrect::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 1px; /* Punto di partenza */
-            height: 1px;
-            border-radius: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            pointer-events: none;
-            animation-duration: 0.5s;
-            animation-timing-function: ease-out;
-            z-index: 50; /* Sopra le cards ma sotto i modali */
-        }
-
-        .pulse-correct::after {
-            background-color: #86efac; /* green-300 */
-            animation-name: pulse-correct;
-        }
-
-        .pulse-incorrect::after {
-            background-color: #fca5a5; /* red-300 */
-            animation-name: pulse-incorrect;
-        }
-
-        /* Stile di caricamento */
-        #loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-start);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            font-size: 3rem;
-            color: #dc2626; /* Usa colore primario fisso per il loading */
-        }
-    </style>
-</head>
-<body>
-    <div id="loading">
-        <div class="text-red-600 animate-pulse">🔥</div>
-    </div>
-    <div class="container">
-        <div id="root"></div>
-    </div>
-    <script src="app.js"></script>
-    
     <script>
+        // Configurazione Tailwind per la Dark Mode
+        tailwind.config = {
+            darkMode: 'class', // Abilita dark mode con la classe 'dark'
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#dc2626', // bg-red-600
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 min-h-screen">
+    
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-50">
+        <p class="text-3xl animate-spin text-red-600 dark:text-red-400">🔄</p>
+    </div>
+
+    <div id="app" class="max-w-xl mx-auto p-4 md:p-6 pb-20">
+        </div>
+    
+    <div id="install-app-container" class="fixed bottom-0 left-0 right-0 p-4 bg-red-600 text-white text-center shadow-lg z-50 hidden">
+        <div class="max-w-xl mx-auto flex justify-between items-center">
+            <span>Installa l'app per un accesso rapido e offline!</span>
+            <button id="install-btn" class="bg-white text-red-600 px-3 py-1 rounded-full font-bold hover:bg-red-100 transition duration-150">Installa</button>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+
+    <script>
+        // Registrazione del Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
+                navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
                         console.log('✅ Service Worker registrato:', registration);
                     })
@@ -128,19 +64,10 @@
                     });
             });
         }
-        
-        // Nascondi loading screen dopo caricamento
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const loading = document.getElementById('loading');
-                if (loading) {
-                    loading.style.display = 'none';
-                }
-            }, 500);
-        });
     </script>
     
     <script>
+        // Logic for Add To Home Screen (A2HS)
         let deferredPrompt;
         
         window.addEventListener('beforeinstallprompt', (e) => {
