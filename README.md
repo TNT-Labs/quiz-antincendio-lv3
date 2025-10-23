@@ -1,66 +1,107 @@
-# 🔥 Quiz Antincendio - Livello 3 (Aggiornato)
+# 🔥 Quiz Antincendio - Livello 3
 
-Progressive Web App (PWA) per la preparazione all'esame Antincendio di Livello 3, con nuove modalità di studio basate sui dati e tracciamento delle performance.
+Progressive Web App per la preparazione all'esame Antincendio di Livello 3.
 
-## ✨ Caratteristiche Aggiornate
+## ✨ Caratteristiche
 
 - ✅ **350 domande ufficiali** con risposte e spiegazioni
 - ✅ **Quattro modalità di studio:**
   - 🎓 **Allenamento**: domande illimitate, feedback immediato.
   - 📝 **Simulazione Esame**: 15 domande, 30 minuti, max 5 errori.
-  - ❌ **Nuova: Solo Errori**: Rivedi solo le domande a cui hai risposto in modo errato in passato. **Ideale per il ripasso mirato.**
-  - ⏱️ **Nuova: Sfida 60s**: Rispondi correttamente al maggior numero di domande possibile in 60 secondi. **Ideale per la velocità.**
-- ✅ **Statistiche Globali e Persistenza Dati**
-  - Tracciamento di tutte le risposte, del tempo impiegato e del tasso di successo.
-  - Visualizzazione delle **Top 5 domande più difficili** (quelle con più errori).
+  - ❌ **Solo Errori (NUOVA)**: Rivedi solo le domande a cui hai sbagliato in passato.
+  - ⏱️ **Sfida 60s (NUOVA)**: Rispondi a quante più domande puoi in un minuto.
+- ✅ **Statistiche Persistenti (NUOVO)**: Tracciamento delle performance, tempo medio e top 5 domande difficili.
+- ✅ **Reset Dati (NUOVO)**: Possibilità di azzerare tutte le statistiche tramite l'app.
 - ✅ **Timer avanzato** con countdown e allarmi
-- ✅ **Risultati dettagliati** con analisi degli errori della sessione
+- ✅ **Risultati dettagliati** con analisi errori
 - ✅ **Funziona offline** dopo la prima visita
 - ✅ **Installabile come app nativa** su Android/iOS
 - ✅ **Design responsive** ottimizzato per mobile
 - ✅ **Nessuna raccolta dati** - tutto in locale
 
-***
+---
 
 ## 🚀 Installazione
 
 ### Su Android/iOS
 
-1. Apri il link dell'app nel browser (Chrome/Safari)
-2. Clicca sul menu (⋮) > **"Installa app"** / **"Aggiungi a Home"**
-3. L'app apparirà nella schermata home come app nativa!
-
-*Nota: L'app ora supporta le **Scorciatoie** (Shortcuts): tieni premuta l'icona dell'app installata per avviare direttamente l'Allenamento, la Simulazione o la modalità Solo Errori.*
+1.  Apri il link dell'app nel browser (Chrome/Safari).
+2.  Clicca sul menu (⋮) > **"Installa app"** / **"Aggiungi a Home"**.
+3.  L'app apparirà nella schermata home come app nativa!
 
 ### Su Desktop
 
-1. Apri il link in Chrome/Edge
-2. Clicca sull'icona **"Installa"** nella barra degli indirizzi
-3. L'app si aprirà in una finestra separata
+1.  Apri il link in Chrome/Edge.
+2.  Clicca sull'icona **"Installa"** nella barra degli indirizzi.
+3.  L'app si aprirà in una finestra separata.
 
-***
+---
 
-## 📖 Come Usare le Nuove Modalità
+## 📖 Come Usare
+
+### Modalità Allenamento 🎓
+
+- Domande illimitate da tutte le categorie.
+- Feedback immediato (risposta corretta/sbagliata) dopo ogni selezione.
+- Usa questa modalità per imparare e memorizzare le risposte.
 
 ### Modalità Solo Errori ❌
 
-Dopo aver completato alcune sessioni, la sezione "Statistiche Globali" monitora i tuoi errori. Questa modalità carica solo quelle domande, permettendoti di concentrarti sui punti deboli finché non le padroneggi.
+- **Disponibile solo dopo aver commesso un errore** in una sessione precedente.
+- Presenta in modo casuale solo le domande che hai sbagliato. Perfetto per il ripasso mirato.
 
-### Modalità Sfida 60s ⏱️
+### Visualizzare e Azzerare le Statistiche 📊
 
-Metti alla prova la tua velocità! Hai 60 secondi per rispondere correttamente a quante più domande puoi. Il feedback è immediato per massimizzare il tempo.
+- Dal menu principale, clicca su **"Visualizza Statistiche Globali"**.
+- Troverai il riepilogo totale delle tue performance e le domande più difficili.
+- In fondo a questa schermata è presente il pulsante **"Azzerra Tutte le Statistiche"** per resettare la tua cronologia.
 
-### Statistiche Globali 📊
+---
 
-Dal menu principale, accedi alle Statistiche per vedere il tuo progresso complessivo, il tempo medio di risposta e la lista delle domande che ti hanno messo più in difficoltà (utili per il ripasso manuale o l'uso della modalità Solo Errori).
+## 🎨 Personalizzazione (Se vuoi cambiare i colori)
 
-***
+L'app usa Tailwind CSS. Per cambiare il colore principale (dal rosso al blu, ad esempio), cerca e sostituisci in `app.js` e `index.html` (o usa la tua build Tailwind):
 
-## 🛠 Sviluppo e Modifiche Tecniche
+- `bg-red-600` → `bg-blue-600` (colore primario)
+- `text-red-600` → `text-blue-600`
+- `border-red-600` → `border-blue-600`
 
-Le principali modifiche al codice includono:
+---
 
-1.  **Persistenza Dati**: Implementazione di `localStorage` in `app.js` per salvare lo storico delle risposte e calcolare le statistiche globali (`quizHistory`).
-2.  **Struttura Modulare**: Ristrutturazione di `app.js` per supportare e gestire lo stato e la logica di feedback di quattro diverse modalità di quiz.
-3.  **Aggiornamento PWA**: Aggiornamento del `CACHE_NAME` in `sw.js` (a `v1.1.0-features`) per forzare l'aggiornamento della cache per gli utenti esistenti.
-4.  **UX Migliorata**: Integrazione del feedback immediato nelle modalità di studio (non-esame) per velocizzare il processo di ripasso.
+## 🌐 Deploy
+
+### GitHub Pages
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin [https://github.com/USERNAME/quiz-antincendio.git](https://github.com/USERNAME/quiz-antincendio.git)
+git push -u origin main
+
+# Vai su Settings > Pages > Deploy from branch 'main'
+Netlify
+Vai su https://app.netlify.com/drop
+
+Trascina la cartella del progetto
+
+Ottieni l'URL istantaneo
+
+Vercel
+Bash
+
+npm i -g vercel
+vercel
+❓ Risoluzione Problemi
+L'app non si installa
+Verifica che sia servita via HTTPS.
+
+Controlla che manifest.json sia valido.
+
+Usa Chrome (migliore supporto PWA).
+
+L'app non si aggiorna (mostra la vecchia versione)
+Soluzione 1 (Sviluppatore): Aggiorna la costante CACHE_NAME in sw.js (ad esempio a 'quiz-antincendio-v1.1.0') e carica il file aggiornato.
+
+Soluzione 2 (Utente/Tester): Apri DevTools (F12) → Application → Service Workers → Abilita "Update on reload" e ricarica la pagina.
