@@ -125,6 +125,19 @@ class QuizApp {
         this.render();
     }
 
+    // --- Nuova funzione per il reset ---
+    resetStats() {
+        if (confirm("Sei sicuro di voler azzerare TUTTE le tue statistiche e la cronologia? Questa azione è irreversibile.")) {
+            localStorage.removeItem('quizHistory');
+            this.history = [];
+            this.calculateStats(); // Azzera anche l'oggetto this.stats
+            this.render(); // Ricarica la schermata Statistiche
+            alert("Statistiche azzerate con successo!");
+        }
+    }
+    // --- Fine nuova funzione ---
+
+
     // --- Avvio Quiz ---
 
     startQuiz() {
@@ -565,6 +578,7 @@ class QuizApp {
 
 
         return `
+
             <div class="p-6">
                 <h1 class="text-3xl font-bold text-red-600 mb-6 text-center">📊 Statistiche Globali</h1>
                 
@@ -597,10 +611,13 @@ class QuizApp {
                     </ul>
                 </div>
                 
-                <button id="change-mode-btn" class="text-red-600 hover:text-red-800 font-medium py-3 px-6 rounded-lg w-full border border-red-600 hover:bg-red-50 transition">
+                <button id="change-mode-btn" class="text-red-600 hover:text-red-800 font-medium py-3 px-6 rounded-lg w-full border border-red-600 hover:bg-red-50 transition mb-3">
                     Torna al Menu Principale
                 </button>
-            </div>
+                
+                <button id="reset-stats-btn" class="text-gray-500 hover:text-red-600 text-sm py-2 px-4 rounded-lg w-full border border-gray-300 hover:border-red-600 transition">
+                    ⚠️ Azzerra Tutte le Statistiche
+                </button>            </div>
         `;
     }
     
@@ -689,6 +706,10 @@ class QuizApp {
         if (changeModeBtn) {
             changeModeBtn.onclick = () => this.resetQuiz();
         }
+        
+        const resetStatsBtn = document.getElementById('reset-stats-btn');
+        if (resetStatsBtn) {
+            resetStatsBtn.onclick = () => this.resetStats();
     }
 }
 
