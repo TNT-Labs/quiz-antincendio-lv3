@@ -1,7 +1,7 @@
 {
   "name": "Quiz Antincendio Livello 3",
   "short_name": "Quiz Antincendio",
-  "description": "App per la preparazione all'esame Antincendio di Livello 3. 350 domande complete con spiegazioni dettagliate.",
+  "description": "App per la preparazione all'esame Antincendio di Livello 3. **350 domande complete con spiegazioni, nuove modalità Solo Errori e Sfida 60s, e statistiche di progresso.**",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -29,15 +29,22 @@
     {
       "name": "Allenamento",
       "short_name": "Allenamento",
-      "description": "Avvia modalità allenamento",
+      "description": "Avvia la modalità Allenamento libero",
       "url": "/?mode=training",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Simulazione Esame",
       "short_name": "Esame",
-      "description": "Avvia simulazione esame",
+      "description": "Avvia la simulazione dell'esame ufficiale (15 domande, 30 min)",
       "url": "/?mode=exam",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Solo Errori",
+      "short_name": "Solo Errori",
+      "description": "Rivedi le domande a cui hai risposto in modo errato",
+      "url": "/?mode=errorsOnly",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     }
   ]
