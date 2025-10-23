@@ -24,9 +24,20 @@
         /* BASE STYLES */
         body {
             transition: background-color 0.3s, color 0.3s;
-            /* Le classi di Tailwind gestiranno il resto (es. .container) */
+            /* Aggiungi min-h-screen, flex e justify-center al body per centrare */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column; /* Importante per allineare correttamente il loading e il container */
+            align-items: center; /* Centra orizzontalmente il container */
         }
         
+        /* Definizione del contenitore per la larghezza massima e la centratura */
+        .container {
+            width: 100%; /* Occupare l'intera larghezza disponibile */
+            max-width: 600px; /* Limita la larghezza massima sui desktop */
+            padding: 1rem; /* Padding sui lati per non attaccare ai bordi */
+        }
+
         /* DARK MODE - Variabili e Sfondo */
         html {
             /* Colori di default per Light Mode */
