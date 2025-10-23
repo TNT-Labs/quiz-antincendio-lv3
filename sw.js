@@ -1,13 +1,13 @@
-const CACHE_NAME = 'quiz-antincendio-v1.3.0-themes-feedback'; // VERSIONE AGGIORNATA
+const CACHE_NAME = 'quiz-antincendio-v1.3.2-statefix'; // Aggiornato!
 const urlsToCache = [
   '/',
   '/index.html',
   '/app.js',
   '/manifest.json',
-  '/quiz_antincendio_ocr_improved.json',
+  '/quiz_antincendio_ocr_improved.json', // Cruciale: assicura che il file JSON sia ricaricato
   '/icon-192.png',
   '/icon-512.png',
-  'https://cdn.tailwindcss.com' // Manteniamo la CDN per il CSS come nel file originale
+  'https://cdn.tailwindcss.com' 
 ];
 
 // Installazione Service Worker
