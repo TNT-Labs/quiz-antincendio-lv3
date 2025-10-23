@@ -1,12 +1,12 @@
-const CACHE_NAME = 'quiz-antincendio-v1.1.0-features';
+const CACHE_NAME = 'quiz-antincendio-v1.2.0-smartfeatures'; // Versione aggiornata
 const urlsToCache = [
   '/',
   '/index.html',
   '/app.js',
   '/manifest.json',
   '/quiz_antincendio_ocr_improved.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  '/icon-192.png',
+  '/icon-512.png',
   'https://cdn.tailwindcss.com' // Manteniamo la CDN per il CSS come nel file originale
 ];
 
@@ -17,7 +17,12 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Service Worker: Caching files');
-        return cache.addAll(urlsToCache);
+        // Aggiungo una gestione più robusta dell'errore cacheAdd per la CDN
+        return cache.addAll(urlsToCache).catch(err => {
+            // Se la CDN fallisce, procediamo con gli altri file
+            console.error('Service Worker: Cache add failed (forse la CDN)', err);
+            return Promise.resolve(); 
+        });
       })
       .then(() => self.skipWaiting())
   );
@@ -31,7 +36,7 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cache => {
           if (cache !== CACHE_NAME) {
-            console.log('Service Worker: Clearing old cache');
+            console.log('Service Worker: Clearing old cache', cache);
             return caches.delete(cache);
           }
         })
@@ -43,6 +48,9 @@ self.addEventListener('activate', event => {
 
 // Intercettazione richieste (Strategia Cache-First)
 self.addEventListener('fetch', event => {
+  // Ignora le richieste che non sono HTTP/HTTPS (es. chrome-extension://)
+  if (!event.request.url.startsWith('http')) return;
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -65,7 +73,8 @@ self.addEventListener('fetch', event => {
           
           caches.open(CACHE_NAME)
             .then(cache => {
-              // Non cacha richieste a CDN se non è nella lista iniziale (come garanzia)
+              // Cacha solo le richieste che hanno successo e non sono "opache" (es. immagini CORS)
+              // Controlla se l'URL da cachare era nella lista iniziale, o è la CDN che lasciamo comunque
               if (urlsToCache.some(url => event.request.url.includes(url))) {
                 cache.put(event.request, responseToCache);
               }
@@ -77,7 +86,7 @@ self.addEventListener('fetch', event => {
       .catch(error => {
           // Fallback per richieste non riuscite (ad esempio, immagini mancanti)
           console.error('Service Worker: Fetch failed:', error);
-          // Qui si potrebbe aggiungere una pagina di fallback offline
+          // Qui si potrebbe aggiungere un fallback per index.html (es. ritorno di una pagina offline)
       })
   );
 });

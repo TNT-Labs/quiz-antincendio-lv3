@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#dc2626">
-    <meta name="description" content="Quiz di preparazione per l'esame Antincendio di Livello 3. 350 domande, simulazioni complete. Aggiunte modalità Solo Errori e Sfida 60s con persistenza dati e statistiche.">
+    <meta name="description" content="Quiz di preparazione per l'esame Antincendio di Livello 3. 350 domande, simulazioni complete. Aggiunte modalità Solo Errori, Sfida 60s, Revisione Intelligente e Obiettivi Giornalieri con persistenza dati e statistiche.">
     <meta name="keywords" content="quiz, antincendio, livello 3, esame, VVF, sicurezza, pwa, formazione">
     <meta name="author" content="Quiz Antincendio">
     
@@ -21,57 +21,36 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        /* Stili per rimuovere le evidenziazioni al tocco su iOS/Android */
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
         body {
-            background-color: #f7f7f7;
+            background-color: #f3f4f6; /* Sfondo generale */
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
-            min-height: 100vh;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            padding: 20px;
         }
-        /* Stili per lo spinner di caricamento */
+        /* Stile di caricamento */
         #loading {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #dc2626;
+            background-color: #f3f4f6;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
-            color: white;
-            font-size: 2rem;
-            flex-direction: column;
-        }
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #fff;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            z-index: 100;
+            font-size: 3rem;
         }
     </style>
 </head>
 <body>
-    <div id="loading">
-        <div class="spinner"></div>
-        Caricamento Quiz...
-    </div>
     
+    <div id="loading">
+        <div class="text-red-600 animate-pulse">🔥</div>
+    </div>
+
     <div class="container">
         <div id="root"></div>
     </div>
@@ -109,12 +88,20 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
+            const installContainer = document.getElementById('install-app-container');
+            if (installContainer) {
+                installContainer.style.display = 'block';
+            }
             console.log('📱 App installabile!');
         });
         
         window.addEventListener('appinstalled', () => {
             console.log('✅ App installata con successo!');
             deferredPrompt = null;
+            const installContainer = document.getElementById('install-app-container');
+            if (installContainer) {
+                installContainer.style.display = 'none';
+            }
         });
     </script>
 </body>

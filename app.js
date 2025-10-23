@@ -1,5 +1,5 @@
 // Quiz Antincendio - Progressive Web App
-// Versione con modalità Allenamento, Esame, Solo Errori, Sfida 60s e Reset Statistiche
+// Versione con modalità Allenamento, Esame, Solo Errori, Sfida 60s, Revisione Intelligente e Obiettivi Giornalieri
 // Correzione Finale: Aggiunto setTimeout per risolvere race condition del timer
 
 class QuizApp {
@@ -12,7 +12,7 @@ class QuizApp {
         this.answeredQuestions = []; // Risposte della sessione corrente
         this.showFeedback = false;
         this.quizState = 'start'; // start, quiz, results, stats
-        this.mode = null; // 'training', 'exam', 'errorsOnly', 'timeChallenge'
+        this.mode = null; // 'training', 'exam', 'errorsOnly', 'timeChallenge', 'smartReview'
 
         // Timer e tempi
         this.startTime = null; // Tempo inizio quiz
@@ -24,6 +24,13 @@ class QuizApp {
         // Nuove proprietà per persistenza e statistiche
         this.history = []; // [{qnum, isCorrect, timestamp, mode, timeSpent}]
         this.stats = { totalAttempts: 0, totalCorrect: 0, totalTime: 0 };
+        this.highScores60s = []; // [{score, timestamp}]
+        this.badges = {}; // {'fireMaster': true, 'streak5days': false}
+        this.dailyGoal = {
+            target: 50, // Obiettivo domande da completare
+            completedToday: 0,
+            lastGoalDate: new Date().toLocaleDateString('it-IT') // Data ultima esecuzione obiettivo
+        };
 
         // Configurazioni modalità
         this.modes = {
@@ -32,647 +39,918 @@ class QuizApp {
                 questions: 'infinite',
                 maxErrors: 'nessuno',
                 timeLimit: null,
-                description: 'Impara dai test senza limiti di tempo ed errori. Feedback immediato.'
+                showFeedback: true,
+                isExam: false
             },
             exam: {
                 name: 'Simulazione Esame',
                 questions: 15,
                 maxErrors: 5,
-                timeLimit: 30 * 60, // 30 minuti in secondi
-                description: '15 domande, 30 minuti, massimo 5 errori. Feedback solo alla conferma.'
+                timeLimit: 1800, // 30 minuti
+                showFeedback: false,
+                isExam: true
             },
             errorsOnly: {
                 name: 'Solo Errori',
-                questions: 'variabile',
+                questions: 'allErrors',
                 maxErrors: 'nessuno',
                 timeLimit: null,
-                description: 'Rivedi solo le domande a cui hai risposto in modo errato in passato. Feedback immediato.'
+                showFeedback: true,
+                isExam: false
             },
             timeChallenge: {
                 name: 'Sfida 60s',
                 questions: 'infinite',
                 maxErrors: 'nessuno',
                 timeLimit: 60, // 60 secondi
-                description: 'Rispondi a quante più domande puoi in un minuto. Tasso di successo e velocità contano.'
+                showFeedback: false,
+                isExam: false
+            },
+            smartReview: { // NUOVA MODALITÀ RIPETIZIONE SPAZIATA
+                name: 'Revisione Intelligente',
+                questions: 'smart',
+                maxErrors: 'nessuno',
+                timeLimit: null,
+                showFeedback: true,
+                isExam: false
             }
         };
 
-        this.init();
+        this.loadData();
+        this.bindEvents();
     }
 
-    // --- Persistenza e Statistiche ---
+    // --- Gestione Dati Persistenti (LocalStorage) ---
 
-    loadHistory() {
+    loadData() {
         try {
-            const historyJson = localStorage.getItem('quizHistory');
-            if (historyJson) {
-                this.history = JSON.parse(historyJson);
-                this.calculateStats();
+            // Carica Dati Quiz
+            fetch('quiz_antincendio_ocr_improved.json')
+                .then(response => response.json())
+                .then(data => {
+                    this.quizData = data.map((q, index) => ({ ...q, qnum: index + 1 }));
+                    this.quizData.sort(() => Math.random() - 0.5); // Mescola le domande all'avvio
+                    this.render();
+                });
+
+            // Carica Statistiche e Cronologia
+            const savedHistory = localStorage.getItem('quizHistory');
+            if (savedHistory) {
+                this.history = JSON.parse(savedHistory);
             }
+            const savedStats = localStorage.getItem('quizStats');
+            if (savedStats) {
+                this.stats = JSON.parse(savedStats);
+            }
+
+            // Carica Classifica 60s
+            const savedHighScores60s = localStorage.getItem('highScores60s');
+            if (savedHighScores60s) {
+                this.highScores60s = JSON.parse(savedHighScores60s);
+            }
+
+            // Carica Badge
+            const savedBadges = localStorage.getItem('quizBadges');
+            if (savedBadges) {
+                this.badges = JSON.parse(savedBadges);
+            }
+
+            // Carica Obiettivo Giornaliero
+            const savedDailyGoal = localStorage.getItem('dailyGoal');
+            if (savedDailyGoal) {
+                this.dailyGoal = JSON.parse(savedDailyGoal);
+            }
+            this.checkGoalReset();
+
         } catch (e) {
-            console.error("Errore nel caricamento della cronologia:", e);
-            this.history = [];
+            console.error("Errore nel caricamento dei dati da localStorage o file JSON:", e);
         }
     }
 
-    saveHistory() {
+    saveData() {
         localStorage.setItem('quizHistory', JSON.stringify(this.history));
-        this.calculateStats();
+        localStorage.setItem('quizStats', JSON.stringify(this.stats));
+        localStorage.setItem('highScores60s', JSON.stringify(this.highScores60s));
+        localStorage.setItem('quizBadges', JSON.stringify(this.badges));
+        localStorage.setItem('dailyGoal', JSON.stringify(this.dailyGoal));
     }
 
-    calculateStats() {
-        this.stats.totalAttempts = this.history.length;
-        this.stats.totalCorrect = this.history.filter(h => h.isCorrect).length;
-        this.stats.totalTime = this.history.reduce((sum, h) => sum + (h.timeSpent || 0), 0);
+    // --- Gestione Obiettivi Giornalieri ---
+
+    checkGoalReset() {
+        const today = new Date().toLocaleDateString('it-IT');
+        if (this.dailyGoal.lastGoalDate !== today) {
+            this.dailyGoal.completedToday = 0;
+            this.dailyGoal.lastGoalDate = today;
+            this.saveData();
+        }
+    }
+
+    updateDailyGoal(count = 1) {
+        this.dailyGoal.completedToday += count;
+        this.checkBadges();
+        this.saveData();
+        this.render(); // Per aggiornare l'interfaccia degli obiettivi
+    }
+
+    // --- Gestione Ripetizione Spaziata ---
+    
+    // Calcola il "fattore di difficoltà" basandosi sulla media delle risposte corrette/sbagliate
+    calculateDifficulty(qnum) {
+        const attempts = this.history.filter(h => h.qnum === qnum);
+        if (attempts.length === 0) return 0.5; // Neutro se non risposto
+        
+        const correctCount = attempts.filter(h => h.isCorrect).length;
+        const incorrectCount = attempts.filter(h => !h.isCorrect).length;
+        
+        // Fattore: 1 (sempre corretto) a 0 (sempre sbagliato)
+        return correctCount / attempts.length;
     }
     
-    // Funzione per il reset delle statistiche
-    resetStats() {
-        if (confirm("Sei sicuro di voler azzerare TUTTE le tue statistiche e la cronologia? Questa azione è irreversibile.")) {
-            localStorage.removeItem('quizHistory');
-            this.history = [];
-            this.calculateStats(); 
-            this.render(); 
-            alert("Statistiche azzerate con successo!");
+    // Determina se una domanda è pronta per la revisione (basato sulla difficoltà e sulla data dell'ultima risposta)
+    isReadyForReview(qnum) {
+        const lastAttempt = this.history
+            .filter(h => h.qnum === qnum)
+            .sort((a, b) => b.timestamp - a.timestamp)[0];
+
+        if (!lastAttempt) return true; // Se non è mai stata risposta, è pronta
+
+        const difficulty = this.calculateDifficulty(qnum);
+        const now = Date.now();
+        const daysSinceLastReview = (now - lastAttempt.timestamp) / (1000 * 60 * 60 * 24); // Giorni
+
+        let interval;
+        // Intervalli di ripetizione (giorni) basati sul fattore di difficoltà:
+        if (difficulty >= 0.8) { // Facile (rivedi dopo 7-14 giorni)
+            interval = 7 + (7 * difficulty);
+        } else if (difficulty >= 0.5) { // Medio (rivedi dopo 3-7 giorni)
+            interval = 3 + (4 * difficulty);
+        } else { // Difficile (rivedi dopo 1 giorno)
+            interval = 1;
         }
-    }
 
-    // --- Inizializzazione ---
-
-    async init() {
-        await this.loadQuizData();
-        this.loadHistory(); // Carica la cronologia all'avvio
-        this.render();
-    }
-
-    async loadQuizData() {
-        try {
-            const response = await fetch('quiz_antincendio_ocr_improved.json');
-            this.quizData = await response.json();
-            console.log(`Caricate ${this.quizData.length} domande`);
-        } catch (error) {
-            console.error('Errore nel caricamento dei dati:', error);
-            this.quizData = [];
-        }
-    }
-
-    shuffleArray(array) {
-        const shuffled = [...array];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled;
-    }
-
-    selectMode(mode) {
-        this.mode = mode;
-        this.quizState = 'quiz';
-        this.startQuiz();
-    }
-    
-    goToStats() {
-        this.quizState = 'stats';
-        this.render();
-    }
-
-    // --- Avvio Quiz ---
-
-    startQuiz() {
-        const config = this.modes[this.mode];
-        let questionsSource = [...this.quizData];
-
-        if (this.mode === 'errorsOnly') {
-            const incorrectQnums = [...new Set(this.history.filter(h => !h.isCorrect).map(h => h.qnum))];
-            if (incorrectQnums.length === 0) {
-                // Nessun errore storico, usa un set casuale
-                questionsSource = this.shuffleArray(questionsSource).slice(0, 30);
-            } else {
-                questionsSource = questionsSource.filter(q => incorrectQnums.includes(q.qnum));
-            }
+        // Se l'ultima volta era sbagliata, rivedi prima
+        if (!lastAttempt.isCorrect) {
+            interval = 0.5; // Rivedi subito il giorno dopo
         }
         
-        const shuffled = this.shuffleArray(questionsSource);
+        return daysSinceLastReview >= interval;
+    }
 
-        if (this.mode === 'exam') {
-            this.selectedQuestions = shuffled.slice(0, config.questions);
-        } else {
-            // Per tutte le altre modalità, usiamo il set completo o filtrato, shuffleato
-            this.selectedQuestions = shuffled;
+    getSmartReviewQuestions() {
+        // 1. Prendi tutte le domande
+        const questionsToReview = this.quizData
+            .filter(q => this.isReadyForReview(q.qnum));
+        
+        // 2. Ordinale per priorità (quelle con difficoltà più bassa in cima)
+        questionsToReview.sort((a, b) => {
+            return this.calculateDifficulty(a.qnum) - this.calculateDifficulty(b.qnum);
+        });
+
+        // 3. Limita il set (es. 20 domande)
+        return questionsToReview.slice(0, 20);
+    }
+
+    // --- Inizializzazione Quiz ---
+
+    selectMode(mode) {
+        if (!this.modes[mode]) return;
+        this.mode = mode;
+        this.quizState = 'quiz';
+        this.incorrectCount = 0;
+        this.answeredQuestions = [];
+        this.questionStartTime = Date.now();
+
+        // Seleziona le domande in base alla modalità
+        if (mode === 'errorsOnly') {
+            const incorrectQnums = [...new Set(this.history.filter(h => !h.isCorrect).map(h => h.qnum))];
+            this.selectedQuestions = this.quizData.filter(q => incorrectQnums.includes(q.qnum));
+            // Se non ci sono errori, torna alla schermata iniziale o avvisa
+            if (this.selectedQuestions.length === 0) {
+                alert('Non hai ancora commesso errori! Prova la modalità Allenamento.');
+                this.resetQuiz();
+                return;
+            }
+        } else if (mode === 'smartReview') {
+            this.selectedQuestions = this.getSmartReviewQuestions();
+            // Se non ci sono domande da rivedere, avvisa
+            if (this.selectedQuestions.length === 0) {
+                alert('Ottimo lavoro! Nessuna domanda è pronta per la Revisione Intelligente. Continua ad allenarti!');
+                this.resetQuiz();
+                return;
+            }
+        } else if (mode === 'exam') {
+            // Selezione casuale delle domande per l'esame
+            this.selectedQuestions = this.quizData.sort(() => 0.5 - Math.random()).slice(0, this.modes[mode].questions);
+        } else if (mode === 'training' || mode === 'timeChallenge') {
+            // Per training e 60s, iniziamo con un set casuale, poi ne aggiungiamo dinamicamente
+            this.selectedQuestions = this.quizData.sort(() => 0.5 - Math.random()).slice(0, 50);
         }
 
         this.currentQuestionIndex = 0;
-        this.incorrectCount = 0;
-        this.answeredQuestions = [];
-        this.selectedAnswer = null;
-        this.showFeedback = false;
-        
-        // Avvia timer e tracciamento
         this.startTime = Date.now();
-        this.questionStartTime = Date.now();
-        
-        // PASSO 1: Renderizza la schermata prima di avviare il timer
-        this.render(); 
-        
-        if (config.timeLimit) {
-            this.timeRemaining = config.timeLimit;
-            // PASSO 2: Avvia il timer dopo un breve ritardo per prevenire la race condition (Errore 159)
-            setTimeout(() => {
-                this.startTimer();
-            }, 50); // 50ms di attesa per il disegno del DOM
-        }
+        this.endTime = null;
+        this.timeRemaining = this.modes[mode].timeLimit;
+        this.startTimer();
+        this.render();
     }
+
+    // ... (metodo startTimer e updateTimer rimangono invariati)
 
     startTimer() {
-        this.timerInterval = setInterval(() => {
-            this.timeRemaining--;
-            
-            // L'elemento è ora garantito esistere
-            const timerElement = document.getElementById('timer-display');
-            if (timerElement) {
-                timerElement.textContent = this.formatTime(this.timeRemaining);
-                if (this.timeRemaining <= 300 && this.mode === 'exam') { // Allarme 5 minuti solo per esame
-                    timerElement.classList.add('text-yellow-400', 'font-bold');
-                } else if (this.timeRemaining <= 10 && this.mode === 'timeChallenge') { // Allarme 10 secondi per sfida
-                     timerElement.classList.add('text-red-600', 'font-bold');
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        
+        // Se c'è un limite di tempo (esame o 60s)
+        if (this.modes[this.mode].timeLimit) {
+            this.timerInterval = setInterval(() => {
+                this.timeRemaining--;
+                this.updateTimerDisplay();
+                if (this.timeRemaining <= 0) {
+                    clearInterval(this.timerInterval);
+                    this.timeRemaining = 0;
+                    if (this.mode === 'timeChallenge') {
+                        this.endTimeChallenge(); // Fine specifica per 60s
+                    } else {
+                        alert('Tempo scaduto!');
+                        this.endQuiz();
+                    }
                 }
-            }
-            
-            // Tempo scaduto
-            if (this.timeRemaining <= 0) {
-                this.stopTimer();
-                this.endQuiz();
-            }
-        }, 1000);
-    }
-
-    stopTimer() {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
+            }, 1000);
+        } else if (this.mode === 'training' || this.mode === 'errorsOnly' || this.mode === 'smartReview') {
+            // Per modalità senza limite, tracciamo il tempo totale
+            this.timerInterval = setInterval(() => {
+                // Aggiorniamo il tempo trascorso ogni secondo
+                this.updateTimerDisplay();
+            }, 1000);
         }
-        this.endTime = Date.now();
     }
 
-    formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    updateTimerDisplay() {
+        const timerElement = document.getElementById('timer');
+        if (timerElement) {
+            let displayTime;
+            if (this.modes[this.mode].timeLimit) {
+                const minutes = Math.floor(this.timeRemaining / 60);
+                const seconds = this.timeRemaining % 60;
+                displayTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                const totalSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                displayTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            timerElement.textContent = displayTime;
+        }
     }
 
-    getElapsedTime() {
-        if (!this.startTime) return 0;
-        const end = this.endTime || Date.now();
-        return Math.floor((end - this.startTime) / 1000);
-    }
-
-    // --- Risposta e Feedback ---
+    // --- Risposta e Avanzamento ---
 
     selectAnswer(option) {
+        // Logica per selezionare una risposta
         if (this.showFeedback) return;
         this.selectedAnswer = option;
         this.render();
-
-        // In modalità Training, Solo Errori, o Sfida 60s, la selezione è anche la conferma
-        if (this.mode !== 'exam') {
-            this.confirmAnswer();
-        }
     }
 
     confirmAnswer() {
         if (!this.selectedAnswer) return;
 
         const currentQuestion = this.selectedQuestions[this.currentQuestionIndex];
-        const isCorrect = this.selectedAnswer === currentQuestion.correct_label;
-        const timeSpent = Date.now() - this.questionStartTime;
+        const isCorrect = currentQuestion.answer === this.selectedAnswer;
 
-        if (!isCorrect) {
+        // Tempo impiegato
+        const timeSpent = (Date.now() - this.questionStartTime) / 1000;
+
+        // 1. Aggiorna la cronologia (History)
+        this.history.push({
+            qnum: currentQuestion.qnum,
+            isCorrect: isCorrect,
+            timestamp: Date.now(),
+            mode: this.mode,
+            timeSpent: timeSpent
+        });
+        
+        // 2. Aggiorna le statistiche totali
+        this.stats.totalAttempts++;
+        if (isCorrect) {
+            this.stats.totalCorrect++;
+        }
+        this.stats.totalTime += timeSpent;
+        
+        // 3. Gestione errori
+        if (!isCorrect && this.modes[this.mode].isExam) {
             this.incorrectCount++;
         }
 
-        const answerRecord = {
-            qnum: currentQuestion.qnum,
-            userAnswer: this.selectedAnswer,
-            isCorrect: isCorrect,
-            mode: this.mode,
-            timestamp: Date.now(),
-            timeSpent: timeSpent
-        };
+        // 4. Aggiorna l'obiettivo giornaliero
+        this.updateDailyGoal();
 
-        this.answeredQuestions.push(answerRecord);
-        this.history.push(answerRecord);
+        // 5. Salva e renderizza
+        this.saveData();
+        this.answeredQuestions.push({ question: currentQuestion, isCorrect: isCorrect, selected: this.selectedAnswer });
 
-        this.showFeedback = true;
-        this.render();
-
-        // Controllo per fine quiz anticipata (Esame: troppi errori)
-        if (this.mode === 'exam' && this.incorrectCount > this.modes.exam.maxErrors) {
-            setTimeout(() => this.endQuiz(), 2000);
-        }
-        
-        // Modalità con feedback immediato: avanza dopo un breve ritardo
-        if (this.mode !== 'exam') {
-            setTimeout(() => this.nextQuestion(), 1500); 
+        if (this.mode === 'timeChallenge') {
+            // Nella 60s, si passa subito alla successiva e si registra solo il risultato finale
+            this.nextQuestion(isCorrect);
+        } else {
+            // Nelle altre modalità, si mostra il feedback
+            this.showFeedback = true;
+            this.render();
         }
     }
 
-    nextQuestion() {
-        this.questionStartTime = Date.now();
+    nextQuestion(isCorrectFor60s = null) {
         this.selectedAnswer = null;
         this.showFeedback = false;
         
-        if (this.currentQuestionIndex < this.selectedQuestions.length - 1) {
-            this.currentQuestionIndex++;
-            this.render();
-        } else if (this.mode === 'timeChallenge' && this.timeRemaining > 0) {
-             // In Sfida 60s, se finiscono le domande, ricomincia da capo (loop infinito)
-             this.currentQuestionIndex = 0;
-             this.selectedQuestions = this.shuffleArray(this.quizData); // Ricarica set casuale
-             this.render();
-        } else {
-            this.endQuiz();
+        // Se è la modalità 60s, ricarichiamo il timer della domanda
+        if (this.mode !== 'timeChallenge') {
+            this.questionStartTime = Date.now();
         }
-    }
-    
-    skipQuestion() {
-        // Solo in modalità Esame ha senso saltare
-        if (this.mode !== 'exam') return;
-        
-        // Registra come risposta "non data" o errata per coerenza nel tracciamento
-        const currentQuestion = this.selectedQuestions[this.currentQuestionIndex];
-        const answerRecord = {
-            qnum: currentQuestion.qnum,
-            userAnswer: 'SALTATA',
-            isCorrect: false, // Considerata errata se saltata in esame
-            mode: this.mode,
-            timestamp: Date.now(),
-            timeSpent: Date.now() - this.questionStartTime
-        };
-        this.answeredQuestions.push(answerRecord);
-        this.history.push(answerRecord);
-        this.incorrectCount++; // Anche le domande saltate contano come errore nel limite
 
-        if (this.currentQuestionIndex < this.selectedQuestions.length - 1) {
-            this.currentQuestionIndex++;
+        this.currentQuestionIndex++;
+        const modeConfig = this.modes[this.mode];
+
+        // Controllo fine quiz (Esame o fine lista Allenamento/Errori)
+        if (modeConfig.isExam && (this.currentQuestionIndex >= modeConfig.questions || this.incorrectCount > modeConfig.maxErrors)) {
+            this.endQuiz();
+            return;
+        }
+
+        if (modeConfig.questions !== 'infinite' && this.currentQuestionIndex >= this.selectedQuestions.length) {
+            this.endQuiz();
+            return;
+        }
+
+        // Caso Allenamento/Solo Errori/Smart Review (illimitato)
+        if (modeConfig.questions === 'infinite' || modeConfig.questions === 'allErrors' || modeConfig.questions === 'smart') {
+            // Se siamo alla fine della lista, ne carichiamo un'altra casuale (o ripartiamo dall'inizio se non illimitato)
+            if (this.currentQuestionIndex >= this.selectedQuestions.length) {
+                // Per allenamento, carichiamo nuove domande casuali
+                if (this.mode === 'training') {
+                    this.selectedQuestions = this.quizData.sort(() => 0.5 - Math.random()).slice(0, 50);
+                    this.currentQuestionIndex = 0;
+                } else if (this.mode === 'errorsOnly') {
+                    // Se gli errori sono finiti, finisce
+                    this.endQuiz();
+                } else if (this.mode === 'smartReview') {
+                    // Se le smart review sono finite, finisce
+                    this.endQuiz();
+                }
+            }
+        }
+        
+        this.render();
+    }
+
+    skipQuestion() {
+        // Funzionalità di skip, solo per Allenamento o 60s (dove non c'è penalità)
+        if (this.mode === 'training' || this.mode === 'timeChallenge') {
+            // Per il 60s lo saltiamo senza contarlo
+            if (this.mode === 'timeChallenge') {
+                this.currentQuestionIndex++;
+                if (this.currentQuestionIndex >= this.selectedQuestions.length) {
+                    this.selectedQuestions = this.quizData.sort(() => 0.5 - Math.random()).slice(0, 50);
+                    this.currentQuestionIndex = 0;
+                }
+            }
             this.selectedAnswer = null;
             this.showFeedback = false;
             this.questionStartTime = Date.now();
+            this.currentQuestionIndex++;
             this.render();
-        } else {
-            this.endQuiz();
         }
     }
 
+    // --- Fine Quiz e Calcolo Risultati ---
 
     endQuiz() {
-        this.stopTimer();
-        this.saveHistory(); // Salva la cronologia e aggiorna le stats
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        this.endTime = Date.now();
         this.quizState = 'results';
+        this.checkBadges(); // Controlla i badge dopo il quiz
+        this.saveData();
+        this.render();
+    }
+    
+    endTimeChallenge() {
+        // Logica specifica per la Sfida 60s
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        this.endTime = Date.now();
+        this.quizState = 'results';
+
+        const correctCount = this.answeredQuestions.filter(a => a.isCorrect).length;
+        const totalAttempts = this.answeredQuestions.length;
+
+        // Calcolo e salvataggio High Score
+        this.highScores60s.push({
+            score: correctCount,
+            total: totalAttempts,
+            timestamp: Date.now()
+        });
+        // Mantieni solo i 10 migliori punteggi, ordinati per score e poi per totalAttempts (a parità di score)
+        this.highScores60s.sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return b.total - a.total; // Piu tentativi = più veloce/meglio
+        }).splice(10); 
+        
+        this.checkBadges();
+        this.saveData();
         this.render();
     }
 
     resetQuiz() {
-        this.stopTimer();
-        this.mode = null;
+        if (this.timerInterval) clearInterval(this.timerInterval);
         this.quizState = 'start';
-        this.selectedAnswer = null;
-        this.showFeedback = false;
-        this.startTime = null;
-        this.endTime = null;
+        this.mode = null;
         this.render();
     }
 
-    // --- Rendering ---
+    // --- Statistiche e Badge ---
     
-    renderStartScreen() {
-        return `
-            <div class="p-6">
-                <h1 class="text-3xl font-bold text-red-600 mb-6 text-center">Quiz Antincendio Livello 3 🔥</h1>
-                <p class="text-gray-600 text-center mb-10">Scegli una modalità per iniziare la tua preparazione:</p>
+    // Funzione per controllare e assegnare badge
+    checkBadges() {
+        // Badge 1: Maestro del Fuoco (10 esami superati)
+        const examsPassed = this.history.filter(h => h.mode === 'exam' && h.isCorrect).length;
+        if (examsPassed >= 10 && !this.badges.fireMaster) {
+            this.badges.fireMaster = {
+                name: 'Maestro del Fuoco 🔥',
+                description: 'Hai superato 10 simulazioni d\'esame con successo.',
+                unlocked: Date.now()
+            };
+        }
 
-                ${Object.keys(this.modes).map(modeKey => {
-                    const mode = this.modes[modeKey];
-                    const isNew = modeKey === 'errorsOnly' || modeKey === 'timeChallenge';
-                    return `
-                        <div class="mb-4 bg-white p-4 rounded-lg shadow-lg border-l-4 border-${isNew ? 'blue' : 'red'}-600 cursor-pointer hover:bg-red-50 transition duration-150" data-select-mode="${modeKey}">
-                            <h2 class="text-xl font-semibold text-gray-800">${mode.name} ${isNew ? '<span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full ml-2">NUOVA</span>' : ''}</h2>
-                            <p class="text-sm text-gray-500">${mode.description}</p>
-                            ${modeKey === 'exam' ? `<p class="text-xs text-red-500 mt-1">Regole: ${mode.questions} Domande, ${mode.timeLimit / 60} min, Max ${mode.maxErrors} errori.</p>` : ''}
-                        </div>
-                    `;
-                }).join('')}
+        // Badge 2: Studente Pro (1000 domande completate in Allenamento/Smart Review)
+        const trainingDone = this.history.filter(h => h.mode === 'training' || h.mode === 'smartReview').length;
+        if (trainingDone >= 1000 && !this.badges.proStudent) {
+             this.badges.proStudent = {
+                name: 'Studente Pro 🎓',
+                description: 'Hai risposto a 1000 domande in modalità Allenamento o Revisione.',
+                unlocked: Date.now()
+            };
+        }
+        
+        // Badge 3: Obiettivo Giornaliero (5 giorni di seguito) - LOGICA DA ESPANDERE (qui per semplicità)
+        // Per una logica completa servirebbe una "streak" salvata in localStorage. 
+        // Per ora, un badge semplice: "Completato l'obiettivo 10 volte totali"
+        const goalCompletions = this.history.filter(h => h.mode === 'goalCompleted').length; // Bisognerebbe aggiungere un record quando l'obiettivo viene completato
+        if (this.dailyGoal.completedToday >= this.dailyGoal.target && !this.badges.dailyGoalAchieved) {
+             this.badges.dailyGoalAchieved = {
+                name: 'Obiettivo Raggiunto 🎯',
+                description: `Hai completato l'obiettivo giornaliero (${this.dailyGoal.target} domande).`,
+                unlocked: Date.now()
+            };
+        }
+        
+        // Badge 4: Re del 60s (Punteggio 20+ nella Sfida 60s)
+        const best60sScore = this.highScores60s.length > 0 ? this.highScores60s[0].score : 0;
+        if (best60sScore >= 20 && !this.badges.king60s) {
+             this.badges.king60s = {
+                name: 'Re del 60s ⏱️',
+                description: 'Hai raggiunto un punteggio di 20 o più nella Sfida 60s.',
+                unlocked: Date.now()
+            };
+        }
+    }
+    
+    getDifficultQuestions() {
+        // Logica per trovare le 5 domande più difficili (rimane invariata)
+        // ...
+        const questionStats = {};
+        this.history.forEach(h => {
+            if (!questionStats[h.qnum]) {
+                questionStats[h.qnum] = { correct: 0, incorrect: 0, totalTime: 0, count: 0 };
+            }
+            if (h.isCorrect) {
+                questionStats[h.qnum].correct++;
+            } else {
+                questionStats[h.qnum].incorrect++;
+            }
+            questionStats[h.qnum].totalTime += h.timeSpent;
+            questionStats[h.qnum].count++;
+        });
+
+        // Converte in array e calcola la percentuale di errore
+        const difficultQuestions = Object.keys(questionStats)
+            .map(qnum => {
+                const stats = questionStats[qnum];
+                const errorRate = stats.incorrect / stats.count;
+                const avgTime = stats.totalTime / stats.count;
                 
-                <div class="mt-8 text-center">
-                    <button id="stats-btn" class="text-red-600 hover:text-red-800 font-medium py-2 px-4 rounded-full border border-red-600 hover:bg-red-50 transition duration-150">
-                        📊 Visualizza Statistiche Globali (${this.stats.totalAttempts} risposte registrate)
-                    </button>
-                </div>
+                // Trova il testo della domanda
+                const questionData = this.quizData.find(q => q.qnum === parseInt(qnum));
+                
+                return {
+                    qnum: parseInt(qnum),
+                    questionText: questionData ? questionData.question.substring(0, 50) + '...' : 'Domanda Sconosciuta',
+                    errorRate: errorRate,
+                    avgTime: avgTime.toFixed(2),
+                    count: stats.count
+                };
+            })
+            .filter(q => q.errorRate > 0) // Filtra solo quelle con almeno un errore
+            .sort((a, b) => {
+                // Ordina prima per tasso di errore (più alto = più difficile), poi per tempo medio
+                if (b.errorRate !== a.errorRate) return b.errorRate - a.errorRate;
+                return b.avgTime - a.avgTime;
+            })
+            .slice(0, 5);
+            
+        return difficultQuestions;
+    }
+
+    // --- Rendering (Interfaccia Utente) ---
+
+    // Aggiungi nuove sezioni nel rendering
+    render() {
+        const root = document.getElementById('root');
+        if (!root) return;
+
+        // Pulizia per evitare duplicati
+        root.innerHTML = ''; 
+
+        switch (this.quizState) {
+            case 'start':
+                root.innerHTML = this.renderStartScreen();
+                break;
+            case 'quiz':
+                root.innerHTML = this.renderQuizScreen();
+                break;
+            case 'results':
+                root.innerHTML = this.renderResultsScreen();
+                break;
+            case 'stats':
+                root.innerHTML = this.renderStatsScreen();
+                break;
+        }
+
+        this.bindEvents(); // Ricollega gli eventi dopo il rendering
+        if (this.quizState === 'quiz' && this.modes[this.mode].timeLimit) {
+            this.updateTimerDisplay(); // Assicura che il display del timer sia aggiornato subito
+        }
+    }
+
+    renderStartScreen() {
+        const goalsText = this.dailyGoal.completedToday >= this.dailyGoal.target 
+            ? `<p class="mt-2 text-green-600 font-semibold">✅ Obiettivo di oggi completato (${this.dailyGoal.completedToday}/${this.dailyGoal.target})!</p>`
+            : `<p class="mt-2 text-red-600 font-semibold">🎯 Obiettivo Giornaliero: ${this.dailyGoal.completedToday}/${this.dailyGoal.target} domande.</p>`;
+
+        let html = `
+            <h1 class="text-3xl font-bold text-center text-red-600 mb-6">Quiz Antincendio Livello 3</h1>
+            ${goalsText}
+            <p class="text-center text-gray-700 mb-8">Scegli la modalità di studio:</p>
+            <div class="space-y-4">
+                ${this.renderModeButton('training', '🎓 Allenamento Libero', 'Domande illimitate con feedback immediato.')}
+                ${this.renderModeButton('exam', '📝 Simulazione Esame', '15 domande, 30 minuti, max 5 errori.')}
+                ${this.renderModeButton('errorsOnly', '❌ Solo Errori', 'Rivedi solo le domande a cui hai sbagliato.')}
+                ${this.renderModeButton('smartReview', '🧠 Revisione Intelligente', 'Ripeti le domande più difficili, quando è il momento.')}
+                ${this.renderModeButton('timeChallenge', '⏱️ Sfida 60s', 'Rispondi a quante più domande puoi in un minuto!')}
             </div>
+            <button id="stats-btn" class="w-full mt-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg shadow hover:bg-gray-300 transition duration-150">
+                Statistiche e Progressi 📊
+            </button>
+            <div id="install-app-container" class="mt-6 text-center hidden">
+                <button id="install-btn" class="py-2 px-4 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition">
+                    Installare l'App 📱
+                </button>
+            </div>
+        `;
+        return html;
+    }
+
+    renderModeButton(mode, title, description) {
+        return `
+            <button data-mode="${mode}" class="mode-select-btn w-full p-4 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition duration-150 text-left">
+                <p class="text-lg font-semibold text-gray-800">${title}</p>
+                <p class="text-sm text-gray-500">${description}</p>
+            </button>
         `;
     }
 
     renderQuizScreen() {
-        const currentQuestion = this.selectedQuestions[this.currentQuestionIndex];
-        if (!currentQuestion) {
-             // Questo accade se errorsOnly non ha domande, o un errore generale
-             if (this.mode === 'errorsOnly' && this.history.length > 0) {
-                 return this.renderErrorScreen("Ottimo! Non hai errori recenti. Torna al menu principale.");
-             }
-             return this.renderErrorScreen("Errore: Domanda non trovata o quiz vuoto.");
-        }
+        const currentQ = this.selectedQuestions[this.currentQuestionIndex];
+        if (!currentQ) return `<div class="text-center p-8">Nessuna domanda selezionata.</div>`;
+        
+        const modeConfig = this.modes[this.mode];
+        const isExam = modeConfig.isExam;
+        const currentModeName = modeConfig.name;
 
-        const isTrainingMode = this.mode !== 'exam';
-        const config = this.modes[this.mode];
+        // Calcolo il numero corrente se non è una modalità fissa (Exam)
+        const currentQNumber = this.currentQuestionIndex + 1;
+        const totalQ = modeConfig.questions !== 'infinite' ? this.selectedQuestions.length : currentQNumber;
+        const progressText = modeConfig.questions === 'infinite' ? `Domanda: ${currentQNumber}+` : `Domanda ${currentQNumber} di ${totalQ}`;
         
-        let headerContent = '';
-        let questionNumberDisplay = '';
-        
-        if (this.mode === 'exam' || this.mode === 'timeChallenge') {
-             const isExam = this.mode === 'exam';
-             headerContent = `
-                <div class="flex justify-between items-center p-4 bg-red-600 text-white shadow-md">
-                    <span class="font-semibold text-lg">${config.name}</span>
-                    <span id="timer-display" class="text-2xl">${this.formatTime(this.timeRemaining)}</span>
-                    ${isExam 
-                        ? `<span class="text-sm">Errori: ${this.incorrectCount} / ${config.maxErrors}</span>`
-                        : `<span class="text-sm">Corrette: ${this.answeredQuestions.filter(q => q.isCorrect).length}</span>`
-                    }
+        // Timer display
+        const timerHtml = `<div id="timer" class="text-2xl font-bold text-red-600">00:00</div>`;
+
+        // Progress Bar
+        let progressBarHtml = '';
+        if (modeConfig.questions !== 'infinite') {
+            const percentage = (currentQNumber / totalQ) * 100;
+            progressBarHtml = `
+                <div class="mt-2 h-2 bg-gray-200 rounded-full">
+                    <div class="h-2 bg-red-600 rounded-full transition-all duration-500" style="width: ${percentage}%;"></div>
                 </div>
             `;
-            questionNumberDisplay = `Domanda: ${this.currentQuestionIndex + 1} di ${this.selectedQuestions.length}`;
-        } else {
-             // Training e Solo Errori
-             headerContent = `
-                <div class="flex justify-between items-center p-4 bg-red-600 text-white shadow-md">
-                    <span class="font-semibold text-lg">${config.name}</span>
-                    <button id="end-training-btn" class="bg-white text-red-600 text-xs font-bold py-1 px-3 rounded-full hover:bg-gray-100 transition">Termina</button>
-                </div>
-            `;
-            questionNumberDisplay = `Sequenza: ${this.answeredQuestions.length + 1}`;
         }
-        
 
-        // Logica per i pulsanti di azione
-        let actionButtons = '';
-        if (this.showFeedback && !this.modes[this.mode].timeLimit) {
-            // Dopo aver risposto in modalità Esame (senza tempo)
-            actionButtons = `
-                <button id="next-btn" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg w-full mt-4 shadow-xl hover:bg-green-700 transition">
-                    Prossima Domanda
-                </button>
-            `;
-        } else if (this.mode === 'exam' && !this.showFeedback) {
-            // Modalità Esame, prima di confermare
-            actionButtons = `
-                <button id="confirm-btn" ${!this.selectedAnswer ? 'disabled' : ''} class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg w-full mt-4 shadow-xl ${!this.selectedAnswer ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700 transition'}">
-                    Conferma Risposta
-                </button>
-                <button id="skip-btn" class="text-red-600 hover:text-red-800 font-medium py-2 px-4 rounded-full mt-2 w-full">
-                    Salta Domanda
-                </button>
-            `;
-        } else if (isTrainingMode && !this.modes[this.mode].timeLimit && !this.showFeedback) {
-             actionButtons = `<p class="text-center text-gray-500 mt-4">Tocca un'opzione per ricevere feedback immediato.</p>`;
-        }
-        
-        // Logica per l'elenco delle opzioni (con feedback)
-        const optionsHtml = Object.keys(currentQuestion.options).map(key => {
-            const optionText = currentQuestion.options[key];
-            let classes = '';
-            let feedbackIcon = '';
-            
+
+        // Status Bar (Top)
+        const statusBarHtml = `
+            <div class="flex justify-between items-center mb-6 border-b pb-4">
+                <div class="text-sm font-medium text-gray-500">${currentModeName}</div>
+                ${timerHtml}
+            </div>
+            <div class="text-center mb-6">
+                <p class="text-lg font-semibold text-gray-700">${progressText}</p>
+                ${progressBarHtml}
+                ${isExam ? `<p class="text-sm text-red-600 font-semibold mt-1">Errori: ${this.incorrectCount} / ${modeConfig.maxErrors}</p>` : ''}
+            </div>
+        `;
+
+        // Domanda
+        const questionHtml = `<p class="text-xl font-bold mb-6 text-gray-900">${currentQ.question}</p>`;
+
+        // Opzioni
+        const optionsHtml = ['a', 'b', 'c'].map(option => {
+            const isSelected = this.selectedAnswer === option;
+            const isCorrect = this.showFeedback && currentQ.answer === option;
+            const isIncorrect = this.showFeedback && isSelected && currentQ.answer !== option;
+
+            let bgColor = isSelected ? 'bg-red-100 border-red-600' : 'bg-white border-gray-200 hover:border-red-400';
+            let icon = '';
+
             if (this.showFeedback) {
-                // Dopo la conferma
-                if (key === currentQuestion.correct_label) {
-                    classes = 'bg-green-100 border-green-600 text-green-800 font-semibold shadow-md';
-                    feedbackIcon = '✅';
-                } else if (key === this.selectedAnswer) {
-                    classes = 'bg-red-100 border-red-600 text-red-800 font-semibold shadow-md line-through';
-                    feedbackIcon = '❌';
-                } else {
-                    classes = 'bg-gray-100 border-gray-300 text-gray-500 opacity-60';
+                if (isCorrect) {
+                    bgColor = 'bg-green-100 border-green-600';
+                    icon = '✅';
+                } else if (isIncorrect) {
+                    bgColor = 'bg-red-100 border-red-600';
+                    icon = '❌';
                 }
-            } else if (key === this.selectedAnswer) {
-                // Prima della conferma (solo evidenziazione in esame)
-                classes = 'bg-red-50 border-red-600 font-semibold';
-            } else {
-                classes = 'bg-white border-gray-200 hover:bg-gray-50';
             }
-            
-            return `<div ${this.showFeedback ? '' : `data-option="${key}"`} class="p-4 mb-3 border rounded-lg cursor-pointer transition duration-150 text-left ${classes} flex items-center" ${this.showFeedback ? '' : `onclick="app.selectAnswer('${key}')"`}>
-                        <span class="font-bold mr-3">${key}.</span>
-                        <span>${optionText}</span>
-                        <span class="ml-auto text-2xl">${feedbackIcon}</span>
-                    </div>`;
+
+            return `
+                <button data-option="${option}" 
+                    class="option-btn w-full p-4 mb-3 border-2 rounded-lg shadow transition-all duration-200 text-left ${bgColor}"
+                    ${this.showFeedback ? 'disabled' : ''}>
+                    <span class="font-semibold">${option.toUpperCase()}.</span> ${currentQ[option]} ${icon}
+                </button>
+            `;
         }).join('');
 
-        // Logica per la Spiegazione (usando correct_text come suggerito)
-        const explanationHtml = this.showFeedback ? `
-            <div class="mt-6 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-800 rounded-lg shadow-inner">
-                <p class="font-bold mb-2">Spiegazione:</p>
-                <p>${currentQuestion.correct_text || 'Spiegazione non disponibile.'}</p>
+        // Feedback
+        const feedbackHtml = this.showFeedback ? `
+            <div class="mt-6 p-4 rounded-lg ${currentQ.answer === this.selectedAnswer ? 'bg-green-100 border-green-400 text-green-800' : 'bg-red-100 border-red-400 text-red-800'} border">
+                <p class="font-bold mb-2">Risposta ${currentQ.answer === this.selectedAnswer ? 'Corretta' : 'Sbagliata'}:</p>
+                <p class="text-sm">${currentQ.explanation}</p>
             </div>
         ` : '';
 
+        // Controlli
+        let controlsHtml = '';
+        if (this.mode === 'timeChallenge') {
+            // Nella modalità 60s si va avanti subito, non c'è conferma
+            controlsHtml = `<button id="end-training-btn" class="w-full mt-6 py-3 bg-gray-400 text-white font-semibold rounded-lg shadow hover:bg-gray-500 transition duration-150">
+                Termina Sfida (60s)
+            </button>`;
+        } else if (!this.showFeedback) {
+            // Conferma per tutte le altre modalità (tranne 60s)
+            controlsHtml = `
+                <div class="mt-6 flex space-x-4">
+                    <button id="confirm-btn" class="flex-1 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-150 ${this.selectedAnswer ? '' : 'opacity-50 cursor-not-allowed'}" ${this.selectedAnswer ? '' : 'disabled'}>
+                        Conferma Risposta
+                    </button>
+                    ${modeConfig.questions === 'infinite' ? `<button id="skip-btn" class="py-3 px-4 bg-gray-400 text-white font-semibold rounded-lg shadow-md hover:bg-gray-500 transition duration-150">Salta</button>` : ''}
+                </div>
+            `;
+        } else {
+            // Prossima domanda dopo il feedback
+            controlsHtml = `
+                <div class="mt-6 flex space-x-4">
+                    <button id="next-btn" class="flex-1 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-150">
+                        Prossima Domanda
+                    </button>
+                    <button id="end-training-btn" class="py-3 px-4 bg-gray-400 text-white font-semibold rounded-lg shadow hover:bg-gray-500 transition duration-150">
+                        Termina
+                    </button>
+                </div>
+            `;
+        }
+
+
         return `
-            ${headerContent}
-            <div class="p-6">
-                <p class="text-sm text-gray-500 mb-4">${questionNumberDisplay}</p>
-                <h2 class="text-xl font-bold mb-6 text-gray-900">${currentQuestion.instruction}</h2>
-                
-                <div id="options-container">
+            ${statusBarHtml}
+            <div class="bg-gray-50 p-6 rounded-xl shadow-inner">
+                ${questionHtml}
+                <div class="space-y-3">
                     ${optionsHtml}
                 </div>
-                
-                ${explanationHtml}
-                
-                <div class="mt-8">
-                    ${actionButtons}
-                </div>
+                ${feedbackHtml}
+                ${controlsHtml}
             </div>
         `;
     }
 
     renderResultsScreen() {
-        const totalAnswered = this.answeredQuestions.length;
-        const correctAnswers = this.answeredQuestions.filter(q => q.isCorrect).length;
-        const incorrectAnswers = totalAnswered - correctAnswers;
-        const scorePercentage = totalAnswered > 0 ? ((correctAnswers / totalAnswered) * 100).toFixed(1) : 0;
-        const elapsedTime = this.getElapsedTime();
-        
-        let resultMessage = '';
-        let resultIcon = '';
-        let resultColor = 'text-green-600';
+        const totalQuestions = this.answeredQuestions.length;
+        const correctCount = this.answeredQuestions.filter(a => a.isCorrect).length;
+        const incorrectCount = totalQuestions - correctCount;
+        const success = this.mode === 'exam' ? incorrectCount <= this.modes.exam.maxErrors : true; // Logica success solo per l'esame
+
+        const totalTimeSeconds = (this.endTime - this.startTime) / 1000;
+        const minutes = Math.floor(totalTimeSeconds / 60);
+        const seconds = Math.floor(totalTimeSeconds % 60);
+        const timeDisplay = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        const avgTime = (totalTimeSeconds / totalQuestions).toFixed(2);
+
+        let title = '';
+        let resultColor = '';
+        let scoreDetails = '';
 
         if (this.mode === 'exam') {
-            const passed = incorrectAnswers <= this.modes.exam.maxErrors;
-            resultMessage = passed ? 'Esame Superato! Complimenti!' : 'Esame Fallito. Troppi errori o tempo scaduto.';
-            resultIcon = passed ? '🎉' : '😔';
-            resultColor = passed ? 'text-green-600' : 'text-red-600';
+            title = success ? '✅ Simulazione Superata!' : '❌ Simulazione Fallita';
+            resultColor = success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+            scoreDetails = `<p class="text-xl font-bold mt-2">Errori: ${incorrectCount} / ${this.modes.exam.maxErrors}</p>`;
         } else if (this.mode === 'timeChallenge') {
-            resultMessage = `Sfida Terminata! Hai risposto correttamente a ${correctAnswers} domande.`;
-            resultIcon = '⏱️';
-            resultColor = 'text-blue-600';
+            title = '⏱️ Sfida 60s Terminata!';
+            resultColor = 'bg-yellow-100 text-yellow-800';
+            scoreDetails = `<p class="text-xl font-bold mt-2 text-red-600">Punteggio: ${correctCount} Corretti</p>`;
+        } else if (this.mode === 'smartReview') {
+            title = '🧠 Revisione Intelligente Completata';
+            resultColor = 'bg-blue-100 text-blue-800';
+            scoreDetails = `<p class="text-xl font-bold mt-2">Hai rivisto ${totalQuestions} domande.</p>`;
         } else {
-            resultMessage = `Sessione di Allenamento Terminata.`;
-            resultIcon = '📖';
-            resultColor = 'text-blue-600';
+            title = 'Sessione di Allenamento Terminata';
+            resultColor = 'bg-gray-100 text-gray-800';
         }
+        
+        const shareText = `Ho superato una simulazione d'esame Antincendio Livello 3! Corretti: ${correctCount}, Errori: ${incorrectCount}, Tempo: ${timeDisplay}. #QuizAntincendio`;
+        const share60sText = `Ho fatto ${correctCount} risposte corrette in 60 secondi nella Sfida Antincendio! Riuscirai a battermi? #Sfida60s`;
+
+
+        const reviewHtml = this.answeredQuestions.map((answer, index) => {
+            const icon = answer.isCorrect ? '✅' : '❌';
+            const bgColor = answer.isCorrect ? 'bg-green-50' : 'bg-red-50';
+            return `
+                <div class="p-3 border-b ${bgColor} flex justify-between items-center text-sm">
+                    <span class="font-semibold">${index + 1}.</span> 
+                    <p class="truncate flex-1 mx-2">${answer.question.question}</p>
+                    <span class="font-bold">${icon}</span>
+                </div>
+            `;
+        }).join('');
+
 
         return `
-            <div class="p-6 text-center">
-                <h1 class="text-4xl font-bold ${resultColor} mb-2">${resultIcon} ${resultMessage}</h1>
-                <p class="text-gray-600 text-lg mb-8">Tempo totale: ${this.formatTime(elapsedTime)}</p>
-
-                <div class="bg-gray-100 p-6 rounded-lg shadow-inner mb-8">
-                    <p class="text-xl font-semibold mb-4">Riepilogo Performance</p>
-                    <div class="grid grid-cols-2 gap-4 text-left">
-                        <div class="bg-white p-3 rounded-md shadow-sm border-l-4 border-green-500">
-                            <p class="text-3xl font-bold text-green-600">${correctAnswers}</p>
-                            <p class="text-sm text-gray-500">Risposte Corrette</p>
-                        </div>
-                        <div class="bg-white p-3 rounded-md shadow-sm border-l-4 border-red-500">
-                            <p class="text-3xl font-bold text-red-600">${incorrectAnswers}</p>
-                            <p class="text-sm text-gray-500">Risposte Errate</p>
-                        </div>
-                        <div class="bg-white p-3 rounded-md shadow-sm border-l-4 border-blue-500 col-span-2">
-                            <p class="text-3xl font-bold text-blue-600">${scorePercentage}%</p>
-                            <p class="text-sm text-gray-500">Percentuale di Successo</p>
-                        </div>
-                    </div>
-                </div>
-
-                <button id="retry-btn" class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg w-full shadow-xl hover:bg-red-700 transition mb-3">
+            <div class="text-center p-6 ${resultColor} rounded-xl shadow-md mb-6">
+                <h2 class="text-2xl font-extrabold">${title}</h2>
+                <p class="text-3xl font-extrabold mt-3">${correctCount} / ${totalQuestions} Corrette</p>
+                ${scoreDetails}
+                <p class="mt-2 text-gray-700">Tempo Totale: ${timeDisplay} (Media: ${avgTime}s/domanda)</p>
+            </div>
+            
+            <div class="mt-6 flex space-x-4">
+                <button id="retry-btn" class="flex-1 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-150">
                     Riprova ${this.modes[this.mode].name}
                 </button>
-                <button id="change-mode-btn" class="text-gray-600 hover:text-red-600 font-medium py-2 px-4 rounded-full w-full border border-gray-300 hover:border-red-600 transition">
-                    Torna al Menu Principale
+                <button id="change-mode-btn" class="flex-1 py-3 bg-gray-400 text-white font-semibold rounded-lg shadow hover:bg-gray-500 transition duration-150">
+                    Cambia Modalità
                 </button>
             </div>
+            
+            <button id="share-btn" class="w-full mt-4 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-150">
+                Condividi Risultato 📢
+            </button>
+            
+            <div class="mt-8">
+                <h3 class="text-xl font-bold mb-3 text-gray-800">Riepilogo Risposte:</h3>
+                <div class="bg-white rounded-lg shadow-sm max-h-60 overflow-y-scroll border">
+                    ${reviewHtml}
+                </div>
+            </div>
+            
+            <script>
+                document.getElementById('share-btn').onclick = () => {
+                    const shareData = {
+                        title: 'Quiz Antincendio',
+                        text: '${this.mode === 'timeChallenge' ? share60sText : shareText}',
+                        url: window.location.href,
+                    };
+                    if (navigator.share) {
+                        navigator.share(shareData).catch(error => console.log('Errore di condivisione', error));
+                    } else {
+                        alert('Il tuo browser non supporta la condivisione nativa. Ecco il testo da copiare:\n\n' + shareData.text);
+                    }
+                };
+            </script>
         `;
     }
 
     renderStatsScreen() {
-        this.calculateStats(); // Assicurati che le statistiche siano aggiornate
-        const { totalAttempts, totalCorrect, totalTime } = this.stats;
-        const totalIncorrect = totalAttempts - totalCorrect;
-        const avgTimePerQuestion = totalAttempts > 0 ? (totalTime / totalAttempts / 1000).toFixed(1) : 0;
-        const successRate = totalAttempts > 0 ? ((totalCorrect / totalAttempts) * 100).toFixed(1) : 0;
+        const difficultQuestions = this.getDifficultQuestions();
+        const difficultHtml = difficultQuestions.length > 0 ? difficultQuestions.map(q => `
+            <li class="py-2 border-b last:border-b-0">
+                <p class="font-semibold text-gray-800">${q.qnum}. ${q.questionText}</p>
+                <p class="text-sm text-red-600">Tasso di Errore: ${(q.errorRate * 100).toFixed(1)}% (${q.count} tentativi)</p>
+            </li>
+        `).join('') : '<p class="text-gray-500">Non ci sono ancora abbastanza dati sugli errori.</p>';
         
-        const errorMap = this.history.filter(h => !h.isCorrect).reduce((map, h) => {
-            map[h.qnum] = (map[h.qnum] || 0) + 1;
-            return map;
-        }, {});
-        
-        const mostDifficult = Object.entries(errorMap)
-            .sort(([, countA], [, countB]) => countB - countA)
-            .slice(0, 5)
-            .map(([qnum, count]) => {
-                const question = this.quizData.find(q => q.qnum === parseInt(qnum));
-                return `<li class="text-sm text-gray-700 p-2 border-b last:border-b-0">
-                            <span class="font-semibold text-red-600">${count} errori:</span> 
-                            ${question ? question.instruction.substring(0, 80) + '...' : 'Domanda Sconosciuta'}
-                        </li>`;
-            }).join('');
+        const totalAttempts = this.stats.totalAttempts;
+        const totalCorrect = this.stats.totalCorrect;
+        const totalAccuracy = totalAttempts > 0 ? ((totalCorrect / totalAttempts) * 100).toFixed(1) : 0;
+        const avgTimeTotal = this.stats.totalTime > 0 ? (this.stats.totalTime / totalAttempts).toFixed(2) : 0;
 
+        // Classifica 60s
+        const highScoresHtml = this.highScores60s.map((score, index) => `
+            <li class="p-3 border-b flex justify-between items-center text-sm ${index === 0 ? 'bg-yellow-100 font-bold' : 'bg-white'}">
+                <span class="w-1/12">${index + 1}°</span>
+                <span class="w-7/12">${score.score} risposte corrette</span>
+                <span class="w-4/12 text-right text-gray-600">${new Date(score.timestamp).toLocaleDateString('it-IT')}</span>
+            </li>
+        `).join('');
+        
+        // Badge
+        const allBadges = Object.values(this.badges).sort((a,b) => b.unlocked - a.unlocked); // Più recenti in cima
+        const badgesHtml = allBadges.length > 0 ? allBadges.map(badge => `
+            <div class="p-3 bg-green-100 rounded-lg border border-green-400">
+                <p class="font-bold text-green-800">${badge.name}</p>
+                <p class="text-sm text-green-700">${badge.description}</p>
+                <p class="text-xs text-green-600 mt-1">Sbloccato il: ${new Date(badge.unlocked).toLocaleDateString('it-IT')}</p>
+            </div>
+        `).join('') : '<p class="text-gray-500">Nessun badge sbloccato. Continua ad allenarti!</p>';
 
         return `
-            <div class="p-6">
-                <h1 class="text-3xl font-bold text-red-600 mb-6 text-center">📊 Statistiche Globali</h1>
-                
-                <div class="bg-gray-100 p-6 rounded-lg shadow-inner mb-8">
-                    <p class="text-xl font-semibold mb-4 text-gray-800">Riepilogo Totale</p>
-                    <div class="grid grid-cols-2 gap-4 text-center">
-                        <div class="bg-white p-4 rounded-md shadow-sm border-b-4 border-blue-500">
-                            <p class="text-3xl font-bold text-blue-600">${totalAttempts}</p>
-                            <p class="text-sm text-gray-500">Domande Tentate</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-md shadow-sm border-b-4 border-green-500">
-                            <p class="text-3xl font-bold text-green-600">${successRate}%</p>
-                            <p class="text-sm text-gray-500">Tasso di Successo</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-md shadow-sm border-b-4 border-yellow-500">
-                            <p class="text-3xl font-bold text-yellow-600">${avgTimePerQuestion}s</p>
-                            <p class="text-sm text-gray-500">Tempo Medio / Domanda</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-md shadow-sm border-b-4 border-red-500">
-                            <p class="text-3xl font-bold text-red-600">${totalIncorrect}</p>
-                            <p class="text-sm text-gray-500">Errori Totali</p>
-                        </div>
-                    </div>
-                </div>
+            <h2 class="text-3xl font-bold text-center text-red-600 mb-8">Progressi e Statistiche 📊</h2>
 
-                <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Top 5 Domande Più Difficili</h2>
-                    <ul class="divide-y divide-gray-200 max-h-64 overflow-y-auto">
-                        ${mostDifficult.length > 0 ? mostDifficult : '<p class="text-gray-500 italic">Non hai ancora commesso errori. Continua così!</p>'}
+            <button id="change-mode-btn" class="w-full mb-6 py-3 bg-gray-400 text-white font-semibold rounded-lg shadow hover:bg-gray-500 transition duration-150">
+                Torna al Menu Principale
+            </button>
+            
+            <div class="space-y-6">
+                
+                <div class="p-5 bg-white rounded-xl shadow-lg border">
+                    <h3 class="text-xl font-bold mb-3 text-gray-800 flex justify-between items-center">
+                        Riepilogo Generale
+                    </h3>
+                    <p class="text-2xl font-extrabold text-red-600">${totalAccuracy}%</p>
+                    <p class="text-sm text-gray-600">Accuratezza Totale (${totalCorrect} corrette su ${totalAttempts} totali)</p>
+                    <p class="mt-2 text-gray-600">Tempo Medio di Risposta: ${avgTimeTotal} secondi</p>
+                </div>
+                
+                <div class="p-5 bg-white rounded-xl shadow-lg border">
+                    <h3 class="text-xl font-bold mb-3 text-gray-800">
+                        Classifica Sfida 60s ⏱️
+                    </h3>
+                    <ul class="rounded-lg overflow-hidden border">
+                        ${highScoresHtml.length > 0 ? highScoresHtml : '<p class="p-3 text-gray-500">Nessun punteggio registrato. Prova la Sfida 60s!</p>'}
                     </ul>
                 </div>
                 
-                <button id="change-mode-btn" class="text-red-600 hover:text-red-800 font-medium py-3 px-6 rounded-lg w-full border border-red-600 hover:bg-red-50 transition mb-3">
-                    Torna al Menu Principale
-                </button>
+                <div class="p-5 bg-white rounded-xl shadow-lg border">
+                    <h3 class="text-xl font-bold mb-3 text-gray-800">
+                        Badge Sbloccati ⭐
+                    </h3>
+                    <div class="space-y-3">
+                        ${badgesHtml}
+                    </div>
+                </div>
+
+                <div class="p-5 bg-white rounded-xl shadow-lg border">
+                    <h3 class="text-xl font-bold mb-3 text-gray-800">
+                        Top 5 Domande Difficili 🤯
+                    </h3>
+                    <ul class="divide-y divide-gray-200">
+                        ${difficultHtml}
+                    </ul>
+                </div>
                 
-                <button id="reset-stats-btn" class="text-gray-500 hover:text-red-600 text-sm py-2 px-4 rounded-lg w-full border border-gray-300 hover:border-red-600 transition">
-                    ⚠️ Azzerra Tutte le Statistiche
-                </button>
+                <div class="pt-4 border-t mt-6">
+                    <button id="reset-stats-btn" class="w-full py-3 bg-red-100 text-red-600 font-semibold rounded-lg shadow hover:bg-red-200 transition duration-150">
+                        ⚠️ Azzerra Tutte le Statistiche
+                    </button>
+                </div>
+                
             </div>
         `;
     }
-    
-    renderErrorScreen(message) {
-        return `
-            <div class="p-6 text-center">
-                <h1 class="text-4xl font-bold text-red-600 mb-4">⚠️ Errore</h1>
-                <p class="text-lg text-gray-700 mb-8">${message}</p>
-                <button id="change-mode-btn" class="bg-red-600 text-white font-bold py-3 px-6 rounded-lg w-full shadow-xl hover:bg-red-700 transition">
-                    Torna al Menu Principale
-                </button>
-            </div>
-        `;
-    }
-    
-    render() {
-        const root = document.getElementById('root');
-        if (this.quizState === 'start') {
-            root.innerHTML = this.renderStartScreen();
-        } else if (this.quizState === 'quiz') {
-            root.innerHTML = this.renderQuizScreen();
-        } else if (this.quizState === 'results') {
-            root.innerHTML = this.renderResultsScreen();
-        } else if (this.quizState === 'stats') {
-             root.innerHTML = this.renderStatsScreen();
-        }
-        this.attachEventListeners();
-    }
 
-    attachEventListeners() {
-        // Rimuove tutti gli event listener vecchi prima di attaccare i nuovi (importante per il rendering manuale)
-        // Uso onclick per semplicità di implementazione
+    // --- Rilegatura Eventi ---
 
-        // Start screen - select mode
-        const modeSelectors = document.querySelectorAll('[data-select-mode]');
-        modeSelectors.forEach(el => {
-            el.onclick = () => { 
-                this.selectMode(el.dataset.selectMode);
-            };
+    bindEvents() {
+        // Schermata Start - Seleziona Modalità
+        document.querySelectorAll('.mode-select-btn').forEach(btn => {
+            btn.onclick = () => this.selectMode(btn.dataset.mode);
         });
-        
-        // Start screen - Stats button
-        const statsBtn = document.getElementById('stats-btn');
-        if (statsBtn) {
-            statsBtn.onclick = () => this.goToStats();
-        }
 
-        // Quiz screen - options
-        const optionButtons = document.querySelectorAll('[data-option]');
-        optionButtons.forEach(btn => {
-             btn.onclick = () => {
+        // Schermata Quiz - Risposte
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.onclick = () => {
                 this.selectAnswer(btn.dataset.option);
             };
         });
 
-        // Quiz screen - actions (Solo per modalità Esame o feedback manuale)
+        // Quiz screen - actions
         const confirmBtn = document.getElementById('confirm-btn');
         if (confirmBtn) {
             confirmBtn.onclick = () => this.confirmAnswer();
@@ -690,7 +968,13 @@ class QuizApp {
 
         const endTrainingBtn = document.getElementById('end-training-btn');
         if (endTrainingBtn) {
-            endTrainingBtn.onclick = () => this.endQuiz();
+            endTrainingBtn.onclick = () => {
+                if (this.mode === 'timeChallenge') {
+                    this.endTimeChallenge();
+                } else {
+                    this.endQuiz();
+                }
+            };
         }
         
         // Results/Stats screen - actions
@@ -706,11 +990,57 @@ class QuizApp {
             changeModeBtn.onclick = () => this.resetQuiz();
         }
         
+        const statsBtn = document.getElementById('stats-btn');
+        if (statsBtn) {
+            statsBtn.onclick = () => {
+                this.quizState = 'stats';
+                this.render();
+            };
+        }
+        
         const resetStatsBtn = document.getElementById('reset-stats-btn');
         if (resetStatsBtn) {
-            resetStatsBtn.onclick = () => this.resetStats();
+            resetStatsBtn.onclick = () => {
+                if (confirm('Sei sicuro di voler azzerare tutte le statistiche, cronologia e punteggi? Questa azione è irreversibile.')) {
+                    localStorage.removeItem('quizHistory');
+                    localStorage.removeItem('quizStats');
+                    localStorage.removeItem('highScores60s');
+                    localStorage.removeItem('quizBadges');
+                    localStorage.removeItem('dailyGoal');
+                    this.history = [];
+                    this.stats = { totalAttempts: 0, totalCorrect: 0, totalTime: 0 };
+                    this.highScores60s = [];
+                    this.badges = {};
+                    this.dailyGoal = { target: 50, completedToday: 0, lastGoalDate: new Date().toLocaleDateString('it-IT') };
+                    this.render();
+                    alert('Statistiche azzerate con successo.');
+                }
+            };
+        }
+        
+        // Gestione A2HS (Add to Home Screen)
+        const installAppContainer = document.getElementById('install-app-container');
+        if (deferredPrompt) {
+            installAppContainer.style.display = 'block';
+            document.getElementById('install-btn').onclick = () => {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the A2HS prompt');
+                    } else {
+                        console.log('User dismissed the A2HS prompt');
+                    }
+                    deferredPrompt = null;
+                    installAppContainer.style.display = 'none';
+                });
+            };
         }
     }
 }
 
-const app = new QuizApp();
+document.addEventListener('DOMContentLoaded', () => {
+    // Aggiunto setTimeout per dare il tempo a tutti gli elementi di caricarsi
+    setTimeout(() => {
+        window.quizApp = new QuizApp();
+    }, 100); 
+});
