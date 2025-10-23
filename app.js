@@ -536,3 +536,181 @@ class QuizApp {
             <p class="text-gray-600 text-lg">${message}</p>
             <p class="text-sm text-gray-500 mt-2">Modalità: ${config.name}</p>
           </div>
+
+          <!-- Statistiche principali -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-blue-50 rounded-lg p-4 text-center">
+              <p class="text-2xl font-bold text-blue-600">${totalQuestions}</p>
+              <p class="text-sm text-gray-600">Domande</p>
+            </div>
+            <div class="bg-green-50 rounded-lg p-4 text-center">
+              <p class="text-2xl font-bold text-green-600">${correctCount}</p>
+              <p class="text-sm text-gray-600">Corrette</p>
+            </div>
+            <div class="bg-red-50 rounded-lg p-4 text-center">
+              <p class="text-2xl font-bold text-red-600">${this.incorrectCount}</p>
+              <p class="text-sm text-gray-600">Errori</p>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-4 text-center">
+              <p class="text-2xl font-bold text-purple-600">${this.formatTime(elapsedTime)}</p>
+              <p class="text-sm text-gray-600">Tempo</p>
+            </div>
+          </div>
+
+          <!-- Dettaglio tempo -->
+          <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-semibold text-gray-700">
+                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Tempo Impiegato
+              </span>
+              <span class="text-sm font-bold text-gray-800">${this.formatTime(elapsedTime)}</span>
+            </div>
+            ${this.mode === 'exam' ? `
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600">Tempo Limite</span>
+                <span class="text-sm text-gray-700">${this.formatTime(config.timeLimit)}</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div class="h-2 rounded-full transition-all ${
+                  elapsedTime <= config.timeLimit ? 'bg-green-600' : 'bg-red-600'
+                }" style="width: ${Math.min((elapsedTime / config.timeLimit) * 100, 100)}%"></div>
+              </div>
+            ` : `
+              <p class="text-xs text-gray-500 mt-1">Tempo medio per domanda: ${this.formatTime(Math.floor(elapsedTime / totalQuestions))}</p>
+            `}
+          </div>
+
+          <!-- Percentuale -->
+          <div class="mb-8">
+            <div class="flex justify-between mb-2">
+              <span class="text-sm font-semibold text-gray-600">Percentuale Corrette</span>
+              <span class="text-sm font-bold text-gray-800">${percentage}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+              <div class="h-3 rounded-full transition-all ${
+                percentage >= 70 ? 'bg-green-600' : percentage >= 50 ? 'bg-yellow-600' : 'bg-red-600'
+              }" style="width: ${percentage}%"></div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1 text-center">
+              ${percentage >= 90 ? 'Eccellente! 🌟' : 
+                percentage >= 70 ? 'Ottimo lavoro! 👍' : 
+                percentage >= 50 ? 'Buon inizio, continua ad allenarti! 💪' : 
+                'Continua a studiare! 📚'}
+            </p>
+          </div>
+
+          <!-- Riepilogo errori (solo se ce ne sono) -->
+          ${this.incorrectCount > 0 ? `
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <h3 class="font-semibold text-red-800 mb-3 flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Domande Sbagliate (${this.incorrectCount})
+              </h3>
+              <div class="space-y-3 max-h-60 overflow-y-auto">
+                ${this.answeredQuestions
+                  .filter(q => !q.isCorrect)
+                  .map((q, idx) => `
+                    <div class="bg-white rounded p-3 text-sm">
+                      <p class="font-semibold text-gray-800 mb-1">${q.question.instruction}</p>
+                      <p class="text-red-600">❌ Tua risposta: ${q.userAnswer}</p>
+                      <p class="text-green-600">✓ Risposta corretta: ${q.question.correct_label} - ${q.question.correct_text}</p>
+                    </div>
+                  `).join('')}
+              </div>
+            </div>
+          ` : `
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 text-center">
+              <p class="text-green-800 font-semibold">🎯 Perfetto! Nessun errore!</p>
+            </div>
+          `}
+
+          <!-- Pulsanti azione -->
+          <div class="flex gap-3">
+            <button id="change-mode-btn" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-lg transition-colors">
+              Cambia Modalità
+            </button>
+            <button id="retry-btn" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              ${this.mode === 'exam' ? 'Riprova Esame' : 'Continua Allenamento'}
+            </button>
+          </div>
+
+          ${this.mode === 'exam' && passed ? `
+            <div class="mt-6 text-center">
+              <p class="text-sm text-gray-600">🎓 Complimenti! Sei pronto per l'esame reale!</p>
+            </div>
+          ` : this.mode === 'exam' && !passed ? `
+            <div class="mt-6 text-center">
+              <p class="text-sm text-gray-600">💡 Suggerimento: Prova la modalità Allenamento per migliorare</p>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  attachEventListeners() {
+    // Start screen - selezione modalità
+    const modeCards = document.querySelectorAll('[data-mode]');
+    modeCards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        const mode = e.currentTarget.dataset.mode;
+        this.selectMode(mode);
+      });
+    });
+
+    // Quiz screen - options
+    const optionButtons = document.querySelectorAll('[data-option]');
+    optionButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.selectAnswer(btn.dataset.option);
+      });
+    });
+
+    // Quiz screen - actions
+    const confirmBtn = document.getElementById('confirm-btn');
+    if (confirmBtn) {
+      confirmBtn.addEventListener('click', () => this.confirmAnswer());
+    }
+
+    const skipBtn = document.getElementById('skip-btn');
+    if (skipBtn) {
+      skipBtn.addEventListener('click', () => this.skipQuestion());
+    }
+
+    const nextBtn = document.getElementById('next-btn');
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => this.nextQuestion());
+    }
+
+    const endTrainingBtn = document.getElementById('end-training-btn');
+    if (endTrainingBtn) {
+      endTrainingBtn.addEventListener('click', () => this.endQuiz());
+    }
+
+    // Results screen
+    const retryBtn = document.getElementById('retry-btn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => {
+        this.selectMode(this.mode);
+      });
+    }
+
+    const changeModeBtn = document.getElementById('change-mode-btn');
+    if (changeModeBtn) {
+      changeModeBtn.addEventListener('click', () => this.resetQuiz());
+    }
+  }
+}
+
+// Inizializza l'app quando il DOM è pronto
+document.addEventListener('DOMContentLoaded', () => {
+  new QuizApp();
+});
