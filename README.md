@@ -1,19 +1,26 @@
-# 🔥 Quiz Antincendio - Livello 3
+# 🔥 Quiz Antincendio - Livello 3 (Aggiornato)
 
-Progressive Web App per la preparazione all'esame Antincendio di Livello 3.
+Progressive Web App (PWA) per la preparazione all'esame Antincendio di Livello 3, con nuove modalità di studio basate sui dati e tracciamento delle performance.
 
-## ✨ Caratteristiche
+## ✨ Caratteristiche Aggiornate
 
 - ✅ **350 domande ufficiali** con risposte e spiegazioni
-- ✅ **Due modalità di studio:**
-  - 🎓 **Allenamento**: domande illimitate, nessun limite
-  - 📝 **Simulazione Esame**: 15 domande, 30 minuti, max 5 errori
+- ✅ **Quattro modalità di studio:**
+  - 🎓 **Allenamento**: domande illimitate, feedback immediato.
+  - 📝 **Simulazione Esame**: 15 domande, 30 minuti, max 5 errori.
+  - ❌ **Nuova: Solo Errori**: Rivedi solo le domande a cui hai risposto in modo errato in passato. **Ideale per il ripasso mirato.**
+  - ⏱️ **Nuova: Sfida 60s**: Rispondi correttamente al maggior numero di domande possibile in 60 secondi. **Ideale per la velocità.**
+- ✅ **Statistiche Globali e Persistenza Dati**
+  - Tracciamento di tutte le risposte, del tempo impiegato e del tasso di successo.
+  - Visualizzazione delle **Top 5 domande più difficili** (quelle con più errori).
 - ✅ **Timer avanzato** con countdown e allarmi
-- ✅ **Risultati dettagliati** con analisi errori
+- ✅ **Risultati dettagliati** con analisi degli errori della sessione
 - ✅ **Funziona offline** dopo la prima visita
 - ✅ **Installabile come app nativa** su Android/iOS
 - ✅ **Design responsive** ottimizzato per mobile
 - ✅ **Nessuna raccolta dati** - tutto in locale
+
+***
 
 ## 🚀 Installazione
 
@@ -23,171 +30,37 @@ Progressive Web App per la preparazione all'esame Antincendio di Livello 3.
 2. Clicca sul menu (⋮) > **"Installa app"** / **"Aggiungi a Home"**
 3. L'app apparirà nella schermata home come app nativa!
 
+*Nota: L'app ora supporta le **Scorciatoie** (Shortcuts): tieni premuta l'icona dell'app installata per avviare direttamente l'Allenamento, la Simulazione o la modalità Solo Errori.*
+
 ### Su Desktop
 
 1. Apri il link in Chrome/Edge
 2. Clicca sull'icona **"Installa"** nella barra degli indirizzi
 3. L'app si aprirà in una finestra separata
 
-## 📖 Come Usare
+***
 
-### Modalità Allenamento 🎓
+## 📖 Come Usare le Nuove Modalità
 
-- Domande illimitate da tutte le 350 disponibili
-- Nessun limite di tempo
-- Nessun limite di errori
-- Termina quando vuoi con il pulsante "Termina"
-- Perfetta per imparare e memorizzare
+### Modalità Solo Errori ❌
 
-### Modalità Simulazione Esame 📝
+Dopo aver completato alcune sessioni, la sezione "Statistiche Globali" monitora i tuoi errori. Questa modalità carica solo quelle domande, permettendoti di concentrarti sui punti deboli finché non le padroneggi.
 
-- 15 domande casuali
-- 30 minuti di tempo
-- Massimo 5 errori consentiti
-- Condizioni realistiche dell'esame
-- Termina automaticamente a tempo scaduto o errori superati
+### Modalità Sfida 60s ⏱️
 
-## 📊 Risultati
+Metti alla prova la tua velocità! Hai 60 secondi per rispondere correttamente a quante più domande puoi. Il feedback è immediato per massimizzare il tempo.
 
-Alla fine di ogni quiz riceverai:
+### Statistiche Globali 📊
 
-- ✅ Numero totale di domande risposte
-- ✅ Domande corrette e sbagliate
-- ✅ Tempo totale impiegato
-- ✅ Percentuale di successo
-- ✅ Elenco dettagliato degli errori con spiegazioni
-- ✅ Valutazione finale (superato/non superato)
+Dal menu principale, accedi alle Statistiche per vedere il tuo progresso complessivo, il tempo medio di risposta e la lista delle domande che ti hanno messo più in difficoltà (utili per il ripasso manuale o l'uso della modalità Solo Errori).
 
-## 🛠️ Sviluppo Locale
+***
 
-### Prerequisiti
+## 🛠 Sviluppo e Modifiche Tecniche
 
-- Python 3 (già installato su Mac/Linux)
-- Oppure Node.js
+Le principali modifiche al codice includono:
 
-### Avvio
-
-```bash
-# Con Python
-python -m http.server 8000
-
-# Oppure con Python 3
-python3 -m http.server 8000
-
-# Oppure con Node.js
-npx serve
-```
-
-Apri il browser su: `http://localhost:8000`
-
-### Test su Dispositivo Mobile
-
-1. Connetti il telefono alla stessa rete WiFi del PC
-2. Trova l'IP del PC:
-   - Windows: `ipconfig`
-   - Mac/Linux: `ifconfig`
-3. Sul telefono, apri: `http://IP_DEL_PC:8000`
-
-## 📁 Struttura File
-
-```
-quiz-antincendio-pwa/
-├── index.html                          # Pagina principale
-├── app.js                              # Logica applicazione
-├── manifest.json                       # Configurazione PWA
-├── sw.js                               # Service Worker (offline)
-├── quiz_antincendio_ocr_improved.json  # Database domande
-├── icon-192.png                        # Icona 192x192
-├── icon-512.png                        # Icona 512x512
-└── README.md                           # Questa documentazione
-```
-
-## 🔧 Personalizzazione
-
-### Modificare i Parametri dell'Esame
-
-In `app.js`, cerca la sezione `modes`:
-
-```javascript
-exam: {
-  name: 'Simulazione Esame',
-  questions: 15,        // ← Cambia numero domande
-  maxErrors: 5,         // ← Cambia errori massimi
-  timeLimit: 30 * 60,   // ← Cambia tempo (secondi)
-  description: '...'
-}
-```
-
-### Cambiare i Colori
-
-Cerca e sostituisci in `app.js`:
-
-- `bg-red-600` → `bg-blue-600` (colore primario)
-- `text-red-600` → `text-blue-600`
-- `border-red-600` → `border-blue-600`
-
-## 🌐 Deploy
-
-### GitHub Pages
-
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/USERNAME/quiz-antincendio.git
-git push -u origin main
-
-# Vai su Settings > Pages > Deploy from branch 'main'
-```
-
-### Netlify
-
-1. Vai su https://app.netlify.com/drop
-2. Trascina la cartella del progetto
-3. Ottieni l'URL istantaneo
-
-### Vercel
-
-```bash
-npm i -g vercel
-vercel
-```
-
-## ❓ Risoluzione Problemi
-
-### L'app non si installa
-
-- Verifica che sia servita via **HTTPS**
-- Controlla che `manifest.json` sia valido
-- Usa Chrome (migliore supporto PWA)
-
-### Il timer non funziona
-
-- Apri DevTools (F12) → Console
-- Verifica errori JavaScript
-- Ricarica la pagina (Ctrl+F5)
-
-### Le domande non si caricano
-
-- Verifica che `quiz_antincendio_ocr_improved.json` sia nella cartella
-- Controlla che il JSON sia valido: https://jsonlint.com/
-
-### Non funziona offline
-
-- Visita l'app online almeno una volta
-- Verifica Service Worker in DevTools → Application
-
-## 📝 Licenza
-
-Questo progetto è rilasciato per scopi educativi.
-
-## 🤝 Contributi
-
-Contributi, segnalazioni bug e richieste di funzionalità sono benvenuti!
-
----
-
-**Buona fortuna con l'esame antincendio! 🔥👨‍🚒**
-
-Per domande o supporto, apri una issue su GitHub.
+1.  **Persistenza Dati**: Implementazione di `localStorage` in `app.js` per salvare lo storico delle risposte e calcolare le statistiche globali (`quizHistory`).
+2.  **Struttura Modulare**: Ristrutturazione di `app.js` per supportare e gestire lo stato e la logica di feedback di quattro diverse modalità di quiz.
+3.  **Aggiornamento PWA**: Aggiornamento del `CACHE_NAME` in `sw.js` (a `v1.1.0-features`) per forzare l'aggiornamento della cache per gli utenti esistenti.
+4.  **UX Migliorata**: Integrazione del feedback immediato nelle modalità di studio (non-esame) per velocizzare il processo di ripasso.
