@@ -1,6 +1,6 @@
 // Quiz Antincendio - Progressive Web App
-// Versione con modalità Allenamento, Esame, Solo Errori e Sfida 60s
-// Correzione: Risolto TypeError in startTimer spostando render()
+// Versione con modalità Allenamento, Esame, Solo Errori, Sfida 60s e Reset Statistiche
+// Correzione Finale: Aggiunto setTimeout per risolvere race condition del timer
 
 class QuizApp {
     constructor() {
@@ -85,6 +85,17 @@ class QuizApp {
         this.stats.totalCorrect = this.history.filter(h => h.isCorrect).length;
         this.stats.totalTime = this.history.reduce((sum, h) => sum + (h.timeSpent || 0), 0);
     }
+    
+    // Funzione per il reset delle statistiche
+    resetStats() {
+        if (confirm("Sei sicuro di voler azzerare TUTTE le tue statistiche e la cronologia? Questa azione è irreversibile.")) {
+            localStorage.removeItem('quizHistory');
+            this.history = [];
+            this.calculateStats(); 
+            this.render(); 
+            alert("Statistiche azzerate con successo!");
+        }
+    }
 
     // --- Inizializzazione ---
 
@@ -125,19 +136,6 @@ class QuizApp {
         this.render();
     }
 
-    // --- Nuova funzione per il reset ---
-    resetStats() {
-        if (confirm("Sei sicuro di voler azzerare TUTTE le tue statistiche e la cronologia? Questa azione è irreversibile.")) {
-            localStorage.removeItem('quizHistory');
-            this.history = [];
-            this.calculateStats(); // Azzera anche l'oggetto this.stats
-            this.render(); // Ricarica la schermata Statistiche
-            alert("Statistiche azzerate con successo!");
-        }
-    }
-    // --- Fine nuova funzione ---
-
-
     // --- Avvio Quiz ---
 
     startQuiz() {
@@ -173,14 +171,15 @@ class QuizApp {
         this.startTime = Date.now();
         this.questionStartTime = Date.now();
         
-        // ************************************************
-        // CORREZIONE: Renderizza la schermata prima di avviare il timer!
+        // PASSO 1: Renderizza la schermata prima di avviare il timer
         this.render(); 
-        // ************************************************
         
         if (config.timeLimit) {
             this.timeRemaining = config.timeLimit;
-            this.startTimer();
+            // PASSO 2: Avvia il timer dopo un breve ritardo per prevenire la race condition (Errore 159)
+            setTimeout(() => {
+                this.startTimer();
+            }, 50); // 50ms di attesa per il disegno del DOM
         }
     }
 
@@ -188,7 +187,7 @@ class QuizApp {
         this.timerInterval = setInterval(() => {
             this.timeRemaining--;
             
-            // L'elemento è ora garantito esistere perché startQuiz() chiama render() prima
+            // L'elemento è ora garantito esistere
             const timerElement = document.getElementById('timer-display');
             if (timerElement) {
                 timerElement.textContent = this.formatTime(this.timeRemaining);
@@ -578,7 +577,6 @@ class QuizApp {
 
 
         return `
-
             <div class="p-6">
                 <h1 class="text-3xl font-bold text-red-600 mb-6 text-center">📊 Statistiche Globali</h1>
                 
@@ -617,7 +615,8 @@ class QuizApp {
                 
                 <button id="reset-stats-btn" class="text-gray-500 hover:text-red-600 text-sm py-2 px-4 rounded-lg w-full border border-gray-300 hover:border-red-600 transition">
                     ⚠️ Azzerra Tutte le Statistiche
-                </button>            </div>
+                </button>
+            </div>
         `;
     }
     
@@ -710,6 +709,7 @@ class QuizApp {
         const resetStatsBtn = document.getElementById('reset-stats-btn');
         if (resetStatsBtn) {
             resetStatsBtn.onclick = () => this.resetStats();
+        }
     }
 }
 
