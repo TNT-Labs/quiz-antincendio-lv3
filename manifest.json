@@ -1,7 +1,7 @@
 {
   "name": "Quiz Antincendio Livello 3",
   "short_name": "Quiz Antincendio",
-  "description": "App per la preparazione all'esame Antincendio di Livello 3. **350 domande complete, 5 modalità di studio (inclusa Revisione Intelligente), obiettivi giornalieri e statistiche di progresso.**",
+  "description": "App per la preparazione all'esame Antincendio di Livello 3. **350 domande complete, 5 modalità di studio, obiettivi giornalieri, Dark Mode e Temi sbloccabili come Premi Visivi.**",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -34,17 +34,17 @@
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Simulazione Esame",
+      "name": "Simulazione",
       "short_name": "Esame",
-      "description": "Avvia la Simulazione d'Esame",
+      "description": "Avvia una simulazione d'esame completa",
       "url": "/?mode=exam",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Revisione Intelligente",
-      "short_name": "Revisione",
-      "description": "Avvia la Revisione Spaziata",
-      "url": "/?mode=smartReview",
+      "name": "Sfida 60s",
+      "short_name": "Sfida 60s",
+      "description": "Metti alla prova la tua velocità di risposta in un minuto",
+      "url": "/?mode=timeChallenge",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     }
   ]

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quiz-antincendio-v1.2.0-smartfeatures'; // Versione aggiornata
+const CACHE_NAME = 'quiz-antincendio-v1.3.0-themes-feedback'; // VERSIONE AGGIORNATA
 const urlsToCache = [
   '/',
   '/index.html',
@@ -86,7 +86,10 @@ self.addEventListener('fetch', event => {
       .catch(error => {
           // Fallback per richieste non riuscite (ad esempio, immagini mancanti)
           console.error('Service Worker: Fetch failed:', error);
-          // Qui si potrebbe aggiungere un fallback per index.html (es. ritorno di una pagina offline)
+          // Fallback alla index.html se non disponibile (per navigazione offline profonda)
+          if (event.request.mode === 'navigate') {
+              return caches.match('/index.html');
+          }
       })
   );
 });

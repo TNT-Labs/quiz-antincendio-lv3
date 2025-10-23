@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#dc2626">
-    <meta name="description" content="Quiz di preparazione per l'esame Antincendio di Livello 3. 350 domande, simulazioni complete. Aggiunte modalità Solo Errori, Sfida 60s, Revisione Intelligente e Obiettivi Giornalieri con persistenza dati e statistiche.">
-    <meta name="keywords" content="quiz, antincendio, livello 3, esame, VVF, sicurezza, pwa, formazione">
+    <meta name="description" content="Quiz di preparazione per l'esame Antincendio di Livello 3. 350 domande, simulazioni complete. Aggiunte modalità Solo Errori, Sfida 60s, Revisione Intelligente, Obiettivi Giornalieri, Temi e Dark Mode.">
+    <meta name="keywords" content="quiz, antincendio, livello 3, esame, VVF, sicurezza, pwa, formazione, temi, dark mode">
     <meta name="author" content="Quiz Antincendio">
     
     <title>Quiz Antincendio Livello 3 - Aggiornato</title>
@@ -21,14 +21,64 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
+        /* BASE STYLES */
         body {
-            background-color: #f3f4f6; /* Sfondo generale */
+            transition: background-color 0.3s, color 0.3s;
+            /* Le classi di Tailwind gestiranno il resto (es. .container) */
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
+        
+        /* DARK MODE - Variabili e Sfondo */
+        html {
+            /* Colori di default per Light Mode */
+            --bg-start: #f3f4f6; /* gray-100 */
+            --text-primary: #1f2937; /* gray-800 */
+            background-color: var(--bg-start);
         }
+        html.dark {
+            --bg-start: #1f2937; /* gray-800 */
+            --text-primary: #f9fafb; /* gray-50 */
+            background-color: var(--bg-start);
+        }
+
+        /* ANIMAZIONE FEEDBACK VISIVO AVANZATO */
+        /* Animazione: espande una bolla di colore per dare un feedback visivo immediato */
+        @keyframes pulse-correct {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        @keyframes pulse-incorrect {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .pulse-correct, .pulse-incorrect {
+            position: relative;
+        }
+        .pulse-correct::after, .pulse-incorrect::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px; /* Punto di partenza */
+            height: 1px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            pointer-events: none;
+            animation-duration: 0.5s;
+            animation-timing-function: ease-out;
+            z-index: 50; /* Sopra le cards ma sotto i modali */
+        }
+
+        .pulse-correct::after {
+            background-color: #86efac; /* green-300 */
+            animation-name: pulse-correct;
+        }
+
+        .pulse-incorrect::after {
+            background-color: #fca5a5; /* red-300 */
+            animation-name: pulse-incorrect;
+        }
+
         /* Stile di caricamento */
         #loading {
             position: fixed;
@@ -36,32 +86,29 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #f3f4f6;
+            background-color: var(--bg-start);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 100;
             font-size: 3rem;
+            color: #dc2626; /* Usa colore primario fisso per il loading */
         }
     </style>
 </head>
 <body>
-    
     <div id="loading">
         <div class="text-red-600 animate-pulse">🔥</div>
     </div>
-
     <div class="container">
         <div id="root"></div>
     </div>
-    
     <script src="app.js"></script>
     
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // Il Service Worker è stato aggiornato (sw.js)
-                navigator.serviceWorker.register('sw.js')
+                navigator.serviceWorker.register('./sw.js')
                     .then(registration => {
                         console.log('✅ Service Worker registrato:', registration);
                     })
