@@ -708,8 +708,7 @@ class QuizApp {
       changeModeBtn.addEventListener('click', () => this.resetQuiz());
     }
   }
-}
-
+} // <--- QUESTA GRAFFA MANCAVA!
 // Inizializza l'app quando il DOM è pronto
 document.addEventListener('DOMContentLoaded', () => {
   new QuizApp();
