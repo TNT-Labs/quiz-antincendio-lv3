@@ -1,7 +1,7 @@
 // Quiz Antincendio - Progressive Web App
 // Versione con modalità Allenamento, Esame, Solo Errori, Sfida 60s, Revisione Intelligente e Obiettivi Giornalieri
 // Aggiornamento: Temi (Premi Visivi), Dark Mode e Feedback Visivo Avanzato
-// Correzione Finale: Aggiunto setTimeout per risolvere race condition del timer
+// Correzione Cruciale: Sincronizzazione caricamento quizData
 
 class QuizApp {
     constructor() {
@@ -10,30 +10,30 @@ class QuizApp {
         this.currentQuestionIndex = 0;
         this.selectedAnswer = null;
         this.incorrectCount = 0;
-        this.answeredQuestions = []; // Risposte della sessione corrente
+        this.answeredQuestions = []; 
         this.showFeedback = false;
-        this.quizState = 'start'; // start, quiz, results, stats, settings
-        this.mode = null; // 'training', 'exam', 'errorsOnly', 'timeChallenge', 'smartReview'
+        this.quizState = 'loading'; // NUOVO: Inizializza a 'loading'
+        this.mode = null; 
 
         // Timer e tempi
-        this.startTime = null; // Tempo inizio quiz
-        this.endTime = null; // Tempo fine quiz
+        this.startTime = null; 
+        this.endTime = null; 
         this.timerInterval = null;
         this.timeRemaining = 0;
-        this.questionStartTime = null; // Tempo inizio domanda
+        this.questionStartTime = null; 
 
-        // Nuove proprietà per persistenza e statistiche
-        this.history = []; // [{qnum, isCorrect, timestamp, mode, timeSpent}]
+        // Dati persistenti
+        this.history = []; 
         this.stats = { totalAttempts: 0, totalCorrect: 0, totalTime: 0 };
-        this.highScores60s = []; // [{score, timestamp}]
-        this.badges = {}; // {'fireMaster': true, 'streak5days': false}
+        this.highScores60s = []; 
+        this.badges = {}; 
         this.dailyGoal = {
-            target: 50, // Obiettivo domande da completare
+            target: 50, 
             completedToday: 0,
-            lastGoalDate: new Date().toLocaleDateString('it-IT') // Data ultima esecuzione obiettivo
+            lastGoalDate: new Date().toLocaleDateString('it-IT') 
         };
 
-        // --- GESTIONE TEMI (Premi Visivi) ---
+        // Gestione Temi
         this.themes = {
             fire: {
                 name: 'Fuoco Classico 🔥',
@@ -48,7 +48,7 @@ class QuizApp {
                 primary: 'blue-600',
                 secondary: 'blue-400',
                 unlocked: false,
-                badge: 'proStudent', // Sbloccato con Studente Pro
+                badge: 'proStudent', 
                 icon: '💧'
             },
             forest: {
@@ -56,21 +56,20 @@ class QuizApp {
                 primary: 'green-600',
                 secondary: 'green-400',
                 unlocked: false,
-                badge: 'fireMaster', // Sbloccato con Maestro del Fuoco
+                badge: 'fireMaster', 
                 icon: '🌲'
             },
             gold: {
                 name: 'Oro Reale 👑',
-                primary: 'yellow-500', // yellow-500 si abbina bene all'oro
+                primary: 'yellow-500', 
                 secondary: 'yellow-300',
                 unlocked: false,
-                badge: 'king60s', // Sbloccato con Re del 60s
+                badge: 'king60s', 
                 icon: '👑'
             }
         };
         this.currentThemeKey = 'fire';
         this.darkMode = false;
-        // --- FINE GESTIONE TEMI ---
 
         // Configurazioni modalità (rimane invariato)
         this.modes = {
@@ -86,7 +85,7 @@ class QuizApp {
                 name: 'Simulazione Esame',
                 questions: 15,
                 maxErrors: 5,
-                timeLimit: 1800, // 30 minuti
+                timeLimit: 1800, 
                 showFeedback: false,
                 isExam: true
             },
@@ -102,23 +101,32 @@ class QuizApp {
                 name: 'Sfida 60s',
                 questions: 'infinite',
                 maxErrors: 'nessuno',
-                timeLimit: 60, // 60 secondi
+                timeLimit: 60, 
                 showFeedback: false,
                 isExam: false
             },
-            smartReview: { // NUOVA MODALITÀ RIPETIZIONE SPAZIATA
+            smartReview: { 
                 name: 'Revisione Intelligente',
                 questions: 'smart',
                 maxErrors: 'nessuno',
                 timeLimit: null,
                 showFeedback: true,
                 isExam: false
+            },
+            review: { // Modalità temporanea per rivedere i risultati
+                 name: 'Revisione Risultati', 
+                 questions: 'fixed', 
+                 maxErrors: 'nessuno', 
+                 timeLimit: null, 
+                 showFeedback: true, 
+                 isExam: false 
             }
         };
 
         this.loadData();
-        this.applyThemeToDOM(); // Applica il tema caricato
+        this.applyThemeToDOM(); 
         this.bindEvents();
+        this.render(); // Inizia a renderizzare lo stato 'loading'
     }
 
     // --- UTILITY PER TEMI ---
@@ -127,6 +135,7 @@ class QuizApp {
     }
 
     applyThemeToDOM() {
+        // ... (Logica applyThemeToDOM rimane invariata)
         const theme = this.getThemeColors();
         const html = document.documentElement;
         
@@ -143,10 +152,9 @@ class QuizApp {
             html.classList.remove('dark');
         }
         
-        // 3. Aggiorna il meta tag theme-color (solo i colori principali)
+        // 3. Aggiorna il meta tag theme-color
         const themeColorMeta = document.querySelector('meta[name="theme-color"]');
         if (themeColorMeta) {
-            // Mappa approssimativa Tailwind 600 a Hex (per il theme-color)
             const colorMap = {
                 'red-600': '#dc2626',
                 'blue-600': '#2563eb',
@@ -176,68 +184,61 @@ class QuizApp {
     // --- Gestione Dati Persistenti (LocalStorage) ---
 
     loadData() {
+        // Carica dati utente da localStorage (sincrono)
         try {
-            // Carica Dati Quiz
-            fetch('quiz_antincendio_ocr_improved.json')
-                .then(response => response.json())
-                .then(data => {
-                    this.quizData = data.map((q, index) => ({ ...q, qnum: index + 1 }));
-                    this.quizData.sort(() => Math.random() - 0.5); // Mescola le domande all'avvio
-                    this.render();
-                });
-
-            // Carica Statistiche e Cronologia
             const savedHistory = localStorage.getItem('quizHistory');
-            if (savedHistory) {
-                this.history = JSON.parse(savedHistory);
-            }
-            const savedStats = localStorage.getItem('quizStats');
-            if (savedStats) {
-                this.stats = JSON.parse(savedStats);
-            }
-
-            // Carica Classifica 60s
-            const savedHighScores60s = localStorage.getItem('highScores60s');
-            if (savedHighScores60s) {
-                this.highScores60s = JSON.parse(savedHighScores60s);
-            }
-
-            // Carica Badge
-            const savedBadges = localStorage.getItem('quizBadges');
-            if (savedBadges) {
-                this.badges = JSON.parse(savedBadges);
-            }
+            if (savedHistory) this.history = JSON.parse(savedHistory);
             
-            // Carica Stato Temi (lo uniamo con i temi di default)
+            const savedStats = localStorage.getItem('quizStats');
+            if (savedStats) this.stats = JSON.parse(savedStats);
+
+            const savedHighScores60s = localStorage.getItem('highScores60s');
+            if (savedHighScores60s) this.highScores60s = JSON.parse(savedHighScores60s);
+
+            const savedBadges = localStorage.getItem('quizBadges');
+            if (savedBadges) this.badges = JSON.parse(savedBadges);
+            
             const savedThemes = localStorage.getItem('quizThemes');
             if (savedThemes) {
                 const loadedThemes = JSON.parse(savedThemes);
-                // Unisci i temi salvati con le definizioni di default (per includere nuovi temi)
                 Object.keys(this.themes).forEach(key => {
-                    if (loadedThemes[key]) {
-                        this.themes[key].unlocked = loadedThemes[key].unlocked;
-                    }
+                    if (loadedThemes[key]) this.themes[key].unlocked = loadedThemes[key].unlocked;
                 });
             }
             
-            // Carica Tema Corrente e Dark Mode
             const savedThemeKey = localStorage.getItem('currentThemeKey');
-            if (savedThemeKey && this.themes[savedThemeKey]) {
-                this.currentThemeKey = savedThemeKey;
-            }
+            if (savedThemeKey && this.themes[savedThemeKey]) this.currentThemeKey = savedThemeKey;
+            
             const savedDarkMode = localStorage.getItem('darkMode');
-            this.darkMode = savedDarkMode === 'true'; // Converti stringa in booleano
+            this.darkMode = savedDarkMode === 'true'; 
 
-            // Carica Obiettivo Giornaliero
             const savedDailyGoal = localStorage.getItem('dailyGoal');
-            if (savedDailyGoal) {
-                this.dailyGoal = JSON.parse(savedDailyGoal);
-            }
+            if (savedDailyGoal) this.dailyGoal = JSON.parse(savedDailyGoal);
             this.checkGoalReset();
 
         } catch (e) {
-            console.error("Errore nel caricamento dei dati da localStorage o file JSON:", e);
+            console.error("Errore nel caricamento dei dati da localStorage:", e);
         }
+
+        // Carica Dati Quiz (ASINCRONO - CRUCIALE)
+        fetch('quiz_antincendio_ocr_improved.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Impossibile caricare il file quiz.json. Stato: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                this.quizData = data.map((q, index) => ({ ...q, qnum: index + 1 }));
+                this.quizData.sort(() => Math.random() - 0.5); 
+                this.quizState = 'start'; // Cambia lo stato solo dopo il caricamento
+                this.render(); // Renderizza la schermata iniziale dopo il caricamento
+            })
+            .catch(error => {
+                console.error("Errore critico nel caricamento delle domande:", error);
+                this.quizState = 'error'; // Imposta lo stato di errore
+                this.render(); // Renderizza la schermata di errore
+            });
     }
 
     saveData() {
@@ -246,7 +247,6 @@ class QuizApp {
         localStorage.setItem('highScores60s', JSON.stringify(this.highScores60s));
         localStorage.setItem('quizBadges', JSON.stringify(this.badges));
         
-        // Salva solo lo stato di sblocco dei temi
         const themesToSave = {};
         Object.keys(this.themes).forEach(key => {
             themesToSave[key] = { unlocked: this.themes[key].unlocked };
@@ -274,70 +274,70 @@ class QuizApp {
         this.dailyGoal.completedToday += count;
         this.checkBadges();
         this.saveData();
-        this.render(); // Per aggiornare l'interfaccia degli obiettivi
+        this.render(); 
     }
 
     // --- Gestione Ripetizione Spaziata (rimane invariato) ---
     
-    // Calcola il "fattore di difficoltà" (rimane invariato)
     calculateDifficulty(qnum) {
+        // ... (Logica rimane invariata)
         const attempts = this.history.filter(h => h.qnum === qnum);
-        if (attempts.length === 0) return 0.5; // Neutro se non risposto
+        if (attempts.length === 0) return 0.5; 
         
         const correctCount = attempts.filter(h => h.isCorrect).length;
-        const incorrectCount = attempts.filter(h => !h.isCorrect).length;
+        // const incorrectCount = attempts.filter(h => !h.isCorrect).length;
         
-        // Fattore: 1 (sempre corretto) a 0 (sempre sbagliato)
         return correctCount / attempts.length;
     }
     
-    // Determina se una domanda è pronta per la revisione (rimane invariato)
     isReadyForReview(qnum) {
+        // ... (Logica rimane invariata)
         const lastAttempt = this.history
             .filter(h => h.qnum === qnum)
             .sort((a, b) => b.timestamp - a.timestamp)[0];
 
-        if (!lastAttempt) return true; // Se non è mai stata risposta, è pronta
+        if (!lastAttempt) return true; 
 
         const difficulty = this.calculateDifficulty(qnum);
         const now = Date.now();
-        const daysSinceLastReview = (now - lastAttempt.timestamp) / (1000 * 60 * 60 * 24); // Giorni
+        const daysSinceLastReview = (now - lastAttempt.timestamp) / (1000 * 60 * 60 * 24); 
 
         let interval;
-        // Intervalli di ripetizione (giorni) basati sul fattore di difficoltà:
-        if (difficulty >= 0.8) { // Facile (rivedi dopo 7-14 giorni)
+        if (difficulty >= 0.8) { 
             interval = 7 + (7 * difficulty);
-        } else if (difficulty >= 0.5) { // Medio (rivedi dopo 3-7 giorni)
+        } else if (difficulty >= 0.5) { 
             interval = 3 + (4 * difficulty);
-        } else { // Difficile (rivedi dopo 1 giorno)
+        } else { 
             interval = 1;
         }
 
-        // Se l'ultima volta era sbagliata, rivedi prima
         if (!lastAttempt.isCorrect) {
-            interval = 0.5; // Rivedi subito il giorno dopo
+            interval = 0.5; 
         }
         
         return daysSinceLastReview >= interval;
     }
 
     getSmartReviewQuestions() {
-        // 1. Prendi tutte le domande
         const questionsToReview = this.quizData
             .filter(q => this.isReadyForReview(q.qnum));
         
-        // 2. Ordinale per priorità (quelle con difficoltà più bassa in cima)
         questionsToReview.sort((a, b) => {
             return this.calculateDifficulty(a.qnum) - this.calculateDifficulty(b.qnum);
         });
 
-        // 3. Limita il set (es. 20 domande)
         return questionsToReview.slice(0, 20);
     }
 
-    // --- Inizializzazione Quiz (rimane invariato) ---
+    // --- Inizializzazione Quiz ---
 
     selectMode(mode) {
+        // CRUCIALE: Controlla se i dati del quiz sono caricati prima di iniziare
+        if (this.quizData.length === 0) {
+            alert('I dati del quiz non sono ancora stati caricati. Riprova tra un istante.');
+            return;
+        }
+        
         if (!this.modes[mode]) return;
         this.mode = mode;
         this.quizState = 'quiz';
@@ -349,7 +349,6 @@ class QuizApp {
         if (mode === 'errorsOnly') {
             const incorrectQnums = [...new Set(this.history.filter(h => !h.isCorrect).map(h => h.qnum))];
             this.selectedQuestions = this.quizData.filter(q => incorrectQnums.includes(q.qnum));
-            // Se non ci sono errori, torna alla schermata iniziale o avvisa
             if (this.selectedQuestions.length === 0) {
                 alert('Non hai ancora commesso errori! Prova la modalità Allenamento.');
                 this.resetQuiz();
@@ -357,17 +356,14 @@ class QuizApp {
             }
         } else if (mode === 'smartReview') {
             this.selectedQuestions = this.getSmartReviewQuestions();
-            // Se non ci sono domande da rivedere, avvisa
             if (this.selectedQuestions.length === 0) {
                 alert('Ottimo lavoro! Nessuna domanda è pronta per la Revisione Intelligente. Continua ad allenarti!');
                 this.resetQuiz();
                 return;
             }
         } else if (mode === 'exam') {
-            // Selezione casuale delle domande per l'esame
             this.selectedQuestions = this.quizData.sort(() => 0.5 - Math.random()).slice(0, this.modes[mode].questions);
         } else if (mode === 'training' || mode === 'timeChallenge') {
-            // Per training e 60s, iniziamo con un set casuale, poi ne aggiungiamo dinamicamente
             this.selectedQuestions = this.quizData.sort(() => 0.5 - Math.random()).slice(0, 50);
         }
 
@@ -380,11 +376,10 @@ class QuizApp {
     }
 
     // --- Timer (rimane invariato) ---
-
     startTimer() {
+        // ... (Logica rimane invariata)
         if (this.timerInterval) clearInterval(this.timerInterval);
         
-        // Se c'è un limite di tempo (esame o 60s)
         if (this.modes[this.mode].timeLimit) {
             this.timerInterval = setInterval(() => {
                 this.timeRemaining--;
@@ -393,7 +388,7 @@ class QuizApp {
                     clearInterval(this.timerInterval);
                     this.timeRemaining = 0;
                     if (this.mode === 'timeChallenge') {
-                        this.endTimeChallenge(); // Fine specifica per 60s
+                        this.endTimeChallenge(); 
                     } else {
                         alert('Tempo scaduto!');
                         this.endQuiz();
@@ -401,15 +396,14 @@ class QuizApp {
                 }
             }, 1000);
         } else if (this.mode === 'training' || this.mode === 'errorsOnly' || this.mode === 'smartReview') {
-            // Per modalità senza limite, tracciamo il tempo totale
             this.timerInterval = setInterval(() => {
-                // Aggiorniamo il tempo trascorso ogni secondo
                 this.updateTimerDisplay();
             }, 1000);
         }
     }
 
     updateTimerDisplay() {
+        // ... (Logica rimane invariata)
         const timerElement = document.getElementById('timer');
         if (timerElement) {
             let displayTime;
@@ -427,10 +421,9 @@ class QuizApp {
         }
     }
 
-    // --- Risposta e Avanzamento ---
+    // --- Risposta e Avanzamento (rimane invariato) ---
 
     selectAnswer(option) {
-        // Logica per selezionare una risposta
         if (this.showFeedback) return;
         this.selectedAnswer = option;
         this.render();
@@ -442,10 +435,8 @@ class QuizApp {
         const currentQuestion = this.selectedQuestions[this.currentQuestionIndex];
         const isCorrect = currentQuestion.answer === this.selectedAnswer;
 
-        // Tempo impiegato
         const timeSpent = (Date.now() - this.questionStartTime) / 1000;
 
-        // 1. Aggiorna la cronologia (History)
         this.history.push({
             qnum: currentQuestion.qnum,
             isCorrect: isCorrect,
@@ -454,34 +445,27 @@ class QuizApp {
             timeSpent: timeSpent
         });
         
-        // 2. Aggiorna le statistiche totali
         this.stats.totalAttempts++;
         if (isCorrect) {
             this.stats.totalCorrect++;
         }
         this.stats.totalTime += timeSpent;
         
-        // 3. Gestione errori
         if (!isCorrect && this.modes[this.mode].isExam) {
             this.incorrectCount++;
         }
 
-        // 4. Aggiorna l'obiettivo giornaliero
         this.updateDailyGoal();
 
-        // 5. Salva e renderizza
         this.saveData();
         this.answeredQuestions.push({ question: currentQuestion, isCorrect: isCorrect, selected: this.selectedAnswer });
 
         if (this.mode === 'timeChallenge') {
-            // Nella 60s, si passa subito alla successiva e si registra solo il risultato finale
             this.nextQuestion(isCorrect);
         } else {
-            // Nelle altre modalità, si mostra il feedback
             this.showFeedback = true;
             this.render();
             
-            // --- Feedback Visivo Avanzato (Pulse) ---
             const root = document.getElementById('root');
             const feedbackClass = isCorrect ? `pulse-correct` : `pulse-incorrect`;
             
@@ -489,16 +473,14 @@ class QuizApp {
             
             setTimeout(() => {
                 root.classList.remove(feedbackClass);
-            }, 500); // 500ms di animazione
-            // --- Fine Feedback Visivo Avanzato ---
+            }, 500); 
         }
     }
 
-    nextQuestion(isCorrectFor60s = null) {
+    nextQuestion() {
         this.selectedAnswer = null;
         this.showFeedback = false;
         
-        // Se è la modalità 60s, ricarichiamo il timer della domanda
         if (this.mode !== 'timeChallenge') {
             this.questionStartTime = Date.now();
         }
@@ -506,7 +488,6 @@ class QuizApp {
         this.currentQuestionIndex++;
         const modeConfig = this.modes[this.mode];
 
-        // Controllo fine quiz (Esame o fine lista Allenamento/Errori)
         if (modeConfig.isExam && (this.currentQuestionIndex >= modeConfig.questions || this.incorrectCount > modeConfig.maxErrors)) {
             this.endQuiz();
             return;
@@ -517,20 +498,15 @@ class QuizApp {
             return;
         }
 
-        // Caso Allenamento/Solo Errori/Smart Review (illimitato)
+        // Caso Allenamento/Solo Errori/Smart Review (illimitato o lista finita)
         if (modeConfig.questions === 'infinite' || modeConfig.questions === 'allErrors' || modeConfig.questions === 'smart') {
-            // Se siamo alla fine della lista, ne carichiamo un'altra casuale (o ripartiamo dall'inizio se non illimitato)
             if (this.currentQuestionIndex >= this.selectedQuestions.length) {
-                // Per allenamento, carichiamo nuove domande casuali
                 if (this.mode === 'training') {
                     this.selectedQuestions = this.quizData.sort(() => 0.5 - Math.random()).slice(0, 50);
                     this.currentQuestionIndex = 0;
-                } else if (this.mode === 'errorsOnly') {
-                    // Se gli errori sono finiti, finisce
-                    this.endQuiz();
-                } else if (this.mode === 'smartReview') {
-                    // Se le smart review sono finite, finisce
-                    this.endQuiz();
+                } else if (this.mode === 'errorsOnly' || this.mode === 'smartReview') {
+                    this.endQuiz(); // Se la lista finisce in queste modalità, termina
+                    return;
                 }
             }
         }
@@ -539,9 +515,8 @@ class QuizApp {
     }
 
     skipQuestion() {
-        // Funzionalità di skip, solo per Allenamento o 60s (dove non c'è penalità)
+        // ... (Logica rimane invariata)
         if (this.mode === 'training' || this.mode === 'timeChallenge') {
-            // Per il 60s lo saltiamo senza contarlo
             if (this.mode === 'timeChallenge') {
                 this.currentQuestionIndex++;
                 if (this.currentQuestionIndex >= this.selectedQuestions.length) {
@@ -563,13 +538,13 @@ class QuizApp {
         if (this.timerInterval) clearInterval(this.timerInterval);
         this.endTime = Date.now();
         this.quizState = 'results';
-        this.checkBadges(); // Controlla i badge dopo il quiz
+        this.checkBadges(); 
         this.saveData();
         this.render();
     }
     
     endTimeChallenge() {
-        // Logica specifica per la Sfida 60s
+        // ... (Logica rimane invariata)
         if (this.timerInterval) clearInterval(this.timerInterval);
         this.endTime = Date.now();
         this.quizState = 'results';
@@ -577,16 +552,14 @@ class QuizApp {
         const correctCount = this.answeredQuestions.filter(a => a.isCorrect).length;
         const totalAttempts = this.answeredQuestions.length;
 
-        // Calcolo e salvataggio High Score
         this.highScores60s.push({
             score: correctCount,
             total: totalAttempts,
             timestamp: Date.now()
         });
-        // Mantieni solo i 10 migliori punteggi, ordinati per score e poi per totalAttempts (a parità di score)
         this.highScores60s.sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
-            return b.total - a.total; // Piu tentativi = più veloce/meglio
+            return b.total - a.total; 
         }).splice(10); 
         
         this.checkBadges();
@@ -601,72 +574,48 @@ class QuizApp {
         this.render();
     }
 
-    // --- Statistiche e Badge ---
-    
-    // Funzione per controllare e assegnare badge e sbloccare temi
+    // --- Statistiche e Badge (rimane invariato) ---
     checkBadges() {
+        // ... (Logica checkBadges rimane invariata)
         // Badge 1: Maestro del Fuoco (10 esami superati)
         const examsPassed = this.history.filter(h => h.mode === 'exam' && h.isCorrect).length;
         if (examsPassed >= 10 && !this.badges.fireMaster) {
-            this.badges.fireMaster = {
-                name: 'Maestro del Fuoco 🔥',
-                description: 'Hai superato 10 simulazioni d\'esame con successo.',
-                unlocked: Date.now()
-            };
+            this.badges.fireMaster = { name: 'Maestro del Fuoco 🔥', description: 'Hai superato 10 simulazioni d\'esame con successo.', unlocked: Date.now() };
         }
 
         // Badge 2: Studente Pro (1000 domande completate in Allenamento/Smart Review)
         const trainingDone = this.history.filter(h => h.mode === 'training' || h.mode === 'smartReview').length;
         if (trainingDone >= 1000 && !this.badges.proStudent) {
-             this.badges.proStudent = {
-                name: 'Studente Pro 🎓',
-                description: 'Hai risposto a 1000 domande in modalità Allenamento o Revisione.',
-                unlocked: Date.now()
-            };
+             this.badges.proStudent = { name: 'Studente Pro 🎓', description: 'Hai risposto a 1000 domande in modalità Allenamento o Revisione.', unlocked: Date.now() };
         }
         
         // Badge 3: Obiettivo Giornaliero (Logica semplificata)
-        const goalCompletions = this.history.filter(h => h.mode === 'goalCompleted').length; 
         if (this.dailyGoal.completedToday >= this.dailyGoal.target && !this.badges.dailyGoalAchieved) {
-             this.badges.dailyGoalAchieved = {
-                name: 'Obiettivo Raggiunto 🎯',
-                description: `Hai completato l'obiettivo giornaliero (${this.dailyGoal.target} domande).`,
-                unlocked: Date.now()
-            };
+             this.badges.dailyGoalAchieved = { name: 'Obiettivo Raggiunto 🎯', description: `Hai completato l'obiettivo giornaliero (${this.dailyGoal.target} domande).`, unlocked: Date.now() };
+             // Nota: L'obiettivo raggiunto non sblocca un tema, ma è un badge.
         }
         
         // Badge 4: Re del 60s (Punteggio 20+ nella Sfida 60s)
         const best60sScore = this.highScores60s.length > 0 ? this.highScores60s[0].score : 0;
         if (best60sScore >= 20 && !this.badges.king60s) {
-             this.badges.king60s = {
-                name: 'Re del 60s ⏱️',
-                description: 'Hai raggiunto un punteggio di 20 o più nella Sfida 60s.',
-                unlocked: Date.now()
-            };
+             this.badges.king60s = { name: 'Re del 60s ⏱️', description: 'Hai raggiunto un punteggio di 20 o più nella Sfida 60s.', unlocked: Date.now() };
         }
         
-        // --- LOGICA SBLOCCO TEMI ---
+        // LOGICA SBLOCCO TEMI
         let newThemeUnlocked = false;
         Object.keys(this.themes).forEach(key => {
             const theme = this.themes[key];
             if (theme.badge && this.badges[theme.badge] && !theme.unlocked) {
-                // Se il badge è sbloccato e il tema non lo è, sblocca il tema.
                 this.themes[key].unlocked = true;
                 newThemeUnlocked = true;
             }
         });
         
-        if (newThemeUnlocked) {
-            // Avvisa l'utente solo se è un tema appena sbloccato
-            // L'avviso vero e proprio viene dato dal renderSettingsScreen
-        }
-        
-        this.saveData(); // Per salvare lo stato aggiornato di badge e temi
+        this.saveData(); 
     }
     
     getDifficultQuestions() {
-        // Logica per trovare le 5 domande più difficili (rimane invariata)
-        // ... (Omessa per brevità, ma non toccata)
+        // ... (Logica getDifficultQuestions rimane invariata)
         const questionStats = {};
         this.history.forEach(h => {
             if (!questionStats[h.qnum]) {
@@ -681,14 +630,12 @@ class QuizApp {
             questionStats[h.qnum].count++;
         });
 
-        // Converte in array e calcola la percentuale di errore
         const difficultQuestions = Object.keys(questionStats)
             .map(qnum => {
                 const stats = questionStats[qnum];
                 const errorRate = stats.incorrect / stats.count;
                 const avgTime = stats.totalTime / stats.count;
                 
-                // Trova il testo della domanda
                 const questionData = this.quizData.find(q => q.qnum === parseInt(qnum));
                 
                 return {
@@ -699,9 +646,8 @@ class QuizApp {
                     count: stats.count
                 };
             })
-            .filter(q => q.errorRate > 0) // Filtra solo quelle con almeno un errore
+            .filter(q => q.errorRate > 0) 
             .sort((a, b) => {
-                // Ordina prima per tasso di errore (più alto = più difficile), poi per tempo medio
                 if (b.errorRate !== a.errorRate) return b.errorRate - a.errorRate;
                 return b.avgTime - a.avgTime;
             })
@@ -712,14 +658,19 @@ class QuizApp {
     // --- Rendering (Interfaccia Utente) ---
 
     render() {
-        this.applyThemeToDOM(); // Applica il tema prima di ogni rendering
+        this.applyThemeToDOM(); 
         const root = document.getElementById('root');
         if (!root) return; 
 
-        // Pulizia per evitare duplicati
         root.innerHTML = ''; 
 
         switch (this.quizState) {
+            case 'loading':
+                root.innerHTML = this.renderLoadingState(); // NUOVO: Schermata di caricamento
+                break;
+            case 'error':
+                root.innerHTML = this.renderErrorState(); // NUOVO: Schermata di errore
+                break;
             case 'start':
                 root.innerHTML = this.renderStartScreen();
                 break;
@@ -742,19 +693,52 @@ class QuizApp {
         }
     }
     
-    // Funzione helper per le classi di colore del tema
+    // NUOVO: Stato di Caricamento
+    renderLoadingState() {
+        const themeColors = this.getThemeClasses();
+        // Nota: la schermata di caricamento base è gestita da #loading in index.html, 
+        // ma questa viene usata per lo stato intermedio di fetch
+        return `
+            <div class="text-center p-8 ${this.darkMode ? 'text-gray-100' : 'text-gray-800'}">
+                <p class="text-6xl animate-spin ${themeColors.text}">🔄</p>
+                <h2 class="text-2xl font-bold mt-4 ${themeColors.text}">Caricamento Domande...</h2>
+                <p class="mt-2 ${this.darkMode ? 'text-gray-400' : 'text-gray-600'}">Attendere il caricamento del database.</p>
+            </div>
+        `;
+    }
+    
+    // NUOVO: Stato di Errore
+    renderErrorState() {
+        const themeColors = this.getThemeClasses();
+        return `
+            <div class="text-center p-6 rounded-xl shadow-lg bg-red-100 dark:bg-red-900 border border-red-400">
+                <p class="text-6xl">🚨</p>
+                <h2 class="text-2xl font-bold mt-4 text-red-700 dark:text-red-300">Errore Caricamento Dati</h2>
+                <p class="mt-2 text-red-600 dark:text-red-400">
+                    Impossibile recuperare il database delle domande (quiz_antincendio_ocr_improved.json). 
+                    Assicurati che il file esista nella directory radice.
+                </p>
+                <button onclick="window.location.reload()" class="w-full mt-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-150">
+                    Riprova a Caricare
+                </button>
+            </div>
+        `;
+    }
+
     getThemeClasses(primaryOrSecondary = 'primary') {
+        // ... (Logica getThemeClasses rimane invariata)
         const theme = this.getThemeColors();
         const color = theme[primaryOrSecondary];
         return {
             text: `text-${color}`,
             bg: `bg-${color}`,
             border: `border-${color}`,
-            hoverBg: `hover:bg-${color.replace('-600', '-700').replace('-500', '-600')}` // Aggiunge un hover scuro
+            hoverBg: `hover:bg-${color.replace('-600', '-700').replace('-500', '-600')}`
         };
     }
 
     renderStartScreen() {
+        // ... (Logica renderStartScreen rimane invariata)
         const themeColors = this.getThemeClasses();
         const goalsText = this.dailyGoal.completedToday >= this.dailyGoal.target 
             ? `<p class="mt-2 text-green-600 font-semibold">✅ Obiettivo di oggi completato (${this.dailyGoal.completedToday}/${this.dailyGoal.target})!</p>` 
@@ -787,6 +771,7 @@ class QuizApp {
     } 
 
     renderModeButton(mode, title, description) {
+        // ... (Logica renderModeButton rimane invariata)
         return `
             <button data-mode="${mode}" class="mode-select-btn w-full p-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-md hover:shadow-lg transition duration-150 text-left">
                 <p class="text-lg font-semibold ${this.darkMode ? 'text-gray-100' : 'text-gray-800'}">${title}</p>
@@ -796,9 +781,10 @@ class QuizApp {
     } 
     
     renderQuizScreen() {
+        // ... (Logica renderQuizScreen rimane invariata)
         const themeColors = this.getThemeClasses();
         const currentQ = this.selectedQuestions[this.currentQuestionIndex];
-        if (!currentQ) return `<div class="text-center p-8 ${this.darkMode ? 'text-gray-100' : 'text-gray-800'}">Nessuna domanda selezionata.</div>`;
+        if (!currentQ) return `<div class="text-center p-8 ${this.darkMode ? 'text-gray-100' : 'text-gray-800'}">Nessuna domanda selezionata o lista esaurita.</div>`;
         const modeConfig = this.modes[this.mode];
         const isExam = modeConfig.isExam;
         const currentModeName = modeConfig.name;
@@ -807,10 +793,8 @@ class QuizApp {
         const totalQ = modeConfig.questions !== 'infinite' ? this.selectedQuestions.length : currentQNumber;
         const progressText = modeConfig.questions === 'infinite' ? `Domanda: ${currentQNumber}+` : `Domanda ${currentQNumber} di ${totalQ}`;
 
-        // Timer display
         const timerHtml = `<div id="timer" class="text-2xl font-bold ${themeColors.text}">00:00</div>`;
 
-        // Progress Bar
         let progressBarHtml = '';
         if (modeConfig.questions !== 'infinite') {
             const percentage = (currentQNumber / totalQ) * 100;
@@ -821,11 +805,10 @@ class QuizApp {
             `;
         }
 
-        // Status Bar (Top)
         const statusBarHtml = `
             <div class="flex justify-between items-center mb-6 border-b dark:border-gray-700 pb-4">
                 <div class="text-sm font-medium ${this.darkMode ? 'text-gray-400' : 'text-gray-500'}">${currentModeName}</div>
-                ${timerHtml}
+                ${modeConfig.timeLimit !== null || this.mode === 'training' || this.mode === 'errorsOnly' || this.mode === 'smartReview' ? timerHtml : ''}
             </div>
             <div class="text-center mb-6">
                 <p class="text-lg font-semibold ${this.darkMode ? 'text-gray-100' : 'text-gray-700'}">${progressText}</p>
@@ -834,12 +817,12 @@ class QuizApp {
             </div>
         `;
 
-        // Domanda
         const questionHtml = `<p class="text-xl font-bold mb-6 ${this.darkMode ? 'text-gray-50' : 'text-gray-900'}">${currentQ.question}</p>`;
 
-        // Opzioni
+        const answeredItem = this.mode === 'review' ? this.answeredQuestions[this.currentQuestionIndex] : null;
+
         const optionsHtml = ['a', 'b', 'c'].map(option => {
-            const isSelected = this.selectedAnswer === option;
+            const isSelected = this.selectedAnswer === option || (answeredItem && answeredItem.selected === option);
             const isCorrect = this.showFeedback && currentQ.answer === option;
             const isIncorrect = this.showFeedback && isSelected && currentQ.answer !== option;
 
@@ -859,7 +842,6 @@ class QuizApp {
                     borderColor = 'border-red-600 dark:border-red-400';
                     icon = '❌';
                 } else if (currentQ.answer === option) {
-                    // Evidenzia la risposta corretta se l'utente ha sbagliato
                     bgColor = 'bg-green-100 dark:bg-green-800';
                     borderColor = 'border-green-600 dark:border-green-400';
                     icon = '✅';
@@ -875,18 +857,19 @@ class QuizApp {
             `;
         }).join('');
 
-        // Feedback
         const feedbackHtml = this.showFeedback ? `
-            <div class="mt-6 p-4 rounded-lg ${currentQ.answer === this.selectedAnswer ? 'bg-green-100 border-green-400 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 border-red-400 text-red-700 dark:bg-red-900 dark:text-red-300'} border">
-                <p class="font-semibold">${currentQ.answer === this.selectedAnswer ? 'Corretto!' : 'Sbagliato.'}</p>
+            <div class="mt-6 p-4 rounded-lg ${currentQ.answer === (this.selectedAnswer || (answeredItem ? answeredItem.selected : null)) ? 'bg-green-100 border-green-400 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 border-red-400 text-red-700 dark:bg-red-900 dark:text-red-300'} border">
+                <p class="font-semibold">${currentQ.answer === (this.selectedAnswer || (answeredItem ? answeredItem.selected : null)) ? 'Corretto!' : 'Sbagliato.'}</p>
                 <p class="mt-2 text-sm">${currentQ.explanation}</p>
+                ${this.mode === 'review' && answeredItem && answeredItem.selected ? `<p class="mt-2 text-sm font-bold">La tua risposta: ${answeredItem.selected.toUpperCase()}</p>` : ''}
             </div>
         ` : '';
 
-        // Controlli
+        const isLastQuestion = this.currentQuestionIndex + 1 >= this.selectedQuestions.length;
+
         const controlsHtml = this.showFeedback ? `
             <button id="next-btn" class="w-full mt-6 py-3 ${themeColors.bg} text-white font-semibold rounded-lg shadow-md ${themeColors.hoverBg} transition duration-150">
-                ${(modeConfig.isExam && this.currentQuestionIndex + 1 === modeConfig.questions) || (modeConfig.questions !== 'infinite' && this.currentQuestionIndex + 1 === this.selectedQuestions.length) ? 'Vedi Risultati' : 'Prossima Domanda'}
+                ${isLastQuestion ? 'Termina Revisione' : 'Prossima Domanda'}
             </button>
         ` : `
             <button id="confirm-btn" class="w-full mt-6 py-3 ${this.selectedAnswer ? themeColors.bg : 'bg-gray-300 dark:bg-gray-600'} text-white font-semibold rounded-lg shadow-md ${this.selectedAnswer ? themeColors.hoverBg : ''} transition duration-150" ${this.selectedAnswer ? '' : 'disabled'}>
@@ -909,7 +892,7 @@ class QuizApp {
         `;
     }
 
-    // ... (renderResultsScreen e renderStatsScreen rimangono invariati o usano getThemeClasses)
+    // ... (renderResultsScreen, renderStatsScreen, renderSettingsScreen rimangono invariati)
     renderResultsScreen() {
         const themeColors = this.getThemeClasses();
         const correctCount = this.answeredQuestions.filter(a => a.isCorrect).length;
@@ -979,13 +962,24 @@ class QuizApp {
         return html;
     }
 
+    renderHighScoresSummary() {
+        const bestScore = this.highScores60s.length > 0 ? this.highScores60s[0].score : 0;
+        const themeColors = this.getThemeClasses();
+        return `
+            <div class="mt-6 p-4 rounded-lg bg-gray-100 dark:bg-gray-700">
+                <p class="font-semibold ${this.darkMode ? 'text-gray-100' : 'text-gray-800'}">Miglior Punteggio 60s:</p>
+                <p class="text-2xl font-bold ${themeColors.text}">${bestScore}</p>
+            </div>
+        `;
+    }
+
     renderStatsScreen() {
+        // ... (Logica renderStatsScreen rimane invariata)
         const themeColors = this.getThemeClasses();
         const accuracy = this.stats.totalAttempts > 0 ? ((this.stats.totalCorrect / this.stats.totalAttempts) * 100).toFixed(1) : 0;
         const avgTime = this.stats.totalAttempts > 0 ? (this.stats.totalTime / this.stats.totalAttempts).toFixed(2) : 0;
         const difficultQuestions = this.getDifficultQuestions();
         
-        // Calcolo i badge sbloccati
         const unlockedBadges = Object.values(this.badges).filter(b => b.unlocked).sort((a, b) => b.unlocked - a.unlocked);
         
         let html = `
@@ -1043,8 +1037,8 @@ class QuizApp {
     }
     
     renderHighScoresTable() {
+        // ... (Logica renderHighScoresTable rimane invariata)
         const themeColors = this.getThemeClasses();
-        // ... (Logica per la tabella High Score, usa themeColors.text per l'header)
         return `
              <h3 class="text-xl font-semibold ${this.darkMode ? 'text-gray-100' : 'text-gray-800'} mb-4">Classifica Sfida 60s</h3>
             <div class="overflow-x-auto mb-8">
@@ -1076,8 +1070,8 @@ class QuizApp {
         `;
     }
 
-    // --- NUOVO: Schermata Impostazioni (Temi/Dark Mode) ---
     renderSettingsScreen() {
+        // ... (Logica renderSettingsScreen rimane invariata)
         const themeColors = this.getThemeClasses();
         
         const themeListHtml = Object.keys(this.themes).map(key => {
@@ -1123,10 +1117,11 @@ class QuizApp {
         `;
     }
 
-    // --- Eventi ---
+
+    // --- Eventi (rimane invariato) ---
 
     bindEvents() {
-        // ... (Eventi esistenti rimangono invariati)
+        // ... (Ri-lega gli eventi)
         document.querySelectorAll('.mode-select-btn').forEach(button => {
             button.onclick = (e) => this.selectMode(e.currentTarget.dataset.mode);
         });
@@ -1135,7 +1130,13 @@ class QuizApp {
         if (confirmBtn) confirmBtn.onclick = () => this.confirmAnswer();
 
         const nextBtn = document.getElementById('next-btn');
-        if (nextBtn) nextBtn.onclick = () => this.nextQuestion();
+        if (nextBtn) nextBtn.onclick = () => {
+             if (this.mode === 'review' && this.currentQuestionIndex + 1 === this.selectedQuestions.length) {
+                this.resetQuiz(); // Torna al menu principale dopo la revisione
+            } else {
+                this.nextQuestion();
+            }
+        };
         
         const skipBtn = document.getElementById('skip-btn');
         if (skipBtn) skipBtn.onclick = () => this.skipQuestion();
@@ -1146,7 +1147,6 @@ class QuizApp {
         const statsBtn = document.getElementById('stats-btn');
         if (statsBtn) statsBtn.onclick = () => { this.quizState = 'stats'; this.render(); };
         
-        // --- NUOVI EVENTI ---
         const settingsBtn = document.getElementById('settings-btn');
         if (settingsBtn) settingsBtn.onclick = () => { this.quizState = 'settings'; this.render(); };
 
@@ -1156,18 +1156,14 @@ class QuizApp {
         document.querySelectorAll('.theme-select-btn').forEach(button => {
             button.onclick = (e) => this.selectTheme(e.currentTarget.dataset.theme);
         });
-        // --- FINE NUOVI EVENTI ---
 
-        // Eventi Opzioni Risposta (rimane invariato)
         document.querySelectorAll('.option-btn').forEach(button => {
             button.onclick = (e) => this.selectAnswer(e.currentTarget.dataset.option);
         });
         
-        // Evento Review Button (dopo il quiz)
         const reviewBtn = document.getElementById('review-btn');
         if (reviewBtn) reviewBtn.onclick = () => this.reviewAnswers();
 
-        // Evento Clear Stats (rimane invariato)
         const clearStatsBtn = document.getElementById('clear-stats-btn');
         if (clearStatsBtn) {
             clearStatsBtn.onclick = () => {
@@ -1178,7 +1174,6 @@ class QuizApp {
                     localStorage.removeItem('quizBadges');
                     localStorage.removeItem('dailyGoal');
                     
-                    // Resetta lo stato interno dell'app
                     this.history = [];
                     this.stats = { totalAttempts: 0, totalCorrect: 0, totalTime: 0 };
                     this.highScores60s = [];
@@ -1190,7 +1185,6 @@ class QuizApp {
             };
         }
         
-        // Gestione A2HS (Add to Home Screen) - rimane invariato
         const installAppContainer = document.getElementById('install-app-container');
         if (deferredPrompt && installAppContainer) {
             installAppContainer.style.display = 'block';
@@ -1209,29 +1203,19 @@ class QuizApp {
         }
     }
     
-    // --- NUOVO: Rivedi Risposte (dopo il quiz) ---
     reviewAnswers() {
-        // Implementazione semplice per mostrare i risultati dettagliati come se fosse una schermata di quiz
+        if (this.timerInterval) clearInterval(this.timerInterval);
         this.quizState = 'quiz';
         this.mode = 'review';
         this.selectedQuestions = this.answeredQuestions.map(a => a.question);
         this.currentQuestionIndex = 0;
-        this.showFeedback = true; // Mostra sempre il feedback in revisione
-
-        // Disattiviamo il timer e il conteggio
-        if (this.timerInterval) clearInterval(this.timerInterval);
-        this.modes.review = { name: 'Revisione Risultati', questions: this.selectedQuestions.length, maxErrors: 'nessuno', timeLimit: null, showFeedback: true, isExam: false };
-
-        // Il metodo renderQuizScreen dovrà adattarsi per visualizzare anche la risposta data in answeredQuestions
-        // Poiché è un refactoring integrale, si presuppone che le domande siano già pronte
+        this.showFeedback = true; 
         this.render();
     }
 }
 
 // Inizializzazione
 document.addEventListener('DOMContentLoaded', () => {
-    // Aggiunto setTimeout per dare il tempo a tutti gli elementi di caricarsi
-    setTimeout(() => {
-        window.quizApp = new QuizApp();
-    }, 100); 
+    // Rimuoviamo il setTimeout, ora la gestione del caricamento è interna all'app
+    window.quizApp = new QuizApp();
 });
