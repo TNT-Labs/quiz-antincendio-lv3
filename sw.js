@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quiz-antincendio-v1.0.0';
+const CACHE_NAME = 'quiz-antincendio-v1.1.0-features';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,7 +7,7 @@ const urlsToCache = [
   '/quiz_antincendio_ocr_improved.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
-  'https://cdn.tailwindcss.com'
+  'https://cdn.tailwindcss.com' // Manteniamo la CDN per il CSS come nel file originale
 ];
 
 // Installazione Service Worker
@@ -41,7 +41,7 @@ self.addEventListener('activate', event => {
   return self.clients.claim();
 });
 
-// Intercettazione richieste
+// Intercettazione richieste (Strategia Cache-First)
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
@@ -65,15 +65,19 @@ self.addEventListener('fetch', event => {
           
           caches.open(CACHE_NAME)
             .then(cache => {
-              cache.put(event.request, responseToCache);
+              // Non cacha richieste a CDN se non è nella lista iniziale (come garanzia)
+              if (urlsToCache.some(url => event.request.url.includes(url))) {
+                cache.put(event.request, responseToCache);
+              }
             });
           
           return response;
         });
       })
-      .catch(() => {
-        // Fallback offline
-        return caches.match('/index.html');
+      .catch(error => {
+          // Fallback per richieste non riuscite (ad esempio, immagini mancanti)
+          console.error('Service Worker: Fetch failed:', error);
+          // Qui si potrebbe aggiungere una pagina di fallback offline
       })
   );
 });

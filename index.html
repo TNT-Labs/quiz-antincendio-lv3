@@ -4,86 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#dc2626">
-    <meta name="description" content="Quiz di preparazione per l'esame Antincendio di Livello 3. 350 domande, simulazioni complete.">
-    <meta name="keywords" content="quiz, antincendio, livello 3, esame, VVF, sicurezza">
+    <meta name="description" content="Quiz di preparazione per l'esame Antincendio di Livello 3. 350 domande, simulazioni complete. Aggiunte modalità Solo Errori e Sfida 60s con persistenza dati.">
+    <meta name="keywords" content="quiz, antincendio, livello 3, esame, VVF, sicurezza, pwa, formazione">
     <meta name="author" content="Quiz Antincendio">
     
-    <title>Quiz Antincendio Livello 3</title>
+    <title>Quiz Antincendio Livello 3 - Aggiornato</title>
     
-    <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="apple-touch-icon" href="icon-192.png">
     
-    <!-- iOS Status Bar -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Quiz Antincendio">
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        /* Prevenzione zoom accidentale su iOS */
+        /* Stili per rimuovere le evidenziazioni al tocco su iOS/Android */
         * {
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
         }
-        
         body {
-            overscroll-behavior-y: contain;
+            background-color: #f7f7f7;
         }
-        
-        /* Loading animation */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #dc2626;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        /* Stili per lo spinner di caricamento */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #dc2626;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            font-size: 2rem;
+            flex-direction: column;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
+            margin-bottom: 10px;
         }
-        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        /* Scrollbar personalizzata */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #dc2626;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #b91c1c;
-        }
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Loading Screen -->
-    <div id="loading" class="fixed inset-0 bg-white flex items-center justify-center z-50">
-        <div class="text-center">
-            <div class="loader mx-auto mb-4"></div>
-            <p class="text-gray-600">Caricamento quiz...</p>
-        </div>
+<body>
+    <div id="loading">
+        <div class="spinner"></div>
+        Caricamento Quiz...
     </div>
     
-    <!-- App Container -->
-    <div id="root"></div>
+    <div class="container">
+        <div id="root"></div>
+    </div>
     
-    <!-- App Script -->
     <script src="app.js"></script>
     
-    <!-- Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -108,7 +102,6 @@
         });
     </script>
     
-    <!-- Install Prompt Handler -->
     <script>
         let deferredPrompt;
         
