@@ -1,354 +1,193 @@
-# 🔥 Quiz Antincendio - App Completa
+# 🔥 Quiz Antincendio - Livello 3
 
-## ✅ Tutte le Funzionalità Implementate
+Progressive Web App per la preparazione all'esame Antincendio di Livello 3.
 
-### 🎯 Due Modalità di Quiz
+## ✨ Caratteristiche
 
-#### 1️⃣ **Modalità Allenamento**
-- ✅ Domande illimitate (tutte le 350)
-- ✅ Nessun limite di tempo
-- ✅ Nessun limite di errori
-- ✅ L'utente decide quando terminare
-- ✅ Conteggio errori visualizzato
-- ✅ Feedback immediato dopo ogni risposta
-- ✅ Timer che conta il tempo trascorso
+- ✅ **350 domande ufficiali** con risposte e spiegazioni
+- ✅ **Due modalità di studio:**
+  - 🎓 **Allenamento**: domande illimitate, nessun limite
+  - 📝 **Simulazione Esame**: 15 domande, 30 minuti, max 5 errori
+- ✅ **Timer avanzato** con countdown e allarmi
+- ✅ **Risultati dettagliati** con analisi errori
+- ✅ **Funziona offline** dopo la prima visita
+- ✅ **Installabile come app nativa** su Android/iOS
+- ✅ **Design responsive** ottimizzato per mobile
+- ✅ **Nessuna raccolta dati** - tutto in locale
 
-#### 2️⃣ **Modalità Simulazione Esame**
-- ✅ 15 domande casuali
-- ✅ 30 minuti di tempo limite
-- ✅ Massimo 5 errori
-- ✅ Timer countdown con allarme visivo
-- ✅ Termina automaticamente se:
-  - Tempo scaduto
-  - Superato limite errori
-  - Completate tutte le domande
-- ✅ Condizioni realistiche dell'esame
+## 🚀 Installazione
 
-### 📊 Schermata Risultati Completa
+### Su Android/iOS
 
-Visualizza:
-- ✅ **Statistiche principali**: domande totali, corrette, errori
-- ✅ **Tempo impiegato**: formato MM:SS
-- ✅ **Confronto con tempo limite** (modalità esame)
-- ✅ **Percentuale di successo**
-- ✅ **Elenco dettagliato errori** con:
-  - Domanda sbagliata
-  - Risposta data
-  - Risposta corretta con spiegazione
-- ✅ **Valutazione finale** (superato/non superato)
-- ✅ **Messaggi motivazionali** basati sulla performance
+1. Apri il link dell'app nel browser (Chrome/Safari)
+2. Clicca sul menu (⋮) > **"Installa app"** / **"Aggiungi a Home"**
+3. L'app apparirà nella schermata home come app nativa!
 
-### ⏱️ Sistema Timer Avanzato
+### Su Desktop
 
-- ✅ **Modalità Allenamento**: timer progressivo che conta il tempo
-- ✅ **Modalità Esame**: countdown da 30 minuti
-- ✅ **Allarme visivo**: testo rosso sotto 5 minuti
-- ✅ **Auto-terminazione**: quiz termina a tempo scaduto
-- ✅ **Visualizzazione risultati**: tempo totale impiegato
+1. Apri il link in Chrome/Edge
+2. Clicca sull'icona **"Installa"** nella barra degli indirizzi
+3. L'app si aprirà in una finestra separata
 
-### 🎨 Interfaccia Utente
+## 📖 Come Usare
 
-- ✅ Design responsive (mobile-first)
-- ✅ Animazioni e transizioni fluide
-- ✅ Feedback visivo immediato (verde/rosso)
-- ✅ Icone intuitive
-- ✅ Barra di progresso (modalità esame)
-- ✅ Colori distintivi per le due modalità
-- ✅ Accessibile e usabile
+### Modalità Allenamento 🎓
 
----
+- Domande illimitate da tutte le 350 disponibili
+- Nessun limite di tempo
+- Nessun limite di errori
+- Termina quando vuoi con il pulsante "Termina"
+- Perfetta per imparare e memorizzare
 
-## 📦 File Pronti per il Deploy
+### Modalità Simulazione Esame 📝
 
-### Struttura Completa
+- 15 domande casuali
+- 30 minuti di tempo
+- Massimo 5 errori consentiti
+- Condizioni realistiche dell'esame
+- Termina automaticamente a tempo scaduto o errori superati
 
-```
-quiz-antincendio-pwa/
-│
-├── index.html                          # ✅ Creato
-├── app.js                              # ✅ Creato (versione completa)
-├── manifest.json                       # ✅ Creato
-├── sw.js                               # ✅ Creato (Service Worker)
-├── quiz_antincendio_ocr_improved.json  # 📥 Il tuo file esistente
-│
-├── icons/
-│   ├── icon-192.png                    # ⚠️ Da creare
-│   ├── icon-512.png                    # ⚠️ Da creare
-│   └── favicon.ico                     # ⚠️ Opzionale
-│
-└── README.md                           # ✅ Creato
-```
+## 📊 Risultati
 
----
+Alla fine di ogni quiz riceverai:
 
-## 🚀 Come Procedere
+- ✅ Numero totale di domande risposte
+- ✅ Domande corrette e sbagliate
+- ✅ Tempo totale impiegato
+- ✅ Percentuale di successo
+- ✅ Elenco dettagliato degli errori con spiegazioni
+- ✅ Valutazione finale (superato/non superato)
 
-### Passo 1: Preparare i File
+## 🛠️ Sviluppo Locale
 
-1. **Crea una cartella** sul tuo PC:
-   ```
-   quiz-antincendio-pwa/
-   ```
+### Prerequisiti
 
-2. **Copia i file** che ti ho fornito:
-   - `index.html`
-   - `app.js` (dal secondo artifact - versione JavaScript completa)
-   - `manifest.json`
-   - `sw.js`
-   - `README.md`
+- Python 3 (già installato su Mac/Linux)
+- Oppure Node.js
 
-3. **Aggiungi il tuo file JSON**:
-   - Copia `quiz_antincendio_ocr_improved.json` nella cartella principale
+### Avvio
 
-### Passo 2: Creare le Icone
-
-**Opzione Rapida - Emoji come Icona:**
-
-1. Crea un file `create-icon.html`:
-
-```html
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"></head>
-<body style="margin:0; display:flex; align-items:center; justify-content:center; 
-             width:512px; height:512px; background:#dc2626;">
-    <div style="font-size:280px;">🔥</div>
-</body>
-</html>
-```
-
-2. Apri in Chrome/Firefox
-3. Fai screenshot (512x512)
-4. Salva come `icon-512.png`
-5. Ridimensiona a 192x192 per `icon-192.png`
-
-**Oppure usa uno di questi tool online:**
-- https://favicon.io/emoji-favicons/ (genera automaticamente)
-- https://www.favicon-generator.org/
-- https://realfavicongenerator.net/
-
-### Passo 3: Testare in Locale
-
-**Windows:**
 ```bash
-cd quiz-antincendio-pwa
+# Con Python
 python -m http.server 8000
-```
 
-**Mac/Linux:**
-```bash
-cd quiz-antincendio-pwa
+# Oppure con Python 3
 python3 -m http.server 8000
-```
 
-**Oppure con Node.js:**
-```bash
+# Oppure con Node.js
 npx serve
 ```
 
-Apri: `http://localhost:8000`
+Apri il browser su: `http://localhost:8000`
 
-### Passo 4: Testare su Android
+### Test su Dispositivo Mobile
 
-1. **Connetti il telefono alla stessa rete WiFi**
-2. **Trova l'IP del PC**:
-   - Windows: `ipconfig` → cerca IPv4
-   - Mac/Linux: `ifconfig` → cerca inet
-3. **Sul telefono**, apri Chrome e vai a: `http://TUO_IP:8000`
-4. **Installa l'app**:
-   - Menu (⋮) → "Installa app" / "Aggiungi a Home"
+1. Connetti il telefono alla stessa rete WiFi del PC
+2. Trova l'IP del PC:
+   - Windows: `ipconfig`
+   - Mac/Linux: `ifconfig`
+3. Sul telefono, apri: `http://IP_DEL_PC:8000`
 
-### Passo 5: Deploy Online
+## 📁 Struttura File
 
-#### Opzione A: GitHub Pages (Consigliata)
-
-```bash
-# Installa Git se non l'hai già
-# Vai su github.com e crea un nuovo repository "quiz-antincendio"
-
-cd quiz-antincendio-pwa
-git init
-git add .
-git commit -m "Initial commit - Quiz Antincendio PWA"
-git branch -M main
-git remote add origin https://github.com/TUO_USERNAME/quiz-antincendio.git
-git push -u origin main
-
-# Vai su Settings > Pages
-# Source: "Deploy from branch 'main'"
-# Salva e aspetta 2-3 minuti
+```
+quiz-antincendio-pwa/
+├── index.html                          # Pagina principale
+├── app.js                              # Logica applicazione
+├── manifest.json                       # Configurazione PWA
+├── sw.js                               # Service Worker (offline)
+├── quiz_antincendio_ocr_improved.json  # Database domande
+├── icon-192.png                        # Icona 192x192
+├── icon-512.png                        # Icona 512x512
+└── README.md                           # Questa documentazione
 ```
 
-URL finale: `https://TUO_USERNAME.github.io/quiz-antincendio`
+## 🔧 Personalizzazione
 
-#### Opzione B: Netlify (Più Veloce)
+### Modificare i Parametri dell'Esame
 
-1. Vai su https://app.netlify.com/drop
-2. Trascina la cartella `quiz-antincendio-pwa`
-3. Ottieni subito l'URL: `https://quiz-antincendio-XXXXX.netlify.app`
-
-#### Opzione C: Vercel
-
-```bash
-npm i -g vercel
-cd quiz-antincendio-pwa
-vercel
-```
-
----
-
-## 📱 Installazione su Android
-
-### Da URL Online (Dopo il Deploy)
-
-1. Apri l'URL in **Chrome** su Android
-2. Menu (⋮) → **"Installa app"** o **"Aggiungi a schermata Home"**
-3. L'app apparirà come app nativa!
-
-### Da File APK (Opzionale - Più Complesso)
-
-Se vuoi un vero APK, puoi usare:
-- **PWA Builder**: https://www.pwabuilder.com/
-  1. Inserisci l'URL della tua PWA
-  2. Genera APK Android
-  3. Scarica e installa
-
----
-
-## 🎯 Test delle Funzionalità
-
-### Checklist Completa
-
-**Modalità Allenamento:**
-- [ ] Avvia modalità allenamento
-- [ ] Rispondi ad alcune domande
-- [ ] Verifica che il timer conta in avanti
-- [ ] Verifica feedback corretto/sbagliato
-- [ ] Clicca "Termina" quando vuoi
-- [ ] Controlla riepilogo finale con:
-  - [ ] Tempo totale
-  - [ ] Errori (senza limite)
-  - [ ] Lista domande sbagliate
-
-**Modalità Esame:**
-- [ ] Avvia simulazione esame
-- [ ] Verifica 15 domande
-- [ ] Verifica countdown da 30:00
-- [ ] Rispondi ad alcune domande
-- [ ] Verifica che con 6 errori il quiz termina
-- [ ] Controlla riepilogo finale con:
-  - [ ] Tempo impiegato vs limite
-  - [ ] Superato/Non superato
-  - [ ] Confronto errori
-
-**Funzionalità Generali:**
-- [ ] App installabile su Android
-- [ ] Funziona offline (dopo prima visita)
-- [ ] Design responsive su mobile
-- [ ] Pulsanti tutti funzionanti
-- [ ] Animazioni fluide
-
----
-
-## 🔧 Personalizzazioni Possibili
-
-### Cambiare Colori
-
-Nel file `app.js` o nelle classi Tailwind:
-
-```javascript
-// Rosso → Blu
-"bg-red-600" → "bg-blue-600"
-"text-red-600" → "text-blue-600"
-"border-red-600" → "border-blue-600"
-```
-
-### Modificare Parametri Esame
-
-Nel file `app.js`, cerca la sezione `this.modes`:
+In `app.js`, cerca la sezione `modes`:
 
 ```javascript
 exam: {
   name: 'Simulazione Esame',
   questions: 15,        // ← Cambia numero domande
   maxErrors: 5,         // ← Cambia errori massimi
-  timeLimit: 30 * 60,   // ← Cambia tempo (in secondi)
+  timeLimit: 30 * 60,   // ← Cambia tempo (secondi)
   description: '...'
 }
 ```
 
-### Aggiungere Suoni
+### Cambiare i Colori
 
-Dopo `handleConfirmAnswer()`:
+Cerca e sostituisci in `app.js`:
 
-```javascript
-// Suono corretto
-if (isCorrect) {
-  new Audio('correct.mp3').play();
-} else {
-  new Audio('wrong.mp3').play();
-}
+- `bg-red-600` → `bg-blue-600` (colore primario)
+- `text-red-600` → `text-blue-600`
+- `border-red-600` → `border-blue-600`
+
+## 🌐 Deploy
+
+### GitHub Pages
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/USERNAME/quiz-antincendio.git
+git push -u origin main
+
+# Vai su Settings > Pages > Deploy from branch 'main'
 ```
 
-### Salvare Statistiche
+### Netlify
 
-Aggiungi al `localStorage`:
+1. Vai su https://app.netlify.com/drop
+2. Trascina la cartella del progetto
+3. Ottieni l'URL istantaneo
 
-```javascript
-// In endQuiz()
-const stats = {
-  mode: this.mode,
-  score: correctCount,
-  errors: this.incorrectCount,
-  time: elapsedTime,
-  date: new Date().toISOString()
-};
+### Vercel
 
-const history = JSON.parse(localStorage.getItem('quizHistory') || '[]');
-history.push(stats);
-localStorage.setItem('quizHistory', JSON.stringify(history));
+```bash
+npm i -g vercel
+vercel
 ```
 
----
+## ❓ Risoluzione Problemi
 
-## ❓ Problemi Comuni
+### L'app non si installa
 
-### "L'app non si installa su Android"
-- Verifica che sia servita via **HTTPS** (GitHub Pages e Netlify lo fanno automaticamente)
+- Verifica che sia servita via **HTTPS**
 - Controlla che `manifest.json` sia valido
-- Prova con Chrome (non tutti i browser supportano PWA)
+- Usa Chrome (migliore supporto PWA)
 
-### "Il timer non funziona"
-- Verifica che il JavaScript sia caricato correttamente
-- Apri DevTools (F12) e controlla errori nella Console
+### Il timer non funziona
 
-### "Le domande non si caricano"
-- Verifica che `quiz_antincendio_ocr_improved.json` sia nella stessa cartella di `index.html`
-- Controlla che il file JSON sia valido (usa https://jsonlint.com/)
+- Apri DevTools (F12) → Console
+- Verifica errori JavaScript
+- Ricarica la pagina (Ctrl+F5)
 
-### "L'app non funziona offline"
-- Prima visita online richiesta per cache
-- Verifica che Service Worker sia registrato (DevTools → Application → Service Workers)
+### Le domande non si caricano
+
+- Verifica che `quiz_antincendio_ocr_improved.json` sia nella cartella
+- Controlla che il JSON sia valido: https://jsonlint.com/
+
+### Non funziona offline
+
+- Visita l'app online almeno una volta
+- Verifica Service Worker in DevTools → Application
+
+## 📝 Licenza
+
+Questo progetto è rilasciato per scopi educativi.
+
+## 🤝 Contributi
+
+Contributi, segnalazioni bug e richieste di funzionalità sono benvenuti!
 
 ---
-
-## 📞 Supporto
-
-Se hai problemi:
-1. Apri DevTools (F12) → scheda Console
-2. Copia eventuali errori
-3. Chiedi aiuto specificando il problema
-
----
-
-## 🎓 Risultato Finale
-
-Avrai un'app completamente funzionante con:
-- ✅ Due modalità (Allenamento + Esame)
-- ✅ Timer avanzato
-- ✅ Risultati dettagliati con tempo
-- ✅ Installabile su Android come app nativa
-- ✅ Funziona offline
-- ✅ Interface professionale e moderna
 
 **Buona fortuna con l'esame antincendio! 🔥👨‍🚒**
+
+Per domande o supporto, apri una issue su GitHub.
