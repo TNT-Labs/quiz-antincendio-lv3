@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quiz-antincendio-v1.3.5-statefix'; // Aggiornato!
+const CACHE_NAME = 'quiz-antincendio-v1.3.2-statefix'; // Aggiornato!
 const urlsToCache = [
   '/',
   '/index.html',

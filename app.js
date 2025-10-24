@@ -291,51 +291,49 @@ class QuizApp {
     }
 
     checkAnswer(qnum, selectedLabel) {
-        if (this.mode === 'results') return; 
+        if (this.mode === 'results' || this.selectedAnswer !== null) return;
 
-        // NUOVA LOGICA: Aggiorna SEMPRE this.selectedAnswer per evidenziare la scelta. 
-        // L'uscita precoce 'this.selectedAnswer !== null' viene rimossa per permettere la re-selezione.
-        this.selectedAnswer = selectedLabel; 
-
+        this.selectedAnswer = selectedLabel;
         const currentQ = this.selectedQuestions[this.currentQuestionIndex];
         const isCorrect = (currentQ.correct_label === selectedLabel);
 
-        // La logica di feedback e salvataggio immediato è SOLO in modalità 'training' e 'timeChallenge'.
-        if (this.mode === 'training' || this.mode === 'timeChallenge') {
+        if (!isCorrect) {
+            this.incorrectCount++;
+        }
 
-            const timeSpent = (Date.now() - this.questionStartTime) / 1000;
+        const timeSpent = (Date.now() - this.questionStartTime) / 1000;
 
-            this.history.push({
-                qnum: currentQ.qnum,
-                isCorrect: isCorrect,
-                timestamp: Date.now(),
-                mode: this.mode,
-                timeSpent: timeSpent,
-            });
+        this.history.push({
+            qnum: currentQ.qnum,
+            isCorrect: isCorrect,
+            timestamp: Date.now(),
+            mode: this.mode,
+            timeSpent: timeSpent,
+        });
 
-            this.stats.totalAttempts++;
+        this.stats.totalAttempts++;
+        if (isCorrect) {
+            this.stats.totalCorrect++;
+        }
+        this.stats.totalTime += timeSpent;
+
+        this.dailyGoal.completedToday += 1;
+        this.savePersistentData();
+        this.checkBadges();
+
+        if (this.mode === 'timeChallenge') {
             if (isCorrect) {
-                this.stats.totalCorrect++;
+                this.nextQuestion();
+                return;
+            } else {
+                this.endQuiz();
+                return;
             }
-            this.stats.totalTime += timeSpent;
+        }
 
-            this.dailyGoal.completedToday += 1;
-            this.savePersistentData();
-            this.checkBadges();
-
-            if (this.mode === 'timeChallenge') {
-                if (isCorrect) {
-                    this.nextQuestion();
-                    return;
-                } else {
-                    this.endQuiz();
-                    return;
-                }
-            }
-            // In modalità 'training', l'esecuzione continua con il render per mostrare il feedback.
-        } 
-        
-        // Per 'exam', 'errorsOnly', 'smartReview', il salvataggio avviene solo in nextQuestion().
+        if (this.mode !== 'training') {
+            this.answeredQuestions.push({ question: currentQ, isCorrect, selectedLabel, timeSpent });
+        }
 
         this.render();
     }
@@ -343,60 +341,36 @@ class QuizApp {
     nextQuestion() {
         if (this.quizState !== 'quiz') return;
 
-        // Se non siamo in modalità 'training' o 'review' e l'utente non ha selezionato nulla, blocca.
+        if (this.mode === 'training') {
+            this.selectedAnswer = null;
+        }
+
+        // Se non siamo in modalità 'training' o 'review' e non è stata data risposta, fermati.
         if (this.mode !== 'training' && this.mode !== 'review' && this.selectedAnswer === null) return;
         
-        // ********************** LOGICA DI SALVATAGGIO FINALE **********************
-        // Salva solo per le modalità che non lo fanno in checkAnswer()
-        const finalModes = ['exam', 'errorsOnly', 'smartReview'];
-        if (finalModes.includes(this.mode) && this.selectedAnswer !== null) {
-            const currentQ = this.selectedQuestions[this.currentQuestionIndex];
-            const isCorrect = (currentQ.correct_label === this.selectedAnswer);
-            const timeSpent = (Date.now() - this.questionStartTime) / 1000;
-
-            // 1. Salva la storia
-            this.history.push({
-                qnum: currentQ.qnum,
-                isCorrect: isCorrect,
-                timestamp: Date.now(),
-                mode: this.mode,
-                timeSpent: timeSpent,
-            });
-            
-            // 2. Salva le risposte date (per la revisione post-quiz)
-            this.answeredQuestions.push({ question: currentQ, isCorrect, selectedLabel: this.selectedAnswer, timeSpent });
-
-            // 3. Aggiorna le statistiche
-            if (!isCorrect) {
-                this.incorrectCount++;
-            }
-            this.stats.totalAttempts++;
-            if (isCorrect) {
-                this.stats.totalCorrect++;
-            }
-            this.stats.totalTime += timeSpent;
-            this.dailyGoal.completedToday += 1;
-            this.savePersistentData();
-            this.checkBadges();
-        }
-        // **************************************************************************
+        // In modalità 'review', possiamo andare avanti anche se selectedAnswer è null,
+        // ma non dobbiamo permettere di saltare le risposte in altri modi.
 
         this.currentQuestionIndex++;
-        this.selectedAnswer = null;
+        this.selectedAnswer = null; // Resettiamo
         this.questionStartTime = Date.now();
 
         if (this.currentQuestionIndex >= this.selectedQuestions.length) {
-            this.endQuiz();
-        } else {
-            // Logica per il caricamento della risposta in modalità 'review' (FIX PRECEDENTE)
-            if (this.mode === 'review') {
-                const currentAnswered = this.answeredQuestions[this.currentQuestionIndex];
-                if (currentAnswered) {
-                    this.selectedAnswer = currentAnswered.selectedLabel;
-                }
+            this.endQuiz(); // Torna al menu risultati alla fine della revisione
+            return; // Interrompe l'esecuzione
+        } 
+        
+        // **AGGIUNGI QUESTA LOGICA PER LA REVISIONE:**
+        if (this.mode === 'review') {
+            const currentAnswered = this.answeredQuestions[this.currentQuestionIndex];
+            if (currentAnswered) {
+                // Carica la risposta data dall'utente per la domanda corrente in revisione
+                this.selectedAnswer = currentAnswered.selectedLabel; 
             }
-            this.render();
         }
+        // **********************************************
+
+        this.render();
     }
 
     endQuiz() {
@@ -421,11 +395,13 @@ class QuizApp {
         if (this.timerInterval) clearInterval(this.timerInterval);
         this.quizState = 'quiz';
         this.mode = 'review';
+        // Non serve mappare a .question, answeredQuestions contiene già tutto
+        // this.selectedQuestions = this.answeredQuestions.map(a => a.question); 
         this.selectedQuestions = this.answeredQuestions.map(a => a.question);
         this.currentQuestionIndex = 0;
         this.showFeedback = true;
         
-        // FIX: Carica la risposta data per la prima domanda in revisione
+        // **LA CHIAVE È QUI:** Dobbiamo caricare la risposta data dall'utente per la prima domanda.
         if (this.answeredQuestions.length > 0) {
             this.selectedAnswer = this.answeredQuestions[0].selectedLabel;
         } else {
@@ -720,16 +696,15 @@ class QuizApp {
                 ` : ''}
             </div>
 
-    const isDisabled = isReviewMode || (this.mode === 'training' && this.selectedAnswer !== null);
-                        
-                        return `
-                            <button 
-                                onclick="window.quizApp.checkAnswer(${currentQ.qnum}, '${label}')"
-                                class="w-full text-left p-4 rounded-lg font-medium transition ${buttonClass} ${isDisabled ? 'cursor-not-allowed' : ''}"
-                                ${isDisabled ? 'disabled' : ''}> 
-                                <span class="font-bold">${label}.</span> ${text}
-                            </button>
-                        `;
+            <button 
+                onclick="window.quizApp.nextQuestion()"
+                class="w-full bg-[var(--theme-color)] text-white font-bold py-3 rounded-xl shadow-lg transition 
+                // In revisione, il pulsante deve essere sempre abilitato. Altrimenti solo se c'è una risposta data
+                ${(this.mode !== 'review' && !this.selectedAnswer && this.mode !== 'training') ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}"
+                ${(this.mode !== 'review' && !this.selectedAnswer && this.mode !== 'training') ? 'disabled' : ''}>
+                ${this.currentQuestionIndex === this.selectedQuestions.length - 1 ? 'Termina Revisione' : 'Prossima Domanda →'}
+            </button>
+        `;    }
 
     renderResults() {
         const totalTime = ((this.endTime - this.startTime) / 1000).toFixed(0);
@@ -1018,4 +993,6 @@ class QuizApp {
 // ============================================
 // INIZIALIZZAZIONE
 // ============================================
+document.addEventListener('DOMContentLoaded', () => {
     window.quizApp = new QuizApp();
+});

@@ -412,10 +412,6 @@ Progetto realizzato come strumento di studio per l'esame Antincendio Livello 3.
 
 ## 🔄 Changelog
 
-### v1.3.5 (2025-10-24) - CURRENT
-- ✨ **NUOVA FEATURE:** Implementata la possibilità di **cambiare la risposta selezionata** in qualsiasi modalità d'esame prima di finalizzarla con "Prossima Domanda".
-- ⚙️ Ristrutturata la logica di `checkAnswer()` e `nextQuestion()` per separare selezione da salvataggio.
-
 ### v1.3.4 (2025-10-24) - CURRENT
 - 🐛 **FIX CRITICO:** Risolto bug che chiedeva di rispondere nuovamente in modalità "Rivedi Risposte" dopo un esame. Ora mostra immediatamente la risposta data e quella corretta.
 - ✅ Migliorata gestione dello stato in modalità 'review'.
