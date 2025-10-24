@@ -345,17 +345,32 @@ class QuizApp {
             this.selectedAnswer = null;
         }
 
-        if (this.mode !== 'training' && this.selectedAnswer === null) return;
+        // Se non siamo in modalità 'training' o 'review' e non è stata data risposta, fermati.
+        if (this.mode !== 'training' && this.mode !== 'review' && this.selectedAnswer === null) return;
+        
+        // In modalità 'review', possiamo andare avanti anche se selectedAnswer è null,
+        // ma non dobbiamo permettere di saltare le risposte in altri modi.
 
         this.currentQuestionIndex++;
-        this.selectedAnswer = null;
+        this.selectedAnswer = null; // Resettiamo
         this.questionStartTime = Date.now();
 
         if (this.currentQuestionIndex >= this.selectedQuestions.length) {
-            this.endQuiz();
-        } else {
-            this.render();
+            this.endQuiz(); // Torna al menu risultati alla fine della revisione
+            return; // Interrompe l'esecuzione
+        } 
+        
+        // **AGGIUNGI QUESTA LOGICA PER LA REVISIONE:**
+        if (this.mode === 'review') {
+            const currentAnswered = this.answeredQuestions[this.currentQuestionIndex];
+            if (currentAnswered) {
+                // Carica la risposta data dall'utente per la domanda corrente in revisione
+                this.selectedAnswer = currentAnswered.selectedLabel; 
+            }
         }
+        // **********************************************
+
+        this.render();
     }
 
     endQuiz() {
@@ -371,6 +386,7 @@ class QuizApp {
         }
 
         this.quizState = 'results';
+        this.reviewQuestionIndex = 0;
         this.savePersistentData();
         this.render();
     }
@@ -379,10 +395,19 @@ class QuizApp {
         if (this.timerInterval) clearInterval(this.timerInterval);
         this.quizState = 'quiz';
         this.mode = 'review';
+        // Non serve mappare a .question, answeredQuestions contiene già tutto
+        // this.selectedQuestions = this.answeredQuestions.map(a => a.question); 
         this.selectedQuestions = this.answeredQuestions.map(a => a.question);
         this.currentQuestionIndex = 0;
         this.showFeedback = true;
-        this.selectedAnswer = null;
+        
+        // **LA CHIAVE È QUI:** Dobbiamo caricare la risposta data dall'utente per la prima domanda.
+        if (this.answeredQuestions.length > 0) {
+            this.selectedAnswer = this.answeredQuestions[0].selectedLabel;
+        } else {
+            this.selectedAnswer = null;
+        }
+        
         this.render();
     }
 
@@ -615,25 +640,44 @@ class QuizApp {
                 
                 <div class="space-y-3">
                     ${Object.entries(currentQ.options).map(([label, text]) => {
-                        const isSelected = this.selectedAnswer === label;
+                        // *** MODIFICHE INIZIANO QUI ***
+                        // In modalità 'review' la risposta data è salvata nel record answeredQuestions
+                        const isReviewMode = this.mode === 'review';
+                        let userSelectedLabel = this.selectedAnswer; 
+                        
+                        // Se siamo in revisione e non è la prima domanda (già caricata in reviewAnswers), 
+                        // recuperiamo la risposta corretta per la domanda corrente
+                        if (isReviewMode) {
+                            const currentAnswered = this.answeredQuestions[this.currentQuestionIndex];
+                            if (currentAnswered) {
+                                userSelectedLabel = currentAnswered.selectedLabel;
+                            }
+                        }
+
+                        const isSelected = userSelectedLabel === label; // Usa la risposta data, non solo this.selectedAnswer
                         const isCorrect = currentQ.correct_label === label;
                         let buttonClass = 'bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500';
                         
-                        if (this.selectedAnswer && this.showFeedback) {
+                        // La variabile 'shouldShowFeedback' è sempre true in 'reviewAnswers', quindi usiamo selectedAnswer per il check
+                        if (userSelectedLabel && this.showFeedback) { 
                             if (isCorrect) {
                                 buttonClass = 'bg-green-500 text-white';
                             } else if (isSelected && !isCorrect) {
                                 buttonClass = 'bg-red-500 text-white';
                             }
                         } else if (isSelected) {
-                            buttonClass = 'bg-blue-500 text-white';
+                            // Questo blocco evidenzia la selezione PRIMA del feedback (solo training o pre-answer)
+                            buttonClass = 'bg-blue-500 text-white'; 
                         }
+
+                        // Determina se il pulsante deve essere disabilitato
+                        const isDisabled = isReviewMode || (this.selectedAnswer && this.mode !== 'training');
 
                         return `
                             <button 
                                 onclick="window.quizApp.checkAnswer(${currentQ.qnum}, '${label}')"
-                                class="w-full text-left p-4 rounded-lg font-medium transition ${buttonClass} ${this.selectedAnswer ? 'cursor-not-allowed' : ''}"
-                                ${this.selectedAnswer ? 'disabled' : ''}>
+                                class="w-full text-left p-4 rounded-lg font-medium transition ${buttonClass} ${isDisabled ? 'cursor-not-allowed' : ''}"
+                                ${isDisabled ? 'disabled' : ''}> 
                                 <span class="font-bold">${label}.</span> ${text}
                             </button>
                         `;
@@ -654,12 +698,13 @@ class QuizApp {
 
             <button 
                 onclick="window.quizApp.nextQuestion()"
-                class="w-full bg-[var(--theme-color)] text-white font-bold py-3 rounded-xl shadow-lg transition ${!this.selectedAnswer && this.mode !== 'training' ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}"
-                ${!this.selectedAnswer && this.mode !== 'training' ? 'disabled' : ''}>
-                ${this.currentQuestionIndex === this.selectedQuestions.length - 1 ? 'Termina Quiz' : 'Prossima Domanda →'}
+                class="w-full bg-[var(--theme-color)] text-white font-bold py-3 rounded-xl shadow-lg transition 
+                // In revisione, il pulsante deve essere sempre abilitato. Altrimenti solo se c'è una risposta data
+                ${(this.mode !== 'review' && !this.selectedAnswer && this.mode !== 'training') ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}"
+                ${(this.mode !== 'review' && !this.selectedAnswer && this.mode !== 'training') ? 'disabled' : ''}>
+                ${this.currentQuestionIndex === this.selectedQuestions.length - 1 ? 'Termina Revisione' : 'Prossima Domanda →'}
             </button>
-        `;
-    }
+        `;    }
 
     renderResults() {
         const totalTime = ((this.endTime - this.startTime) / 1000).toFixed(0);

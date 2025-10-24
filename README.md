@@ -412,6 +412,11 @@ Progetto realizzato come strumento di studio per l'esame Antincendio Livello 3.
 
 ## 🔄 Changelog
 
+### v1.3.4 (2025-10-24) - CURRENT
+- 🐛 **FIX CRITICO:** Risolto bug che chiedeva di rispondere nuovamente in modalità "Rivedi Risposte" dopo un esame. Ora mostra immediatamente la risposta data e quella corretta.
+- ✅ Migliorata gestione dello stato in modalità 'review'.
+- ⚙️ Ottimizzazione della navigazione post-quiz.
+
 ### v1.3.3 (2025-10-23) - CURRENT
 - 🐛 **FIX CRITICO:** Risolto bug race condition caricamento dati
 - 🐛 FIX: Gestione stato 'loading' corretto
