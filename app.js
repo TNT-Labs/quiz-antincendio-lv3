@@ -720,16 +720,17 @@ class QuizApp {
                 ` : ''}
             </div>
 
-            const shouldBeDisabled = (this.mode === 'review') || (this.mode === 'training' && this.selectedAnswer !== null);
-
+    const isDisabled = isReviewMode || (this.mode === 'training' && this.selectedAnswer !== null);
+                        
                         return `
                             <button 
                                 onclick="window.quizApp.checkAnswer(${currentQ.qnum}, '${label}')"
-                                class="w-full text-left p-4 rounded-lg font-medium transition ${buttonClass} ${shouldBeDisabled ? 'cursor-not-allowed' : ''}"
-                                ${shouldBeDisabled ? 'disabled' : ''}> 
+                                class="w-full text-left p-4 rounded-lg font-medium transition ${buttonClass} ${isDisabled ? 'cursor-not-allowed' : ''}"
+                                ${isDisabled ? 'disabled' : ''}> 
                                 <span class="font-bold">${label}.</span> ${text}
                             </button>
                         `;
+
     renderResults() {
         const totalTime = ((this.endTime - this.startTime) / 1000).toFixed(0);
         const correctCount = this.selectedQuestions.length - this.incorrectCount;
