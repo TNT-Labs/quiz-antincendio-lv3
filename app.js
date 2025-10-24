@@ -1018,6 +1018,4 @@ class QuizApp {
 // ============================================
 // INIZIALIZZAZIONE
 // ============================================
-document.addEventListener('DOMContentLoaded', () => {
     window.quizApp = new QuizApp();
-});
