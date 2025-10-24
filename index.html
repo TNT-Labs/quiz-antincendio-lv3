@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#dc2626">
-    <meta name="description" content="Quiz di preparazione per l'esame Antincendio di Livello 3. 350 domande, simulazioni complete. Aggiunte modalità Solo Errori, Sfida 60s, Revisione Intelligente, Obiettivi Giornalieri, Temi e Dark Mode.">
+    <meta name="description" content="Quiz di preparazione per l'esame Antincendio di Livello 3. 350 domande, simulazioni complete, modalità Solo Errori, Sfida 60s, Revisione Intelligente, Obiettivi Giornalieri, Temi e Dark Mode.">
     <meta name="keywords" content="quiz, antincendio, livello 3, esame, VVF, sicurezza, pwa, formazione, temi, dark mode">
     <meta name="author" content="Quiz Antincendio">
     
-    <title>Quiz Antincendio Livello 3 - Aggiornato</title>
+    <title>Quiz Antincendio Livello 3 - PWA</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon-192.png">
@@ -20,13 +20,12 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Configurazione Tailwind per la Dark Mode
         tailwind.config = {
-            darkMode: 'class', // Abilita dark mode con la classe 'dark'
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        'primary': '#dc2626', // bg-red-600
+                        'primary': '#dc2626',
                     }
                 }
             }
@@ -35,24 +34,32 @@
 </head>
 <body class="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 min-h-screen">
     
+    <!-- Loading Screen -->
     <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900 z-50">
-        <p class="text-3xl animate-spin text-red-600 dark:text-red-400">🔄</p>
+        <div class="text-center">
+            <p class="text-6xl animate-spin mb-4">🔥</p>
+            <p class="text-xl font-bold text-red-600 dark:text-red-400">Caricamento...</p>
+        </div>
     </div>
 
-    <div id="app" class="max-w-xl mx-auto p-4 md:p-6 pb-20">
-        </div>
+    <!-- App Container -->
+    <div id="app" class="max-w-xl mx-auto p-4 md:p-6 pb-20"></div>
     
+    <!-- Install Banner -->
     <div id="install-app-container" class="fixed bottom-0 left-0 right-0 p-4 bg-red-600 text-white text-center shadow-lg z-50 hidden">
         <div class="max-w-xl mx-auto flex justify-between items-center">
-            <span>Installa l'app per un accesso rapido e offline!</span>
-            <button id="install-btn" class="bg-white text-red-600 px-3 py-1 rounded-full font-bold hover:bg-red-100 transition duration-150">Installa</button>
+            <span class="text-sm">📱 Installa l'app per accesso rapido e offline!</span>
+            <button id="install-btn" class="bg-white text-red-600 px-4 py-2 rounded-full font-bold hover:bg-red-100 transition">
+                Installa
+            </button>
         </div>
     </div>
     
+    <!-- Main App Script -->
     <script src="app.js"></script>
 
+    <!-- Service Worker Registration -->
     <script>
-        // Registrazione del Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
@@ -60,34 +67,10 @@
                         console.log('✅ Service Worker registrato:', registration);
                     })
                     .catch(error => {
-                        console.log('❌ Errore registrazione Service Worker:', error);
+                        console.log('❌ Errore Service Worker:', error);
                     });
             });
         }
-    </script>
-    
-    <script>
-        // Logic for Add To Home Screen (A2HS)
-        let deferredPrompt;
-        
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const installContainer = document.getElementById('install-app-container');
-            if (installContainer) {
-                installContainer.style.display = 'block';
-            }
-            console.log('📱 App installabile!');
-        });
-        
-        window.addEventListener('appinstalled', () => {
-            console.log('✅ App installata con successo!');
-            deferredPrompt = null;
-            const installContainer = document.getElementById('install-app-container');
-            if (installContainer) {
-                installContainer.style.display = 'none';
-            }
-        });
     </script>
 </body>
 </html>
