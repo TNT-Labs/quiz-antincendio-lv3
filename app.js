@@ -720,8 +720,8 @@ class QuizApp {
                 ` : ''}
             </div>
 
-            const shouldBeDisabled = (this.mode === 'training' && this.selectedAnswer !== null) || this.mode === 'review';
-                        
+            const shouldBeDisabled = (this.mode === 'review') || (this.mode === 'training' && this.selectedAnswer !== null);
+
                         return `
                             <button 
                                 onclick="window.quizApp.checkAnswer(${currentQ.qnum}, '${label}')"
@@ -730,7 +730,6 @@ class QuizApp {
                                 <span class="font-bold">${label}.</span> ${text}
                             </button>
                         `;
-
     renderResults() {
         const totalTime = ((this.endTime - this.startTime) / 1000).toFixed(0);
         const correctCount = this.selectedQuestions.length - this.incorrectCount;
