@@ -1,448 +1,515 @@
-
 // Quiz Antincendio - Progressive Web App v1.3.3 FIXED
 // Versione completa corretta con tutti i metodi implementati
+
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
+    e.preventDefault();
+    deferredPrompt = e;
 });
+
 class QuizApp {
-  constructor() {
-    this.root = document.getElementById('app');
-    this.quizData = [];
-    this.selectedQuestions = [];
-    this.currentQuestionIndex = 0;
-    this.selectedAnswer = null;
-    this.incorrectCount = 0;
-    this.answeredQuestions = [];
-    this.showFeedback = false;
-    this.quizState = 'loading';
-    this.mode = null;
-    this.startTime = null;
-    this.endTime = null;
-    this.timerInterval = null;
-    this.timeRemaining = 0;
-    this.questionStartTime = null;
-    this.history = [];
-    this.stats = { totalAttempts: 0, totalCorrect: 0, totalTime: 0, totalQuestions: 350 };
-    this.highScores60s = [];
-    this.badges = {};
-    this.dailyGoal = {
-      target: 50,
-      completedToday: 0,
-      lastGoalDate: new Date().toLocaleDateString('it-IT')
-    };
-    this.settings = {
-      darkMode: false,
-      theme: 'red',
-      unlockedThemes: ['red']
-    };
-    this.loadPersistentData();
-    this.checkDailyGoal();
-    this.applySettings();
-    this.loadData();
-  }
-  // ============================================
-  // CARICAMENTO DATI
-  // ============================================
-  async loadData() {
-    try {
-      const response = await fetch('quiz_antincendio_ocr_improved.json');
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
-      this.quizData = data.map((q, index) => ({ ...q, qnum: index + 1 }));
-      this.stats.totalQuestions = this.quizData.length;
-      this.quizState = 'start';
-      this.quizData.sort(() => Math.random() - 0.5);
-    } catch (error) {
-      console.error("Errore caricamento dati:", error);
-      this.quizState = 'error';
-    } finally {
-      this.hideInitialLoadingScreen();
-      this.render();
-      this.handleA2HS();
+    constructor() {
+        this.root = document.getElementById('app');
+        this.quizData = [];
+        this.selectedQuestions = [];
+        this.currentQuestionIndex = 0;
+        this.selectedAnswer = null;
+        this.incorrectCount = 0;
+        this.answeredQuestions = [];
+        this.showFeedback = false;
+        this.quizState = 'loading';
+        this.mode = null;
+        this.startTime = null;
+        this.endTime = null;
+        this.timerInterval = null;
+        this.timeRemaining = 0;
+        this.questionStartTime = null;
+        this.history = [];
+        this.stats = { totalAttempts: 0, totalCorrect: 0, totalTime: 0, totalQuestions: 350 };
+        this.highScores60s = [];
+        this.badges = {};
+        this.dailyGoal = {
+            target: 50,
+            completedToday: 0,
+            lastGoalDate: new Date().toLocaleDateString('it-IT')
+        };
+        this.settings = {
+            darkMode: false,
+            theme: 'red',
+            unlockedThemes: ['red']
+        };
+
+        this.loadPersistentData();
+        this.checkDailyGoal();
+        this.applySettings();
+        this.loadData();
     }
-  }
-  hideInitialLoadingScreen() {
-    const loading = document.getElementById('loading');
-    if (loading) loading.style.display = 'none';
-  }
-  // ============================================
-  // PERSISTENZA DATI
-  // ============================================
-  loadPersistentData() {
-    try {
-      const savedHistory = localStorage.getItem('quizHistory');
-      const savedStats = localStorage.getItem('quizStats');
-      const savedScores = localStorage.getItem('highScores60s');
-      const savedBadges = localStorage.getItem('quizBadges');
-      const savedDailyGoal = localStorage.getItem('dailyGoal');
-      const savedSettings = localStorage.getItem('quizSettings');
-      if (savedHistory) this.history = JSON.parse(savedHistory);
-      if (savedStats) this.stats = { ...this.stats, ...JSON.parse(savedStats) };
-      if (savedScores) this.highScores60s = JSON.parse(savedScores);
-      if (savedBadges) this.badges = JSON.parse(savedBadges);
-      if (savedDailyGoal) this.dailyGoal = { ...this.dailyGoal, ...JSON.parse(savedDailyGoal) };
-      if (savedSettings) {
-        const loadedSettings = JSON.parse(savedSettings);
-        this.settings = { ...this.settings, ...loadedSettings };
-        if (!this.settings.unlockedThemes || !this.settings.unlockedThemes.includes('red')) {
-          this.settings.unlockedThemes = this.settings.unlockedThemes || [];
-          if (!this.settings.unlockedThemes.includes('red')) {
-            this.settings.unlockedThemes.push('red');
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Errore caricamento localStorage:", error);
-    }
-  }
-  savePersistentData() {
-    try {
-      localStorage.setItem('quizHistory', JSON.stringify(this.history));
-      localStorage.setItem('quizStats', JSON.stringify(this.stats));
-      localStorage.setItem('highScores60s', JSON.stringify(this.highScores60s));
-      localStorage.setItem('quizBadges', JSON.stringify(this.badges));
-      localStorage.setItem('dailyGoal', JSON.stringify(this.dailyGoal));
-      localStorage.setItem('quizSettings', JSON.stringify(this.settings));
-    } catch (error) {
-      console.error("Errore salvataggio localStorage:", error);
-    }
-  }
-  // ============================================
-  // IMPOSTAZIONI
-  // ============================================
-  applySettings() {
-    const rootElement = document.documentElement;
-    if (this.settings.darkMode) {
-      rootElement.classList.add('dark');
-    } else {
-      rootElement.classList.remove('dark');
-    }
-    const themeColor = this.getThemeColor(this.settings.theme);
-    document.documentElement.style.setProperty('--theme-color', themeColor);
-    const metaTheme = document.querySelector('meta[name="theme-color"]');
-    if (metaTheme) metaTheme.setAttribute('content', themeColor);
-  }
-  getThemeColor(themeName) {
-    switch (themeName) {
-      case 'forest': return '#16a34a';
-      case 'water': return '#0284c7';
-      case 'gold': return '#ca8a04';
-      case 'red':
-      default: return '#dc2626';
-    }
-  }
-  toggleDarkMode() {
-    this.settings.darkMode = !this.settings.darkMode;
-    this.applySettings();
-    this.savePersistentData();
-    this.render();
-  }
-  changeTheme(newTheme) {
-    if (this.settings.unlockedThemes.includes(newTheme)) {
-      this.settings.theme = newTheme;
-      this.applySettings();
-      this.savePersistentData();
-      this.render();
-    }
-  }
-  // ============================================
-  // LOGICA QUIZ
-  // ============================================
-  selectMode(mode) {
-    if (this.quizData.length === 0) {
-      alert("I dati non sono ancora stati caricati.");
-      return;
-    }
-    this.mode = mode;
-    this.incorrectCount = 0;
-    this.answeredQuestions = [];
-    this.startTime = Date.now();
-    this.questionStartTime = Date.now();
-    switch (mode) {
-      case 'training':
-        this.selectedQuestions = [...this.quizData];
-        this.selectedQuestions.sort(() => Math.random() - 0.5);
-        this.quizState = 'quiz';
-        break;
-      case 'exam':
-        this.selectedQuestions = this.getExamQuestions();
-        this.timeRemaining = 30 * 60;
-        this.startTimer(1000, () => this.checkExamTime());
-        this.quizState = 'quiz';
-        break;
-      case 'errorsOnly':
-        this.selectedQuestions = this.getReviewQuestions(0.7);
-        if (this.selectedQuestions.length === 0) {
-          alert("Non hai errori da rivedere!");
-          this.quizState = 'start';
-        } else {
-          this.selectedQuestions.sort(() => Math.random() - 0.5);
-          this.quizState = 'quiz';
-        }
-        break;
-      case 'smartReview':
-        this.selectedQuestions = this.getSmartReviewQuestions();
-        if (this.selectedQuestions.length === 0) {
-          alert("Non ci sono domande da rivedere!");
-          this.quizState = 'start';
-        } else {
-          this.selectedQuestions.sort(() => Math.random() - 0.5);
-          this.quizState = 'quiz';
-        }
-        break;
-      case 'timeChallenge':
-        this.selectedQuestions = [...this.quizData];
-        this.selectedQuestions.sort(() => Math.random() - 0.5);
-        this.timeRemaining = 60;
-        this.startTimer(1000, () => this.checkTimeChallengeTime());
-        this.quizState = 'quiz';
-        break;
-      default:
-        this.quizState = 'start';
-    }
-    this.currentQuestionIndex = 0;
-    this.selectedAnswer = null;
-    this.showFeedback = (mode === 'training');
-    this.render();
-  }
-  getExamQuestions() {
-    const shuffled = [...this.quizData].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 15);
-  }
-  getReviewQuestions(minErrorRate) {
-    const questionStats = this.getQuestionStats();
-    return this.quizData.filter(q => {
-      const stats = questionStats[q.qnum] || { total: 0, incorrect: 0 };
-      if (stats.total === 0) return false;
-      const errorRate = stats.incorrect / stats.total;
-      return errorRate >= minErrorRate;
-    });
-  }
-  getSmartReviewQuestions() {
-    const questionStats = this.getQuestionStats();
-    const now = Date.now();
-    return this.quizData
-      .map(q => {
-        const qHistories = this.history.filter(h => h.qnum === q.qnum && h.mode !== 'review');
-        const lastHistory = qHistories.length > 0 ? qHistories[qHistories.length - 1] : null;
-        const stats = questionStats[q.qnum] || { total: 0, incorrect: 0 };
-        const errorRate = stats.total > 0 ? stats.incorrect / stats.total : 1;
-        let priority = 0;
-        if (lastHistory) {
-          const timeSinceLastReview = (now - lastHistory.timestamp) / (1000 * 60 * 60 * 24);
-          if (!lastHistory.isCorrect) {
-            priority = 1000;
-          } else {
-            const difficultyFactor = (1 - errorRate) * 10;
-            const reviewInterval = 1 + difficultyFactor;
-            if (timeSinceLastReview >= reviewInterval) {
-              priority = timeSinceLastReview * (errorRate + 1);
+
+    // ============================================
+    // CARICAMENTO DATI
+    // ============================================
+    async loadData() {
+        try {
+            const response = await fetch('quiz_antincendio_ocr_improved.json');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
             }
-          }
-        } else {
-          priority = 50;
+            const data = await response.json();
+            this.quizData = data.map((q, index) => ({ ...q, qnum: index + 1 }));
+            this.stats.totalQuestions = this.quizData.length;
+            this.quizState = 'start';
+            this.quizData.sort(() => Math.random() - 0.5);
+        } catch (error) {
+            console.error("Errore caricamento dati:", error);
+            this.quizState = 'error';
+        } finally {
+            this.hideInitialLoadingScreen();
+            this.render();
+            this.handleA2HS();
         }
-        return { question: q, priority: priority };
-      })
-      .filter(item => item.priority > 0)
-      .sort((a, b) => b.priority - a.priority)
-      .map(item => item.question)
-      .slice(0, 50);
-  }
-  getQuestionStats() {
-    return this.history.reduce((acc, item) => {
-      const qnum = item.qnum;
-      if (!acc[qnum]) {
-        acc[qnum] = { total: 0, incorrect: 0 };
-      }
-      acc[qnum].total++;
-      if (!item.isCorrect) {
-        acc[qnum].incorrect++;
-      }
-      return acc;
-    }, {});
-  }
-  checkAnswer(qnum, selectedLabel) {
-    if (this.mode === 'results' || this.selectedAnswer !== null) return;
-    this.selectedAnswer = selectedLabel;
-    const currentQ = this.selectedQuestions[this.currentQuestionIndex];
-    const isCorrect = (currentQ.correct_label === selectedLabel);
-    if (!isCorrect) {
-      this.incorrectCount++;
     }
-    const timeSpent = (Date.now() - this.questionStartTime) / 1000;
-    this.history.push({
-      qnum: currentQ.qnum,
-      isCorrect: isCorrect,
-      timestamp: Date.now(),
-      mode: this.mode,
-      timeSpent: timeSpent,
-    });
-    this.stats.totalAttempts++;
-    if (isCorrect) {
-      this.stats.totalCorrect++;
+
+    hideInitialLoadingScreen() {
+        const loading = document.getElementById('loading');
+        if (loading) loading.style.display = 'none';
     }
-    this.stats.totalTime += timeSpent;
-    this.dailyGoal.completedToday += 1;
-    this.savePersistentData();
-    this.checkBadges();
-    if (this.mode === 'timeChallenge') {
-      if (isCorrect) {
-        this.nextQuestion();
-        return;
-      } else {
-        this.endQuiz();
-        return;
-      }
+
+    // ============================================
+    // PERSISTENZA DATI
+    // ============================================
+    loadPersistentData() {
+        try {
+            const savedHistory = localStorage.getItem('quizHistory');
+            const savedStats = localStorage.getItem('quizStats');
+            const savedScores = localStorage.getItem('highScores60s');
+            const savedBadges = localStorage.getItem('quizBadges');
+            const savedDailyGoal = localStorage.getItem('dailyGoal');
+            const savedSettings = localStorage.getItem('quizSettings');
+
+            if (savedHistory) this.history = JSON.parse(savedHistory);
+            if (savedStats) this.stats = { ...this.stats, ...JSON.parse(savedStats) };
+            if (savedScores) this.highScores60s = JSON.parse(savedScores);
+            if (savedBadges) this.badges = JSON.parse(savedBadges);
+            if (savedDailyGoal) this.dailyGoal = { ...this.dailyGoal, ...JSON.parse(savedDailyGoal) };
+            if (savedSettings) {
+                const loadedSettings = JSON.parse(savedSettings);
+                this.settings = { ...this.settings, ...loadedSettings };
+                if (!this.settings.unlockedThemes || !this.settings.unlockedThemes.includes('red')) {
+                    this.settings.unlockedThemes = this.settings.unlockedThemes || [];
+                    if (!this.settings.unlockedThemes.includes('red')) {
+                        this.settings.unlockedThemes.push('red');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Errore caricamento localStorage:", error);
+        }
     }
-    if (this.mode !== 'training') {
-      this.answeredQuestions.push({ question: currentQ, isCorrect, selectedLabel, timeSpent });
+
+    savePersistentData() {
+        try {
+            localStorage.setItem('quizHistory', JSON.stringify(this.history));
+            localStorage.setItem('quizStats', JSON.stringify(this.stats));
+            localStorage.setItem('highScores60s', JSON.stringify(this.highScores60s));
+            localStorage.setItem('quizBadges', JSON.stringify(this.badges));
+            localStorage.setItem('dailyGoal', JSON.stringify(this.dailyGoal));
+            localStorage.setItem('quizSettings', JSON.stringify(this.settings));
+        } catch (error) {
+            console.error("Errore salvataggio localStorage:", error);
+        }
     }
-    this.render();
-  }
-  nextQuestion() {
-    if (this.quizState !== 'quiz') return;
-    if (this.mode === 'training') {
-      this.selectedAnswer = null;
+
+    // ============================================
+    // IMPOSTAZIONI
+    // ============================================
+    applySettings() {
+        const rootElement = document.documentElement;
+        if (this.settings.darkMode) {
+            rootElement.classList.add('dark');
+        } else {
+            rootElement.classList.remove('dark');
+        }
+        const themeColor = this.getThemeColor(this.settings.theme);
+        document.documentElement.style.setProperty('--theme-color', themeColor);
+        const metaTheme = document.querySelector('meta[name="theme-color"]');
+        if (metaTheme) metaTheme.setAttribute('content', themeColor);
     }
-    // Se non siamo in modalità 'training' o 'review' e non è stata data risposta, fermati.
-    if (this.mode !== 'training' && this.mode !== 'review' && this.selectedAnswer === null) return;
-    // In modalità 'review', possiamo andare avanti anche se selectedAnswer è null,
-    // ma non dobbiamo permettere di saltare le risposte in altri modi.
-    this.currentQuestionIndex++;
-    this.selectedAnswer = null; // Resettiamo
-    this.questionStartTime = Date.now();
-    if (this.currentQuestionIndex >= this.selectedQuestions.length) {
-      this.endQuiz(); // Torna al menu risultati alla fine della revisione
-      return; // Interrompe l'esecuzione
+
+    getThemeColor(themeName) {
+        switch (themeName) {
+            case 'forest': return '#16a34a';
+            case 'water': return '#0284c7';
+            case 'gold': return '#ca8a04';
+            case 'red':
+            default: return '#dc2626';
+        }
     }
-    // **AGGIUNGI QUESTA LOGICA PER LA REVISIONE:**
-    if (this.mode === 'review') {
-      const currentAnswered = this.answeredQuestions[this.currentQuestionIndex];
-      if (currentAnswered) {
-        // Carica la risposta data dall'utente per la domanda corrente in revisione
-        this.selectedAnswer = currentAnswered.selectedLabel;
-      }
+
+    toggleDarkMode() {
+        this.settings.darkMode = !this.settings.darkMode;
+        this.applySettings();
+        this.savePersistentData();
+        this.render();
     }
-    this.render();
-  }
-  endQuiz() {
-    clearInterval(this.timerInterval);
-    this.endTime = Date.now();
-    if (this.mode === 'timeChallenge') {
-      this.checkHighScore60s();
-    } else if (this.mode === 'exam') {
-      if (this.incorrectCount <= 5) {
-        this.unlockBadge('fireMaster');
-      }
+
+    changeTheme(newTheme) {
+        if (this.settings.unlockedThemes.includes(newTheme)) {
+            this.settings.theme = newTheme;
+            this.applySettings();
+            this.savePersistentData();
+            this.render();
+        }
     }
-    this.quizState = 'results';
-    this.reviewQuestionIndex = 0;
-    this.savePersistentData();
-    this.render();
-  }
-  reviewAnswers() {
-    if (this.timerInterval) clearInterval(this.timerInterval);
-    this.quizState = 'quiz';
-    this.mode = 'review';
-    this.selectedQuestions = this.answeredQuestions.map(a => a.question);
-    this.currentQuestionIndex = 0;
-    this.showFeedback = true;
-    if (this.answeredQuestions.length > 0) {
-      this.selectedAnswer = this.answeredQuestions[0].selectedLabel;
-    } else {
-      this.selectedAnswer = null;
+
+    // ============================================
+    // LOGICA QUIZ
+    // ============================================
+    selectMode(mode) {
+        if (this.quizData.length === 0) {
+            alert("I dati non sono ancora stati caricati.");
+            return;
+        }
+
+        this.mode = mode;
+        this.incorrectCount = 0;
+        this.answeredQuestions = [];
+        this.startTime = Date.now();
+        this.questionStartTime = Date.now();
+
+        switch (mode) {
+            case 'training':
+                this.selectedQuestions = [...this.quizData];
+                this.selectedQuestions.sort(() => Math.random() - 0.5);
+                this.quizState = 'quiz';
+                break;
+            case 'exam':
+                this.selectedQuestions = this.getExamQuestions();
+                this.timeRemaining = 30 * 60;
+                this.startTimer(1000, () => this.checkExamTime());
+                this.quizState = 'quiz';
+                break;
+            case 'errorsOnly':
+                this.selectedQuestions = this.getReviewQuestions(0.7);
+                if (this.selectedQuestions.length === 0) {
+                    alert("Non hai errori da rivedere!");
+                    this.quizState = 'start';
+                } else {
+                    this.selectedQuestions.sort(() => Math.random() - 0.5);
+                    this.quizState = 'quiz';
+                }
+                break;
+            case 'smartReview':
+                this.selectedQuestions = this.getSmartReviewQuestions();
+                if (this.selectedQuestions.length === 0) {
+                    alert("Non ci sono domande da rivedere!");
+                    this.quizState = 'start';
+                } else {
+                    this.selectedQuestions.sort(() => Math.random() - 0.5);
+                    this.quizState = 'quiz';
+                }
+                break;
+            case 'timeChallenge':
+                this.selectedQuestions = [...this.quizData];
+                this.selectedQuestions.sort(() => Math.random() - 0.5);
+                this.timeRemaining = 60;
+                this.startTimer(1000, () => this.checkTimeChallengeTime());
+                this.quizState = 'quiz';
+                break;
+            default:
+                this.quizState = 'start';
+        }
+
+        this.currentQuestionIndex = 0;
+        this.selectedAnswer = null;
+        this.showFeedback = (mode === 'training');
+        this.render();
     }
-    this.render();
-  }
-  // ============================================
-  // TIMER
-  // ============================================
-  startTimer(interval, callback) {
-    this.timerInterval = setInterval(() => {
-      this.timeRemaining--;
-      callback();
-      this.render();
-    }, interval);
-  }
-  checkExamTime() {
-    if (this.timeRemaining <= 0) {
-      this.endQuiz();
+
+    getExamQuestions() {
+        const shuffled = [...this.quizData].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, 15);
     }
-  }
-  checkTimeChallengeTime() {
-    if (this.timeRemaining <= 0) {
-      this.endQuiz();
+
+    getReviewQuestions(minErrorRate) {
+        const questionStats = this.getQuestionStats();
+        return this.quizData.filter(q => {
+            const stats = questionStats[q.qnum] || { total: 0, incorrect: 0 };
+            if (stats.total === 0) return false;
+            const errorRate = stats.incorrect / stats.total;
+            return errorRate >= minErrorRate;
+        });
     }
-  }
-  formatTime(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  }
-  // ============================================
-  // BADGE E OBIETTIVI
-  // ============================================
-  checkDailyGoal() {
-    const today = new Date().toLocaleDateString('it-IT');
-    if (this.dailyGoal.lastGoalDate !== today) {
-      this.dailyGoal.completedToday = 0;
-      this.dailyGoal.lastGoalDate = today;
-      this.savePersistentData();
+
+    getSmartReviewQuestions() {
+        const questionStats = this.getQuestionStats();
+        const now = Date.now();
+
+        return this.quizData
+            .map(q => {
+                const qHistories = this.history.filter(h => h.qnum === q.qnum && h.mode !== 'review');
+                const lastHistory = qHistories.length > 0 ? qHistories[qHistories.length - 1] : null;
+                const stats = questionStats[q.qnum] || { total: 0, incorrect: 0 };
+                const errorRate = stats.total > 0 ? stats.incorrect / stats.total : 1;
+
+                let priority = 0;
+
+                if (lastHistory) {
+                    const timeSinceLastReview = (now - lastHistory.timestamp) / (1000 * 60 * 60 * 24);
+                    if (!lastHistory.isCorrect) {
+                        priority = 1000;
+                    } else {
+                        const difficultyFactor = (1 - errorRate) * 10;
+                        const reviewInterval = 1 + difficultyFactor;
+                        if (timeSinceLastReview >= reviewInterval) {
+                            priority = timeSinceLastReview * (errorRate + 1);
+                        }
+                    }
+                } else {
+                    priority = 50;
+                }
+
+                return { question: q, priority: priority };
+            })
+            .filter(item => item.priority > 0)
+            .sort((a, b) => b.priority - a.priority)
+            .map(item => item.question)
+            .slice(0, 50);
     }
-  }
-  checkBadges() {
-    const examPassed = this.history.filter(h => h.mode === 'exam' && h.isCorrect).length;
-    const totalAnswered = this.history.length;
-    if (examPassed >= 10 && !this.badges.fireMaster) {
-      this.unlockBadge('fireMaster');
+
+    getQuestionStats() {
+        return this.history.reduce((acc, item) => {
+            const qnum = item.qnum;
+            if (!acc[qnum]) {
+                acc[qnum] = { total: 0, incorrect: 0 };
+            }
+            acc[qnum].total++;
+            if (!item.isCorrect) {
+                acc[qnum].incorrect++;
+            }
+            return acc;
+        }, {});
     }
-    if (totalAnswered >= 1000 && !this.badges.studentPro) {
-      this.unlockBadge('studentPro');
+
+    checkAnswer(qnum, selectedLabel) {
+        if (this.mode === 'results' || this.selectedAnswer !== null) return;
+
+        this.selectedAnswer = selectedLabel;
+        const currentQ = this.selectedQuestions[this.currentQuestionIndex];
+        const isCorrect = (currentQ.correct_label === selectedLabel);
+
+        if (!isCorrect) {
+            this.incorrectCount++;
+        }
+
+        const timeSpent = (Date.now() - this.questionStartTime) / 1000;
+
+        this.history.push({
+            qnum: currentQ.qnum,
+            isCorrect: isCorrect,
+            timestamp: Date.now(),
+            mode: this.mode,
+            timeSpent: timeSpent,
+        });
+
+        this.stats.totalAttempts++;
+        if (isCorrect) {
+            this.stats.totalCorrect++;
+        }
+        this.stats.totalTime += timeSpent;
+
+        this.dailyGoal.completedToday += 1;
+        this.savePersistentData();
+        this.checkBadges();
+
+        if (this.mode === 'timeChallenge') {
+            if (isCorrect) {
+                this.nextQuestion();
+                return;
+            } else {
+                this.endQuiz();
+                return;
+            }
+        }
+
+        if (this.mode !== 'training') {
+            this.answeredQuestions.push({ question: currentQ, isCorrect, selectedLabel, timeSpent });
+        }
+
+        this.render();
     }
-    if (this.dailyGoal.completedToday >= this.dailyGoal.target && !this.badges.dailyGoalReached) {
-      this.unlockBadge('dailyGoalReached');
+
+    nextQuestion() {
+        if (this.quizState !== 'quiz') return;
+
+        if (this.mode === 'training') {
+            this.selectedAnswer = null;
+        }
+
+        // Se non siamo in modalità 'training' o 'review' e non è stata data risposta, fermati.
+        if (this.mode !== 'training' && this.mode !== 'review' && this.selectedAnswer === null) return;
+        
+        // In modalità 'review', possiamo andare avanti anche se selectedAnswer è null,
+        // ma non dobbiamo permettere di saltare le risposte in altri modi.
+
+        this.currentQuestionIndex++;
+        this.selectedAnswer = null; // Resettiamo
+        this.questionStartTime = Date.now();
+
+        if (this.currentQuestionIndex >= this.selectedQuestions.length) {
+            this.endQuiz(); // Torna al menu risultati alla fine della revisione
+            return; // Interrompe l'esecuzione
+        } 
+        
+        // **AGGIUNGI QUESTA LOGICA PER LA REVISIONE:**
+        if (this.mode === 'review') {
+            const currentAnswered = this.answeredQuestions[this.currentQuestionIndex];
+            if (currentAnswered) {
+                // Carica la risposta data dall'utente per la domanda corrente in revisione
+                this.selectedAnswer = currentAnswered.selectedLabel; 
+            }
+        }
+        // **********************************************
+
+        this.render();
     }
-  }
-  unlockBadge(badgeName) {
-    this.badges[badgeName] = true;
-    if (badgeName === 'fireMaster' && !this.settings.unlockedThemes.includes('forest')) {
-      this.settings.unlockedThemes.push('forest');
-      alert('🎉 Badge Sbloccato: Maestro del Fuoco! Tema Foresta disponibile!');
-    } else if (badgeName === 'studentPro' && !this.settings.unlockedThemes.includes('water')) {
-      this.settings.unlockedThemes.push('water');
-      alert('🎉 Badge Sbloccato: Studente Pro! Tema Acqua disponibile!');
-    } else if (badgeName === 'king60s' && !this.settings.unlockedThemes.includes('gold')) {
-      this.settings.unlockedThemes.push('gold');
-      alert('🎉 Badge Sbloccato: Re del 60s! Tema Oro disponibile!');
+
+    endQuiz() {
+        clearInterval(this.timerInterval);
+        this.endTime = Date.now();
+
+        if (this.mode === 'timeChallenge') {
+            this.checkHighScore60s();
+        } else if (this.mode === 'exam') {
+            if (this.incorrectCount <= 5) {
+                this.unlockBadge('fireMaster');
+            }
+        }
+
+        this.quizState = 'results';
+        this.reviewQuestionIndex = 0;
+        this.savePersistentData();
+        this.render();
     }
-    this.savePersistentData();
-  }
-  checkHighScore60s() {
-    const score = this.currentQuestionIndex;
-    this.highScores60s.push({ score, timestamp: Date.now() });
-    this.highScores60s.sort((a, b) => b.score - a.score);
-    this.highScores60s = this.highScores60s.slice(0, 5);
-    if (score >= 20 && !this.badges.king60s) {
-      this.unlockBadge('king60s');
+
+    reviewAnswers() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        this.quizState = 'quiz';
+        this.mode = 'review';
+        // Non serve mappare a .question, answeredQuestions contiene già tutto
+        // this.selectedQuestions = this.answeredQuestions.map(a => a.question); 
+        this.selectedQuestions = this.answeredQuestions.map(a => a.question);
+        this.currentQuestionIndex = 0;
+        this.showFeedback = true;
+        
+        // **LA CHIAVE È QUI:** Dobbiamo caricare la risposta data dall'utente per la prima domanda.
+        if (this.answeredQuestions.length > 0) {
+            this.selectedAnswer = this.answeredQuestions[0].selectedLabel;
+        } else {
+            this.selectedAnswer = null;
+        }
+        
+        this.render();
     }
-    this.savePersistentData();
-  }
-  resetStats() {
-    if (confirm('Vuoi davvero azzerare tutte le statistiche?')) {
-      this.history = [];
-      this.stats = { totalAttempts: 0, totalCorrect: 0, totalTime: 0, totalQuestions: this.quizData.length };
-      this.highScores60s = [];
-      this.badges = {};
-      this.dailyGoal.completedToday = 0;
-      this.savePersistentData();
-      this.render();
+
+    // ============================================
+    // TIMER
+    // ============================================
+    startTimer(interval, callback) {
+        this.timerInterval = setInterval(() => {
+            this.timeRemaining--;
+            callback();
+            this.render();
+        }, interval);
     }
-  }
+
+    checkExamTime() {
+        if (this.timeRemaining <= 0) {
+            this.endQuiz();
+        }
+    }
+
+    checkTimeChallengeTime() {
+        if (this.timeRemaining <= 0) {
+            this.endQuiz();
+        }
+    }
+
+    formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // ============================================
+    // BADGE E OBIETTIVI
+    // ============================================
+    checkDailyGoal() {
+        const today = new Date().toLocaleDateString('it-IT');
+        if (this.dailyGoal.lastGoalDate !== today) {
+            this.dailyGoal.completedToday = 0;
+            this.dailyGoal.lastGoalDate = today;
+            this.savePersistentData();
+        }
+    }
+
+    checkBadges() {
+        const examPassed = this.history.filter(h => h.mode === 'exam' && h.isCorrect).length;
+        const totalAnswered = this.history.length;
+
+        if (examPassed >= 10 && !this.badges.fireMaster) {
+            this.unlockBadge('fireMaster');
+        }
+
+        if (totalAnswered >= 1000 && !this.badges.studentPro) {
+            this.unlockBadge('studentPro');
+        }
+
+        if (this.dailyGoal.completedToday >= this.dailyGoal.target && !this.badges.dailyGoalReached) {
+            this.unlockBadge('dailyGoalReached');
+        }
+    }
+
+    unlockBadge(badgeName) {
+        this.badges[badgeName] = true;
+
+        if (badgeName === 'fireMaster' && !this.settings.unlockedThemes.includes('forest')) {
+            this.settings.unlockedThemes.push('forest');
+            alert('🎉 Badge Sbloccato: Maestro del Fuoco! Tema Foresta disponibile!');
+        } else if (badgeName === 'studentPro' && !this.settings.unlockedThemes.includes('water')) {
+            this.settings.unlockedThemes.push('water');
+            alert('🎉 Badge Sbloccato: Studente Pro! Tema Acqua disponibile!');
+        } else if (badgeName === 'king60s' && !this.settings.unlockedThemes.includes('gold')) {
+            this.settings.unlockedThemes.push('gold');
+            alert('🎉 Badge Sbloccato: Re del 60s! Tema Oro disponibile!');
+        }
+
+        this.savePersistentData();
+    }
+
+    checkHighScore60s() {
+        const score = this.currentQuestionIndex;
+        this.highScores60s.push({ score, timestamp: Date.now() });
+        this.highScores60s.sort((a, b) => b.score - a.score);
+        this.highScores60s = this.highScores60s.slice(0, 5);
+
+        if (score >= 20 && !this.badges.king60s) {
+            this.unlockBadge('king60s');
+        }
+
+        this.savePersistentData();
+    }
+
+    resetStats() {
+        if (confirm('Vuoi davvero azzerare tutte le statistiche?')) {
+            this.history = [];
+            this.stats = { totalAttempts: 0, totalCorrect: 0, totalTime: 0, totalQuestions: this.quizData.length };
+            this.highScores60s = [];
+            this.badges = {};
+            this.dailyGoal.completedToday = 0;
+            this.savePersistentData();
+            this.render();
+        }
+    }
 
     // ============================================
     // RENDERING
@@ -926,8 +993,6 @@ class QuizApp {
 // ============================================
 // INIZIALIZZAZIONE
 // ============================================
-
-}
 document.addEventListener('DOMContentLoaded', () => {
-  window.quizApp = new QuizApp();
+    window.quizApp = new QuizApp();
 });
