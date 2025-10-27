@@ -89,6 +89,14 @@ class QuizApp {
             console.error("Errore salvataggio localStorage:", e);
         }
     }
+    checkDailyGoal() {
+        const today = new Date().toLocaleDateString('it-IT');
+        if (this.dailyGoal.lastGoalDate !== today) {
+            this.dailyGoal.lastGoalDate = today;
+            this.dailyGoal.completedToday = 0;
+            this.savePersistentData();
+        }
+    }
 
     // ========================================
     // Impostazioni visive
