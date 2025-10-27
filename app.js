@@ -1,5 +1,5 @@
-// Quiz Antincendio - Progressive Web App v1.3.5 Stable
-// Correzioni: Revisione risposte, Timer review, nextQuestion semplificato, A2HS sicuro
+// Quiz Antincendio - Progressive Web App v1.3.6 Stable
+// Update: Risposte modificabili prima di "Prossima Domanda" (eccetto Training e TimeChallenge)
 
 let deferredPrompt;
 
@@ -29,11 +29,7 @@ class QuizApp {
         this.stats = { totalAttempts: 0, totalCorrect: 0, totalTime: 0, totalQuestions: 350 };
         this.highScores60s = [];
         this.badges = {};
-        this.dailyGoal = {
-            target: 50,
-            completedToday: 0,
-            lastGoalDate: new Date().toLocaleDateString('it-IT')
-        };
+        this.dailyGoal = { target: 50, completedToday: 0, lastGoalDate: new Date().toLocaleDateString('it-IT') };
         this.settings = { darkMode: false, theme: 'red', unlockedThemes: ['red'] };
 
         this.loadPersistentData();
@@ -55,17 +51,16 @@ class QuizApp {
             console.error("Errore caricamento dati:", err);
             this.quizState = 'error';
         } finally {
-            this.hideInitialLoadingScreen();
+            const loading = document.getElementById('loading');
+            if (loading) loading.style.display = 'none';
             this.render();
             setTimeout(() => this.handleA2HS(), 600);
         }
     }
 
-    hideInitialLoadingScreen() {
-        const el = document.getElementById('loading');
-        if (el) el.style.display = 'none';
-    }
-
+    // ========================================
+    // Persistenza dati
+    // ========================================
     loadPersistentData() {
         try {
             const get = (k, def = null) => JSON.parse(localStorage.getItem(k)) || def;
@@ -95,6 +90,9 @@ class QuizApp {
         }
     }
 
+    // ========================================
+    // Impostazioni visive
+    // ========================================
     applySettings() {
         const root = document.documentElement;
         root.classList.toggle('dark', this.settings.darkMode);
@@ -113,6 +111,9 @@ class QuizApp {
         }[t] || '#dc2626';
     }
 
+    // ========================================
+    // Modalità di gioco
+    // ========================================
     selectMode(mode) {
         if (!this.quizData.length) return alert("Dati non ancora caricati.");
         clearInterval(this.timerInterval);
@@ -164,23 +165,71 @@ class QuizApp {
     checkExamTime() { if (this.timeRemaining <= 0) this.endQuiz(); }
     checkTimeChallengeTime() { if (this.timeRemaining <= 0) this.endQuiz(); }
 
-    reviewAnswers() {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
+    // ========================================
+    // Gestione risposte
+    // ========================================
+    checkAnswer(qnum, selectedLabel) {
+        if (this.mode === 'results') return;
+        const currentQ = this.selectedQuestions[this.currentQuestionIndex];
+        this.selectedAnswer = selectedLabel;
+
+        // Risposta immediata solo in training e timeChallenge
+        if (['training', 'timeChallenge'].includes(this.mode)) {
+            const isCorrect = (currentQ.correct_label === selectedLabel);
+            if (!isCorrect) this.incorrectCount++;
+
+            const timeSpent = (Date.now() - this.questionStartTime) / 1000;
+            this.history.push({
+                qnum: currentQ.qnum,
+                isCorrect,
+                timestamp: Date.now(),
+                mode: this.mode,
+                timeSpent
+            });
+
+            this.stats.totalAttempts++;
+            if (isCorrect) this.stats.totalCorrect++;
+            this.stats.totalTime += timeSpent;
+            this.dailyGoal.completedToday += 1;
+            this.savePersistentData();
+            this.checkBadges();
+
+            if (this.mode === 'timeChallenge') {
+                if (isCorrect) this.nextQuestion();
+                else this.endQuiz();
+                return;
+            }
         }
-        this.quizState = 'quiz';
-        this.mode = 'review';
-        this.selectedQuestions = this.answeredQuestions.map(a => a.question);
-        this.currentQuestionIndex = 0;
-        this.showFeedback = true;
-        this.selectedAnswer = null; // 🔧 lasciamo gestione interna a renderQuiz
-        this.render();
+
+        this.render(); // mostra selezione corrente (modificabile nelle altre modalità)
     }
 
     nextQuestion() {
         if (this.quizState !== 'quiz') return;
-        if (!this.selectedAnswer && !['training', 'review'].includes(this.mode)) return;
+
+        // Salva risposta solo al momento di avanzare (per modalità non immediate)
+        if (this.selectedAnswer && !['training', 'timeChallenge'].includes(this.mode)) {
+            const currentQ = this.selectedQuestions[this.currentQuestionIndex];
+            const isCorrect = (currentQ.correct_label === this.selectedAnswer);
+            if (!isCorrect) this.incorrectCount++;
+
+            const timeSpent = (Date.now() - this.questionStartTime) / 1000;
+
+            this.history.push({
+                qnum: currentQ.qnum,
+                isCorrect,
+                timestamp: Date.now(),
+                mode: this.mode,
+                timeSpent
+            });
+
+            this.stats.totalAttempts++;
+            if (isCorrect) this.stats.totalCorrect++;
+            this.stats.totalTime += timeSpent;
+            this.dailyGoal.completedToday += 1;
+            this.savePersistentData();
+            this.checkBadges();
+        }
 
         this.currentQuestionIndex++;
         this.selectedAnswer = null;
@@ -192,6 +241,9 @@ class QuizApp {
         this.render();
     }
 
+    // ========================================
+    // Rendering dinamico
+    // ========================================
     renderQuiz() {
         const currentQ = this.selectedQuestions[this.currentQuestionIndex];
         if (!currentQ) return `<p>Caricamento domanda...</p>`;
@@ -201,7 +253,6 @@ class QuizApp {
             userSelectedLabel = this.answeredQuestions[this.currentQuestionIndex].selectedLabel;
 
         const progress = ((this.currentQuestionIndex + 1) / this.selectedQuestions.length) * 100;
-
         const timerHTML = (['exam', 'timeChallenge'].includes(this.mode))
             ? `<div class="bg-red-100 dark:bg-red-900 text-center mb-4 p-2 rounded">
                  ⏱️ Tempo: ${this.formatTime(this.timeRemaining)}
@@ -220,7 +271,8 @@ class QuizApp {
                     if (isCorrect) style = 'bg-green-500 text-white';
                     else if (isSelected) style = 'bg-red-500 text-white';
                 } else if (isSelected) style = 'bg-blue-500 text-white';
-                const disabled = (this.mode === 'review' || (this.selectedAnswer && this.mode !== 'training'));
+                const disabled = (this.mode === 'review' || 
+                                  (['training', 'timeChallenge'].includes(this.mode) && this.selectedAnswer));
                 return `
                 <button onclick="window.quizApp.checkAnswer(${currentQ.qnum}, '${label}')"
                   class="w-full text-left p-4 rounded-lg font-medium ${style} ${disabled ? 'cursor-not-allowed' : ''}"
@@ -229,6 +281,10 @@ class QuizApp {
                 </button>`;
             }).join('')}
           </div>
+
+          ${(['exam','smartReview','errorsOnly'].includes(this.mode)) ? `
+            <p class="text-xs text-gray-500 italic mt-3">Puoi cambiare la risposta finché non premi "Prossima domanda".</p>
+          ` : ''}
         </div>
         <button onclick="window.quizApp.nextQuestion()" 
           class="w-full bg-[var(--theme-color)] text-white py-3 rounded-xl font-bold mt-4
@@ -238,24 +294,8 @@ class QuizApp {
         </button>`;
     }
 
-    handleA2HS() {
-        const c = document.getElementById('install-app-container');
-        const b = document.getElementById('install-btn');
-        if (!deferredPrompt || !c || !b) return;
-        if (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
-            c.style.display = 'none'; return;
-        }
-        c.style.display = 'block';
-        b.onclick = async () => {
-            deferredPrompt.prompt();
-            const choice = await deferredPrompt.userChoice;
-            if (choice.outcome === 'accepted') console.log('✅ App installata');
-            deferredPrompt = null;
-            c.style.display = 'none';
-        };
-    }
-
-    // ... (resto invariato)
+    // ========================================
+    // Altri metodi rimangono invariati (timer, badges, renderResults, ecc.)
 }
 
 document.addEventListener('DOMContentLoaded', () => {
