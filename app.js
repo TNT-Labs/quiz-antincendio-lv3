@@ -53,7 +53,7 @@ class QuizApp {
         } finally {
             const loading = document.getElementById('loading');
             if (loading) loading.style.display = 'none';
-            this.render();
+            this.renderQuiz();
             setTimeout(() => this.handleA2HS(), 600);
         }
     }
@@ -158,7 +158,7 @@ class QuizApp {
         }
         this.currentQuestionIndex = 0;
         this.quizState = 'quiz';
-        this.render();
+        this.renderQuiz();
     }
 
     startTimer(interval, cb) {
@@ -166,7 +166,7 @@ class QuizApp {
         this.timerInterval = setInterval(() => {
             this.timeRemaining--;
             cb();
-            this.render();
+            this.renderQuiz();
         }, interval);
     }
 
@@ -209,7 +209,7 @@ class QuizApp {
             }
         }
 
-        this.render(); // mostra selezione corrente (modificabile nelle altre modalità)
+        this.renderQuiz(); // mostra selezione corrente (modificabile nelle altre modalità)
     }
 
     nextQuestion() {
@@ -246,7 +246,7 @@ class QuizApp {
         if (this.currentQuestionIndex >= this.selectedQuestions.length)
             return this.endQuiz();
 
-        this.render();
+        this.renderQuiz();
     }
 
     // ========================================
@@ -309,3 +309,4 @@ class QuizApp {
 document.addEventListener('DOMContentLoaded', () => {
     window.quizApp = new QuizApp();
 });
+
