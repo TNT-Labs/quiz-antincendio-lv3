@@ -297,25 +297,26 @@ class QuizApp {
     }
 
     checkAnswer(qnum, selectedLabel) {
-        // FIX: In modalita review non permettere di rispondere
+        // Impedisce di rispondere se siamo in modalità 'review' o se la risposta è già stata data
         if (this.mode === 'review' || this.selectedAnswer !== null) return;
 
         this.selectedAnswer = selectedLabel;
         const currentQ = this.selectedQuestions[this.currentQuestionIndex];
         const isCorrect = (currentQ.correct_label === selectedLabel);
 
+        // Nel TimeChallenge l'errore non deve terminare il quiz, ma si può contare (o ignorare, a discrezione).
+        // Manteniamo il conteggio degli errori per consistenza, ma non ne impedisce l'avanzamento.
         if (!isCorrect) {
             this.incorrectCount++;
         }
 
         const timeSpent = (Date.now() - this.questionStartTime) / 1000;
 
-        // Solo in training mode aggiungiamo la risposta a answeredQuestions per il riepilogo
-        if (this.mode === 'training') {
-             this.answeredQuestions.push({ question: currentQ, isCorrect, selectedLabel, timeSpent });
-        }
+        // --- Logica Unificata ---
+        // Aggiungi la domanda all'array delle risposte per la revisione finale.
+        this.answeredQuestions.push({ question: currentQ, isCorrect, selectedLabel, timeSpent });
 
-
+        // Aggiungi l'evento alla cronologia statistica
         this.history.push({
             qnum: currentQ.qnum,
             isCorrect: isCorrect,
@@ -324,27 +325,25 @@ class QuizApp {
             timeSpent: timeSpent,
         });
 
+        // Aggiorna le statistiche globali
         this.stats.totalAttempts++;
         if (isCorrect) {
             this.stats.totalCorrect++;
         }
         this.stats.totalTime += timeSpent;
 
+        // Aggiorna gli obiettivi
         this.dailyGoal.completedToday += 1;
+        
+        // Salva, controlla i badge e aggiorna il rendering
         this.savePersistentData();
         this.checkBadges();
 
-        if (this.mode === 'timeChallenge') {
-            if (!isCorrect) { // FIX: Only end quiz on incorrect answer in time challenge
-                this.endQuiz();
-                return;
-            }
-        }
-
-        if (this.mode !== 'training') {
-            this.answeredQuestions.push({ question: currentQ, isCorrect, selectedLabel, timeSpent });
-        }
-
+        // RENDERIZZAZIONE
+        // Nella modalità 'training', l'utente vede il feedback ma deve cliccare "Prossima Domanda".
+        // Nelle modalità a tempo (exam, timeChallenge, smartReview, errorsOnly), 
+        // l'avanzamento avviene con nextQuestion().
+        
         this.render();
     }
 
@@ -409,12 +408,8 @@ class QuizApp {
             }
         }
 
-        // FIX: If training mode, go back to results screen
-        if (this.mode === 'training') {
-            this.quizState = 'results';
-        } else {
-            this.quizState = 'results';
-        }
+        // Lo stato è sempre 'results' alla fine di ogni quiz.
+        this.quizState = 'results';
 
         this.savePersistentData();
         this.render();
