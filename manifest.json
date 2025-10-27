@@ -1,16 +1,15 @@
 {
   "name": "Quiz Antincendio Livello 3",
   "short_name": "Quiz Antincendio",
-  "description": "App per la preparazione all'esame Antincendio di Livello 3. **350 domande complete, 5 modalità di studio, obiettivi giornalieri, Dark Mode e Temi sbloccabili come Premi Visivi.**",
-  "start_url": "/",
-  "scope": "/",
+  "version": "1.3.5",
+  "description": "PWA Quiz Antincendio con modalità esame, revisione intelligente, temi, badge e supporto offline.",
+  "start_url": "./?source=pwa",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#dc2626",
-  "orientation": "portrait",
-  "categories": ["education", "productivity"],
-  "lang": "it",
-  "dir": "ltr",
+  "lang": "it-IT",
   "icons": [
     {
       "src": "icon-192.png",
@@ -26,26 +25,8 @@
     }
   ],
   "shortcuts": [
-    {
-      "name": "Allenamento",
-      "short_name": "Allenamento",
-      "description": "Avvia la modalità Allenamento libero",
-      "url": "/?mode=training",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Simulazione",
-      "short_name": "Esame",
-      "description": "Avvia una simulazione d'esame completa",
-      "url": "/?mode=exam",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Sfida 60s",
-      "short_name": "Sfida 60s",
-      "description": "Metti alla prova la tua velocità di risposta in un minuto",
-      "url": "/?mode=timeChallenge",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
-    }
+    { "name": "Allenamento Libero", "url": "./index.html#training", "icons": [{ "src": "icon-192.png" }] },
+    { "name": "Simulazione Esame", "url": "./index.html#exam", "icons": [{ "src": "icon-192.png" }] },
+    { "name": "Sfida 60s", "url": "./index.html#timeChallenge", "icons": [{ "src": "icon-192.png" }] }
   ]
 }
