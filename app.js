@@ -335,10 +335,7 @@ class QuizApp {
         this.checkBadges();
 
         if (this.mode === 'timeChallenge') {
-            if (isCorrect) {
-                this.nextQuestion();
-                return;
-            } else {
+            if (!isCorrect) { // FIX: Only end quiz on incorrect answer in time challenge
                 this.endQuiz();
                 return;
             }
@@ -747,21 +744,17 @@ class QuizApp {
         const incorrectCount = totalQuestionsAnswered - correctCount;
         const percentage = totalQuestionsAnswered > 0 ? ((correctCount / totalQuestionsAnswered) * 100).toFixed(1) : 0;
         const totalTime = ((this.endTime - this.startTime) / 1000).toFixed(0);
-        const passed = this.mode === 'exam' ? this.incorrectCount <= 5 : true; // Logica 'passed' solo per esame
+
+        // FIX: Determina il risultato per l'esame
+        const isExam = this.mode === 'exam';
+        const examPassed = isExam ? this.incorrectCount <= 5 : false;
+        const resultTitle = isExam ? (examPassed ? '✅ Complimenti!' : '❌ Non Superato') : 'Riepilogo'; // Titolo generico per altre modalità
+        const titleColor = isExam ? (examPassed ? 'text-green-600' : 'text-red-600') : 'text-blue-600';
 
 
-        // Se in training mode, la logica del "superato" non si applica
-        const resultTitle = this.mode === 'training' ? 'Riepilogo Allenamento' : (passed ? '✅ Complimenti!' : '❌ Non Superato');
-        const titleColor = this.mode === 'training' ? 'text-blue-600' : (passed ? 'text-green-600' : 'text-red-600');
-
-
-        return `
-            <div class="bg-white dark:bg-gray-700 rounded-xl p-8 shadow-lg text-center mb-20">
-                <h2 class="text-3xl font-extrabold mb-6 ${titleColor}">
-                    ${resultTitle}
-                </h2>
-
-                 ${this.mode === 'training' ? `
+        const renderStatsGrid = () => {
+            if (this.mode === 'training') {
+                return `
                      <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
                             <p class="text-3xl font-bold text-blue-600">${totalQuestionsAnswered}</p>
@@ -793,29 +786,51 @@ class QuizApp {
                         </div>
                     </div>
                  `}
+            ${isExam ? `
+                <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg mb-6">
+                     <p class="text-3xl font-bold ${incorrectCount <= 5 ? 'text-green-600' : 'text-red-600'}">${incorrectCount}</p>
+                     <p class="text-sm dark:text-gray-300">Errori (${incorrectCount <= 5 ? 'Max 5' : 'Troppi!'})</p>
+                 </div>
+            ` : ''}
+            `;
+        };
 
-
-                ${this.mode === 'timeChallenge' ? `
+        const renderTimeChallengeScore = () => {
+            if (this.mode === 'timeChallenge') {
+                return `
                     <div class="bg-purple-100 dark:bg-purple-900 p-4 rounded-lg mb-4">
                         <p class="text-2xl font-bold text-purple-800 dark:text-purple-200">
                             🏆 Punteggio: ${this.currentQuestionIndex}
                         </p>
                     </div>
-                ` : ''}
+                `;
+            }
+            return '';
+        };
+
+        const renderReviewButton = () => {
+            if (this.answeredQuestions.length > 0) {
+                return `
+                     <button onclick="window.quizApp.reviewAnswers()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition">
+                         🔍 Rivedi Risposte ${this.mode === 'training' ? 'Allenamento' : ''}
+                     </button>
+                 `;
+            }
+            return '';
+        };
+
+
+        return `
+            <div class="bg-white dark:bg-gray-700 rounded-xl p-8 shadow-lg text-center mb-20">
+                <h2 class="text-3xl font-extrabold mb-6 ${titleColor}">
+                    ${resultTitle}
+                </h2>
+
+                ${renderStatsGrid()}
+                ${renderTimeChallengeScore()}
 
                 <div class="space-y-3">
-                    ${this.mode !== 'training' ? `
-                        <button onclick="window.quizApp.reviewAnswers()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition">
-                            🔍 Rivedi Risposte
-                        </button>
-                    ` : ''}
-
-                    ${this.answeredQuestions.length > 0 && this.mode === 'training' ? `
-                         <button onclick="window.quizApp.reviewAnswers()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition">
-                             🔍 Rivedi Risposte Allenamento
-                         </button>
-                     ` : ''}
-
+                    ${renderReviewButton()}
                     <button onclick="window.quizApp.quizState = 'start'; window.quizApp.render();" class="w-full bg-[var(--theme-color)] text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition">
                         🏠 Torna al Menu
                     </button>
@@ -823,6 +838,7 @@ class QuizApp {
             </div>
         `;
     }
+
 
     renderStats() {
         const avgAccuracy = this.stats.totalAttempts > 0 ?
@@ -842,10 +858,8 @@ class QuizApp {
             .sort((a, b) => parseFloat(b.errorRate) - parseFloat(a.errorRate))
             .slice(0, 5);
 
-        return `
-            <div class="mb-20">
-                <h1 class="text-3xl font-extrabold text-center mb-6 text-[var(--theme-color)]">📊 Statistiche</h1>
-
+        const renderGeneralStats = () => {
+            return `
                 <div class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg mb-6">
                     <h3 class="text-xl font-bold mb-4 dark:text-white">Riepilogo Generale</h3>
                     <div class="grid grid-cols-2 gap-4">
@@ -867,8 +881,12 @@ class QuizApp {
                         </div>
                     </div>
                 </div>
+            `;
+        };
 
-                ${this.highScores60s.length > 0 ? `
+        const renderHighScores = () => {
+            if (this.highScores60s.length > 0) {
+                return `
                     <div class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg mb-6">
                         <h3 class="text-xl font-bold mb-4 dark:text-white">🏆 Top 5 Sfida 60s</h3>
                         <div class="space-y-2">
@@ -881,9 +899,14 @@ class QuizApp {
                             `).join('')}
                         </div>
                     </div>
-                ` : ''}
+                `;
+            }
+            return '';
+        };
 
-                ${topErrors.length > 0 ? `
+        const renderTopErrors = () => {
+            if (topErrors.length > 0) {
+                return `
                     <div class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg mb-6">
                         <h3 class="text-xl font-bold mb-4 dark:text-white">⚠️ Top 5 Domande Difficili</h3>
                         <div class="space-y-2">
@@ -898,8 +921,13 @@ class QuizApp {
                             `).join('')}
                         </div>
                     </div>
-                ` : ''}
+                `;
+            }
+            return '';
+        };
 
+        const renderBadges = () => {
+            return `
                 <div class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg mb-6">
                     <h3 class="text-xl font-bold mb-4 dark:text-white">🏅 Badge Sbloccati</h3>
                     <div class="grid grid-cols-2 gap-4">
@@ -909,6 +937,18 @@ class QuizApp {
                         ${this.renderBadge('dailyGoalReached', '🎯 Obiettivo', 'Meta giornaliera')}
                     </div>
                 </div>
+            `;
+        };
+
+
+        return `
+            <div class="mb-20">
+                <h1 class="text-3xl font-extrabold text-center mb-6 text-[var(--theme-color)]">📊 Statistiche</h1>
+
+                ${renderGeneralStats()}
+                ${renderHighScores()}
+                ${renderTopErrors()}
+                ${renderBadges()}
 
                 <button onclick="window.quizApp.resetStats()" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition">
                     🗑️ Azzera Statistiche
@@ -932,10 +972,8 @@ class QuizApp {
     }
 
     renderSettings() {
-        return `
-            <div class="mb-20">
-                <h1 class="text-3xl font-extrabold text-center mb-6 text-[var(--theme-color)]">⚙️ Impostazioni</h1>
-
+        const renderAppearanceSettings = () => {
+            return `
                 <div class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg mb-6">
                     <h3 class="text-xl font-bold mb-4 dark:text-white">🎨 Aspetto</h3>
 
@@ -958,6 +996,11 @@ class QuizApp {
                     </div>
                 </div>
 
+            `;
+        };
+
+        const renderDailyGoalSettings = () => {
+            return `
                 <div class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg mb-6">
                     <h3 class="text-xl font-bold mb-4 dark:text-white">🎯 Obiettivi</h3>
                     <div class="p-4 bg-gray-100 dark:bg-gray-600 rounded-lg">
@@ -973,7 +1016,11 @@ class QuizApp {
                         </p>
                     </div>
                 </div>
+            `;
+        };
 
+        const renderInfo = () => {
+            return `
                 <div class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg">
                     <h3 class="text-xl font-bold mb-4 dark:text-white">ℹ️ Informazioni</h3>
                     <div class="space-y-2 text-sm dark:text-gray-300">
@@ -983,6 +1030,17 @@ class QuizApp {
                         <p><strong>PWA:</strong> Supporto Offline Completo</p>
                     </div>
                 </div>
+            `;
+        };
+
+
+        return `
+            <div class="mb-20">
+                <h1 class="text-3xl font-extrabold text-center mb-6 text-[var(--theme-color)]">⚙️ Impostazioni</h1>
+
+                ${renderAppearanceSettings()}
+                ${renderDailyGoalSettings()}
+                ${renderInfo()}
             </div>
 
             ${this.renderBottomNav()}
