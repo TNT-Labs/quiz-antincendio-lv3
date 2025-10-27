@@ -170,6 +170,12 @@ class QuizApp {
             return;
         }
 
+        // FIX: Stop timer when selecting a new mode
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+
         this.mode = mode;
         this.incorrectCount = 0;
         this.answeredQuestions = [];
@@ -304,6 +310,12 @@ class QuizApp {
 
         const timeSpent = (Date.now() - this.questionStartTime) / 1000;
 
+        // Solo in training mode aggiungiamo la risposta a answeredQuestions per il riepilogo
+        if (this.mode === 'training') {
+             this.answeredQuestions.push({ question: currentQ, isCorrect, selectedLabel, timeSpent });
+        }
+
+
         this.history.push({
             qnum: currentQ.qnum,
             isCorrect: isCorrect,
@@ -359,7 +371,7 @@ class QuizApp {
                 return;
             }
 
-            // Carica la risposta dell'utente per la prossima domanda
+            // Carica la risposta data per la prossima domanda
             const currentAnswered = this.answeredQuestions[this.currentQuestionIndex];
             if (currentAnswered) {
                 this.selectedAnswer = currentAnswered.selectedLabel;
@@ -389,7 +401,7 @@ class QuizApp {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
         }
-        
+
         this.endTime = Date.now();
 
         if (this.mode === 'timeChallenge') {
@@ -400,7 +412,13 @@ class QuizApp {
             }
         }
 
-        this.quizState = 'results';
+        // FIX: If training mode, go back to results screen
+        if (this.mode === 'training') {
+            this.quizState = 'results';
+        } else {
+            this.quizState = 'results';
+        }
+
         this.savePersistentData();
         this.render();
     }
@@ -411,20 +429,20 @@ class QuizApp {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
         }
-        
+
         this.quizState = 'quiz';
         this.mode = 'review';
         this.selectedQuestions = this.answeredQuestions.map(a => a.question);
         this.currentQuestionIndex = 0;
         this.showFeedback = true;
-        
+
         // FIX: Carica la risposta data per la prima domanda
         if (this.answeredQuestions.length > 0) {
             this.selectedAnswer = this.answeredQuestions[0].selectedLabel;
         } else {
             this.selectedAnswer = null;
         }
-        
+
         this.render();
     }
 
@@ -645,6 +663,14 @@ class QuizApp {
         const currentAnswered = isReviewMode ? this.answeredQuestions[this.currentQuestionIndex] : null;
         const userAnswer = isReviewMode && currentAnswered ? currentAnswered.selectedLabel : this.selectedAnswer;
 
+        // FIX: Add exit button for training mode
+        const exitButtonHTML = this.mode === 'training' ? `
+            <button onclick="window.quizApp.endQuiz()" class="w-full bg-gray-500 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition mt-4">
+                🚪 Esci dall'Allenamento
+            </button>
+        ` : '';
+
+
         return `
             ${timerHTML}
             <div class="mb-4">
@@ -659,13 +685,13 @@ class QuizApp {
 
             <div class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg mb-6">
                 <h2 class="text-xl font-bold mb-4 dark:text-white">${currentQ.instruction}</h2>
-                
+
                 <div class="space-y-3">
                     ${Object.entries(currentQ.options).map(([label, text]) => {
                         const isSelected = userAnswer === label;
                         const isCorrect = currentQ.correct_label === label;
                         let buttonClass = 'bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500';
-                        
+
                         // FIX: Logica semplificata per i colori
                         if (userAnswer && this.showFeedback) {
                             if (isCorrect) {
@@ -680,7 +706,7 @@ class QuizApp {
                         const isDisabled = isReviewMode || (userAnswer && this.mode !== 'training');
 
                         return `
-                            <button 
+                            <button
                                 onclick="window.quizApp.checkAnswer(${currentQ.qnum}, '${label}')"
                                 class="w-full text-left p-4 rounded-lg font-medium transition ${buttonClass} ${isDisabled ? 'cursor-not-allowed' : ''}"
                                 ${isDisabled ? 'disabled' : ''}>
@@ -702,38 +728,72 @@ class QuizApp {
                 ` : ''}
             </div>
 
-            <button 
+            <button
                 onclick="window.quizApp.nextQuestion()"
-                class="w-full bg-[var(--theme-color)] text-white font-bold py-3 rounded-xl shadow-lg transition 
+                class="w-full bg-[var(--theme-color)] text-white font-bold py-3 rounded-xl shadow-lg transition
                 ${(this.mode !== 'review' && this.mode !== 'training' && !userAnswer) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}"
                 ${(this.mode !== 'review' && this.mode !== 'training' && !userAnswer) ? 'disabled' : ''}>
                 ${this.currentQuestionIndex === this.selectedQuestions.length - 1 ? (isReviewMode ? 'Termina Revisione' : 'Completa Quiz') : 'Prossima Domanda →'}
             </button>
+
+            ${exitButtonHTML}
         `;
     }
 
     renderResults() {
+        // Calcola le metriche per il riepilogo
+        const totalQuestionsAnswered = this.answeredQuestions.length;
+        const correctCount = this.answeredQuestions.filter(q => q.isCorrect).length;
+        const incorrectCount = totalQuestionsAnswered - correctCount;
+        const percentage = totalQuestionsAnswered > 0 ? ((correctCount / totalQuestionsAnswered) * 100).toFixed(1) : 0;
         const totalTime = ((this.endTime - this.startTime) / 1000).toFixed(0);
-        const correctCount = this.selectedQuestions.length - this.incorrectCount;
-        const percentage = ((correctCount / this.selectedQuestions.length) * 100).toFixed(1);
-        const passed = this.mode === 'exam' ? this.incorrectCount <= 5 : true;
+        const passed = this.mode === 'exam' ? this.incorrectCount <= 5 : true; // Logica 'passed' solo per esame
+
+
+        // Se in training mode, la logica del "superato" non si applica
+        const resultTitle = this.mode === 'training' ? 'Riepilogo Allenamento' : (passed ? '✅ Complimenti!' : '❌ Non Superato');
+        const titleColor = this.mode === 'training' ? 'text-blue-600' : (passed ? 'text-green-600' : 'text-red-600');
+
 
         return `
             <div class="bg-white dark:bg-gray-700 rounded-xl p-8 shadow-lg text-center mb-20">
-                <h2 class="text-3xl font-extrabold mb-6 ${passed ? 'text-green-600' : 'text-red-600'}">
-                    ${passed ? '✅ Complimenti!' : '❌ Non Superato'}
+                <h2 class="text-3xl font-extrabold mb-6 ${titleColor}">
+                    ${resultTitle}
                 </h2>
 
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
-                        <p class="text-3xl font-bold text-blue-600">${percentage}%</p>
-                        <p class="text-sm dark:text-gray-300">Accuratezza</p>
+                 ${this.mode === 'training' ? `
+                     <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
+                            <p class="text-3xl font-bold text-blue-600">${totalQuestionsAnswered}</p>
+                            <p class="text-sm dark:text-gray-300">Domande Risposte</p>
+                        </div>
+                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
+                            <p class="text-3xl font-bold text-green-600">${correctCount}</p>
+                            <p class="text-sm dark:text-gray-300">Corrette</p>
+                        </div>
+                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
+                            <p class="text-3xl font-bold text-red-600">${incorrectCount}</p>
+                            <p class="text-sm dark:text-gray-300">Sbagliate</p>
+                        </div>
+                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
+                            <p class="text-3xl font-bold text-purple-600">${totalTime}s</p>
+                            <p class="text-sm dark:text-gray-300">Tempo Totale</p>
+                        </div>
+                     </div>
+
+                 ` : `
+                     <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
+                            <p class="text-3xl font-bold text-blue-600">${percentage}%</p>
+                            <p class="text-sm dark:text-gray-300">Accuratezza</p>
+                        </div>
+                        <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
+                            <p class="text-3xl font-bold text-purple-600">${totalTime}s</p>
+                            <p class="text-sm dark:text-gray-300">Tempo Totale</p>
+                        </div>
                     </div>
-                    <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
-                        <p class="text-3xl font-bold text-purple-600">${totalTime}s</p>
-                        <p class="text-sm dark:text-gray-300">Tempo Totale</p>
-                    </div>
-                </div>
+                 `}
+
 
                 ${this.mode === 'timeChallenge' ? `
                     <div class="bg-purple-100 dark:bg-purple-900 p-4 rounded-lg mb-4">
@@ -749,6 +809,13 @@ class QuizApp {
                             🔍 Rivedi Risposte
                         </button>
                     ` : ''}
+
+                    ${this.answeredQuestions.length > 0 && this.mode === 'training' ? `
+                         <button onclick="window.quizApp.reviewAnswers()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition">
+                             🔍 Rivedi Risposte Allenamento
+                         </button>
+                     ` : ''}
+
                     <button onclick="window.quizApp.quizState = 'start'; window.quizApp.render();" class="w-full bg-[var(--theme-color)] text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition">
                         🏠 Torna al Menu
                     </button>
@@ -758,9 +825,9 @@ class QuizApp {
     }
 
     renderStats() {
-        const avgAccuracy = this.stats.totalAttempts > 0 ? 
+        const avgAccuracy = this.stats.totalAttempts > 0 ?
             ((this.stats.totalCorrect / this.stats.totalAttempts) * 100).toFixed(1) : 0;
-        const avgTime = this.stats.totalAttempts > 0 ? 
+        const avgTime = this.stats.totalAttempts > 0 ?
             (this.stats.totalTime / this.stats.totalAttempts).toFixed(1) : 0;
 
         const questionStats = this.getQuestionStats();
@@ -871,10 +938,10 @@ class QuizApp {
 
                 <div class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg mb-6">
                     <h3 class="text-xl font-bold mb-4 dark:text-white">🎨 Aspetto</h3>
-                    
+
                     <div class="flex justify-between items-center mb-4 p-4 bg-gray-100 dark:bg-gray-600 rounded-lg">
                         <span class="font-bold dark:text-white">🌙 Modalità Scura</span>
-                        <button onclick="window.quizApp.toggleDarkMode()" 
+                        <button onclick="window.quizApp.toggleDarkMode()"
                             class="px-6 py-2 rounded-lg font-bold transition ${this.settings.darkMode ? 'bg-yellow-500 text-black' : 'bg-gray-800 text-white'}">
                             ${this.settings.darkMode ? 'ON' : 'OFF'}
                         </button>
@@ -895,9 +962,9 @@ class QuizApp {
                     <h3 class="text-xl font-bold mb-4 dark:text-white">🎯 Obiettivi</h3>
                     <div class="p-4 bg-gray-100 dark:bg-gray-600 rounded-lg">
                         <label class="block font-bold mb-2 dark:text-white">Obiettivo Giornaliero</label>
-                        <input 
-                            type="number" 
-                            value="${this.dailyGoal.target}" 
+                        <input
+                            type="number"
+                            value="${this.dailyGoal.target}"
                             onchange="window.quizApp.dailyGoal.target = parseInt(this.value); window.quizApp.savePersistentData(); window.quizApp.render();"
                             class="w-full p-2 rounded border border-gray-300 dark:bg-gray-700 dark:text-white dark:border-gray-500"
                             min="1" max="350">
@@ -927,7 +994,7 @@ class QuizApp {
         const isCurrent = this.settings.theme === themeId;
 
         return `
-            <button 
+            <button
                 onclick="${isUnlocked ? `window.quizApp.changeTheme('${themeId}')` : ''}"
                 class="p-4 rounded-lg font-bold text-center transition ${isCurrent ? 'ring-4 ring-blue-500' : ''} ${isUnlocked ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'}"
                 style="background-color: ${color}; color: white;"
@@ -947,17 +1014,17 @@ class QuizApp {
         return `
             <div class="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-white dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 shadow-2xl z-40">
                 <div class="flex justify-around items-center h-16">
-                    <button onclick="window.quizApp.quizState = 'start'; window.quizApp.render();" 
+                    <button onclick="window.quizApp.quizState = 'start'; window.quizApp.render();"
                         class="flex flex-col items-center justify-center transition ${isStart ? 'text-[var(--theme-color)]' : 'text-gray-500 dark:text-gray-300 hover:text-[var(--theme-color)]'}">
                         <span class="text-2xl">🏠</span>
                         <span class="text-xs font-medium">Home</span>
                     </button>
-                    <button onclick="window.quizApp.quizState = 'stats'; window.quizApp.render();" 
+                    <button onclick="window.quizApp.quizState = 'stats'; window.quizApp.render();"
                         class="flex flex-col items-center justify-center transition ${isStats ? 'text-[var(--theme-color)]' : 'text-gray-500 dark:text-gray-300 hover:text-[var(--theme-color)]'}">
                         <span class="text-2xl">📊</span>
                         <span class="text-xs font-medium">Stats</span>
                     </button>
-                    <button onclick="window.quizApp.quizState = 'settings'; window.quizApp.render();" 
+                    <button onclick="window.quizApp.quizState = 'settings'; window.quizApp.render();"
                         class="flex flex-col items-center justify-center transition ${isSettings ? 'text-[var(--theme-color)]' : 'text-gray-500 dark:text-gray-300 hover:text-[var(--theme-color)]'}">
                         <span class="text-2xl">⚙️</span>
                         <span class="text-xs font-medium">Impostazioni</span>
