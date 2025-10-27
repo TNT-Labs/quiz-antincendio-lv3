@@ -54,7 +54,7 @@ class QuizApp {
             const loading = document.getElementById('loading');
             if (loading) loading.style.display = 'none';
             this.renderQuiz();
-            setTimeout(() => this.handleA2HS(), 600);
+            
         }
     }
 
