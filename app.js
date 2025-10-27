@@ -753,6 +753,14 @@ class QuizApp {
 
 
         const renderStatsGrid = () => {
+            // Calcola le metriche (le ho spostate all'inizio per chiarezza)
+            const totalQuestionsAnswered = this.answeredQuestions.length;
+            const correctCount = this.answeredQuestions.filter(q => q.isCorrect).length;
+            const incorrectCount = totalQuestionsAnswered - correctCount;
+            const percentage = totalQuestionsAnswered > 0 ? ((correctCount / totalQuestionsAnswered) * 100).toFixed(1) : 0;
+            const totalTime = ((this.endTime - this.startTime) / 1000).toFixed(0);
+            const isExam = this.mode === 'exam'; // Già definito nella funzione chiamante, ma meglio averlo qui per riferimento
+
             if (this.mode === 'training') {
                 return `
                      <div class="grid grid-cols-2 gap-4 mb-6">
@@ -773,8 +781,9 @@ class QuizApp {
                             <p class="text-sm dark:text-gray-300">Tempo Totale</p>
                         </div>
                      </div>
-
-                 ` : `
+                `; // <-- Ritorna e finisce qui per il 'training' mode
+            } else { // Modalità non-training (es. 'exam', 'timeChallenge', ecc.)
+                let html = `
                      <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
                             <p class="text-3xl font-bold text-blue-600">${percentage}%</p>
@@ -785,14 +794,20 @@ class QuizApp {
                             <p class="text-sm dark:text-gray-300">Tempo Totale</p>
                         </div>
                     </div>
-                 `}
-            ${isExam ? `
-                <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg mb-6">
-                     <p class="text-3xl font-bold ${incorrectCount <= 5 ? 'text-green-600' : 'text-red-600'}">${incorrectCount}</p>
-                     <p class="text-sm dark:text-gray-300">Errori (${incorrectCount <= 5 ? 'Max 5' : 'Troppi!'})</p>
-                 </div>
-            ` : ''}
-            `;
+                `;
+
+                // Aggiungi il blocco 'isExam' se necessario
+                if (isExam) {
+                    html += `
+                        <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg mb-6">
+                             <p class="text-3xl font-bold ${incorrectCount <= 5 ? 'text-green-600' : 'text-red-600'}">${incorrectCount}</p>
+                             <p class="text-sm dark:text-gray-300">Errori (${incorrectCount <= 5 ? 'Max 5' : 'Troppi!'})</p>
+                         </div>
+                    `;
+                }
+                
+                return html; // <-- Ritorna la stringa finale per le altre modalità
+            }
         };
 
         const renderTimeChallengeScore = () => {
