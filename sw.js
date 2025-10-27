@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quiz-antincendio-v1.3.5';
+const CACHE_NAME = 'quiz-antincendio-v1.3.6';
 const ORIGIN = self.location.origin;
 
 self.addEventListener('install', e => {
@@ -43,3 +43,4 @@ self.addEventListener('fetch', e => {
       .catch(() => e.request.mode === 'navigate' ? caches.match(`${ORIGIN}/index.html`) : undefined)
   );
 });
+
