@@ -119,6 +119,21 @@ class QuizApp {
         }[t] || '#dc2626';
     }
 
+
+    render() {
+      // Example: render different views based on quizState
+      if (this.quizState === 'quiz') {
+        this.root.innerHTML = this.renderQuiz();
+      } else if (this.quizState === 'start') {
+        this.root.innerHTML = '<button onclick="window.quizApp.selectMode(\'training\')">Inizia Quiz</button>';
+      } else if (this.quizState === 'error') {
+        this.root.innerHTML = '<p>Errore nel caricamento dei dati.</p>';
+      } else {
+        this.root.innerHTML = '<p>Stato sconosciuto.</p>';
+      }
+    }
+
+
     // ========================================
     // Modalità di gioco
     // ========================================
