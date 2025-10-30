@@ -62,13 +62,14 @@ Essendo una PWA, l'app è installabile su qualsiasi dispositivo:
 
 ## 📁 Struttura del Progetto
 
-La struttura minima necessaria è:
-quiz-antincendio-pwa/ 
-                    ├── app.js # La logica principale dell'applicazione (QuizApp class) 
-                    ├── index.html # Il markup HTML principale 
-                    ├── style.css # (File CSS o link al CDN di Tailwind) 
-                    ├── sw.js # Il Service Worker per la funzionalità offline/caching 
-                    └── quiz_antincendio_ocr_improved.json # File JSON contenente le domande
+La struttura minima necessaria si trova nella cartella `quiz-antincendio-pwa/` e include i seguenti file:
+
+* `app.js`: La logica principale dell'applicazione (`QuizApp` class).
+* `index.html`: Il markup HTML principale.
+* `style.css`: Il file CSS (o link al CDN di Tailwind).
+* `sw.js`: Il Service Worker per la funzionalità offline/caching.
+* `quiz_antincendio_ocr_improved.json`: Il file JSON contenente le domande.
+  
 ## ⚙️ Logica Chiave
 
 ### Gestione dello Stato e Rendering
@@ -115,4 +116,5 @@ Questo progetto è distribuito sotto licenza **MIT**.
 - [ ] **Sincronizzazione cloud** - Backup automatico
 
 *Ultima modifica: 29 Ottobre 2025*
+
 
