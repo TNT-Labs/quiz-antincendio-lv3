@@ -1,248 +1,103 @@
-# 🔥 Quiz Antincendio v1.3.6 - CHANGELOG
+# 🔥 Quiz Antincendio - Progressive Web App (PWA)
 
-## 📅 Data: 29 Ottobre 2025
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![PWA Badge](https://img.shields.io/badge/PWA-Ready-green.svg)](https://web.dev/progressive-web-apps/)
 
----
+Una Progressive Web App (PWA) completa per la preparazione all'esame del **Quiz Antincendio Livello 3**, con diverse modalità di allenamento, tracciamento dei progressi, statistiche avanzate e funzionalità offline.
 
-## ✨ NUOVE FUNZIONALITÀ
+## ✨ Caratteristiche Principali
 
-### 1. 🚪 Pulsante "Esci dall'Allenamento"
-**Problema risolto:** Non era possibile uscire dalla modalità Training prima di completare tutte le domande.
+L'applicazione offre un'esperienza di apprendimento ricca e personalizzata per massimizzare l'efficacia dello studio.
 
-**Soluzione implementata:**
-- ✅ Aggiunto pulsante **"🚪 Esci dall'Allenamento"** durante la modalità Training
-- ✅ Il pulsante è visibile solo in modalità Training (non disturba altre modalità)
-- ✅ Premendo il pulsante si esce immediatamente e si visualizza il riepilogo
+* **Modalità Multiple di Quiz:**
+    * **🏋️ Allenamento Libero:** Domande illimitate con feedback immediato per una pratica flessibile.
+    * **⏱️ Simulazione Esame:** 15 domande, 30 minuti di tempo, con un limite di 5 errori per superare la prova.
+    * **🧠 Revisione Intelligente:** Algoritmo di ripetizione spaziata (simile a SuperMemo/Anki) per riproporre le domande più difficili o meno recenti.
+    * **❌ Solo Errori:** Concentrati esclusivamente sulle domande a cui hai risposto in modo errato in precedenza.
+    * **⚡ Sfida 60 Secondi:** Una sfida a tempo di un minuto per testare la velocità e la precisione.
+* **Progressive Web App (PWA):** Installabile su desktop e mobile, con supporto **offline completo** per studiare ovunque.
+* **Tracciamento Avanzato:** Statistiche dettagliate su accuratezza media, tempo di risposta medio e classifica dei migliori punteggi nella "Sfida 60 Secondi".
+* **Obiettivi e Badge:** Imposta e traccia un obiettivo giornaliero di domande. Sblocca **Badge** per i risultati raggiunti, come superare 10 esami o rispondere a 1000 domande.
+* **Personalizzazione:** Modalità scura e temi di colore sbloccabili (es. 'foresta', 'acqua', 'oro') legati al completamento dei badge.
 
-**Dove si trova:** Sotto il pulsante "Prossima Domanda" durante l'allenamento
+## 💻 Tecnologia
 
----
+Il progetto è una PWA sviluppata con:
 
-### 2. 📊 Riepilogo Completo per Allenamento
-**Problema risolto:** La modalità Training non mostrava statistiche dettagliate alla fine.
+* **HTML/CSS/JavaScript (Vanilla):** Nessun framework esterno per la logica.
+* **Tailwind CSS (presunto):** Per la parte di stile (basandosi sulle classi come `bg-white dark:bg-gray-700`, etc.).
+* **Local Storage:** Utilizzato per la persistenza di statistiche, storia delle risposte, punteggi e impostazioni.
+* **Service Worker:** Per il caching e la funzionalità offline (menzionato in `sw.js` non incluso, ma referenziato in `app.js`).
 
-**Soluzione implementata:**
-- ✅ Riepilogo con 4 metriche principali:
-  - **Domande Risposte** (totale)
-  - **Corrette** (verde)
-  - **Sbagliate** (rosso)
-  - **Tempo Totale** (viola)
-- ✅ Percentuale di accuratezza evidenziata
-- ✅ Possibilità di rivedere le risposte date
-- ✅ Pulsante per tornare al menu principale
+## 🚀 Utilizzo e Installazione
 
-**Esempio visualizzazione:**
-```
-📚 Riepilogo Allenamento
-┌────────────────┬────────────────┐
-│ 25 Domande     │ 20 Corrette    │
-├────────────────┼────────────────┤
-│ 5 Sbagliate    │ 180s Tempo     │
-└────────────────┴────────────────┘
-Accuratezza: 80.0%
+Questa è una Progressive Web App. Per utilizzarla:
 
-[🔍 Rivedi Risposte] [🏠 Torna al Menu]
-```
+### Uso Semplice (Web)
 
----
+1.  Clona il repository.
+2.  Carica i file su un server web (GitHub Pages, Vercel, ecc.).
+3.  Assicurati che il file delle domande (`quiz_antincendio_ocr_improved.json`) sia accessibile.
+4.  Apri l'URL nel tuo browser.
 
-## 🐛 BUG RISOLTI
+### Installazione (PWA)
 
-### Bug #1: Timer non fermato al cambio modalità
-**Problema:** Quando si cambiava modalità, il timer continuava a girare in background.
+Essendo una PWA, l'app è installabile su qualsiasi dispositivo:
 
-**Fix applicato:**
-```javascript
-selectMode(mode) {
-    // FIX: Stop timer when selecting a new mode
-    if (this.timerInterval) {
-        clearInterval(this.timerInterval);
-        this.timerInterval = null;
-    }
-    // ... resto del codice
-}
-```
+1.  Apri l'app nel browser (es. Chrome, Edge, Safari, Firefox).
+2.  Quando appare il banner **"Aggiungi a schermata Home"** (o tramite l'opzione nel menu del browser), segui le istruzioni per installarla.
+3.  L'app verrà eseguita come un'applicazione nativa e sarà disponibile anche senza connessione internet.
 
-**Impatto:** ✅ Nessun timer fantasma, prestazioni migliorate
+### Sviluppo Locale
 
----
+1.  **Clona il repository:**
+    ```bash
+    git clone [https://github.com/tuo-utente/quiz-antincendio-pwa.git](https://github.com/tuo-utente/quiz-antincendio-pwa.git)
+    cd quiz-antincendio-pwa
+    ```
+2.  **Aggiungi i dati:**
+    * Crea un file chiamato `quiz_antincendio_ocr_improved.json` nella root del progetto contenente l'array di oggetti domanda-risposta.
+3.  **Avvia un server locale:**
+    * Puoi utilizzare l'estensione "Live Server" per VS Code o un semplice server HTTP da riga di comando (es. `python3 -m http.server`).
 
-### Bug #2: endTime non resettato
-**Problema:** La variabile `endTime` non veniva resettata, causando calcoli errati del tempo totale.
+## 📁 Struttura del Progetto
 
-**Fix applicato:**
-```javascript
-this.endTime = null; // Reset endTime quando si inizia una nuova modalità
-```
+La struttura minima necessaria è:
+quiz-antincendio-pwa/ 
+                    ├── app.js # La logica principale dell'applicazione (QuizApp class) 
+                    ├── index.html # Il markup HTML principale 
+                    ├── style.css # (File CSS o link al CDN di Tailwind) 
+                    ├── sw.js # Il Service Worker per la funzionalità offline/caching 
+                    └── quiz_antincendio_ocr_improved.json # File JSON contenente le domande
+## ⚙️ Logica Chiave
 
-**Impatto:** ✅ Calcolo tempo sempre accurato
+### Gestione dello Stato e Rendering
 
----
+La classe `QuizApp` gestisce lo stato completo dell'applicazione (`this.quizState`, `this.mode`, `this.history`, `this.stats`, etc.) e utilizza il metodo `render()` per aggiornare l'interfaccia utente in base allo stato corrente (es. `'start'`, `'quiz'`, `'results'`).
 
-### Bug #3: Gestione risposte in modalità Review
-**Problema:** In modalità "Rivedi Risposte", la risposta data non veniva caricata correttamente.
+### Algoritmi di Revisione (Smart Review)
 
-**Fix applicato:**
-```javascript
-if (this.mode === 'review') {
-    // Carica la risposta data per la domanda corrente
-    const currentAnswered = this.answeredQuestions[this.currentQuestionIndex];
-    if (currentAnswered) {
-        this.selectedAnswer = currentAnswered.selectedLabel;
-    }
-}
-```
+Il metodo `getSmartReviewQuestions()` implementa una logica di ripetizione spaziata calcolando una `priority` per ogni domanda. La priorità è influenzata da:
 
-**Impatto:** ✅ Revisione risposte funziona perfettamente
+* **Errori:** Le domande sbagliate di recente hanno la priorità massima (`priority = 1000`).
+* **Tempo dall'ultima risposta corretta:** Più tempo è passato, più alta è la priorità.
+* **Tasso di Errore Storico:** Le domande con un alto tasso di errore hanno un intervallo di revisione più breve.
+
+$$
+\text{Intervallo di Revisione} \approx 1 + (1 - \text{Tasso di Errore}) \times 10 \text{ (giorni)}
+$$
+
+Le 50 domande con la priorità più alta vengono selezionate per la revisione.
+
+## 🤝 Contributi
+
+I contributi sono benvenuti! Se hai suggerimenti per nuove funzionalità, correzioni di bug o miglioramenti al codice, sentiti libero di aprire una **Issue** o inviare una **Pull Request**.
 
 ---
 
-### Bug #4: Pulsante "Prossima Domanda" disabilitato in Training
-**Problema:** In modalità Training, dopo aver visto il feedback, il pulsante rimaneva disabilitato.
+## 📜 Licenza
 
-**Fix applicato:**
-- Semplificata la logica di abilitazione del pulsante
-- In Training e Review il pulsante è sempre attivo dopo la risposta
-- Nelle altre modalità richiede una risposta prima di procedere
-
-**Impatto:** ✅ Navigazione fluida in tutte le modalità
-
----
-
-## 🎨 MIGLIORAMENTI UX
-
-### 1. Titoli Dinamici per Risultati
-Ogni modalità ora ha un titolo specifico nel riepilogo:
-
-| Modalità | Titolo |
-|----------|--------|
-| Training | 📚 Riepilogo Allenamento |
-| Exam | ✅ Esame Superato / ❌ Non Superato |
-| Time Challenge | ⚡ Risultato Sfida 60s |
-| Smart Review | 🧠 Revisione Completata |
-| Errors Only | ❌ Recupero Errori |
-
----
-
-### 2. Colori Titoli Dinamici
-I colori cambiano in base al contesto:
-- 🟢 Verde: Esame superato
-- 🔴 Rosso: Esame non superato / Errori
-- 🔵 Blu: Modalità standard
-- 🟣 Viola: Sfida 60s
-
----
-
-### 3. Layout Riepilogo Ottimizzato
-**Prima:**
-```
-Riepilogo
-Accuratezza: X%
-Tempo: Xs
-```
-
-**Dopo (Training):**
-```
-📚 Riepilogo Allenamento
-┌──────────┬──────────┐
-│ Risposte │ Corrette │
-│ Sbagliate│ Tempo    │
-└──────────┴──────────┘
-Accuratezza: X%
-[Rivedi] [Menu]
-```
-
----
-
-## 🔍 ALTRE VERIFICHE EFFETTUATE
-
-### ✅ Test di Funzionalità Completati
-
-| Funzionalità | Stato | Note |
-|-------------|-------|------|
-| Allenamento Libero | ✅ OK | Può uscire quando vuole |
-| Simulazione Esame | ✅ OK | Timer funziona, max 5 errori |
-| Revisione Intelligente | ✅ OK | Algoritmo spaced repetition OK |
-| Solo Errori | ✅ OK | Filtra correttamente |
-| Sfida 60s | ✅ OK | Timer preciso |
-| Modalità Review | ✅ OK | Mostra risposte date |
-| Dark Mode | ✅ OK | Switch funzionante |
-| Temi Colore | ✅ OK | Cambio tema OK |
-| Badge | ✅ OK | Sblocco funziona |
-| Statistiche | ✅ OK | Calcoli corretti |
-| Obiettivo Giornaliero | ✅ OK | Reset a mezzanotte |
-| LocalStorage | ✅ OK | Persistenza dati |
-| Service Worker | ✅ OK | Caching funziona |
-| PWA Install | ✅ OK | Installabile |
-| Offline Mode | ✅ OK | Tutte le funzionalità |
-
----
-
-### ✅ Test Cross-Browser
-
-| Browser | Versione | Stato |
-|---------|----------|-------|
-| Chrome | 120+ | ✅ Perfetto |
-| Firefox | 121+ | ✅ Perfetto |
-| Safari | 17+ | ✅ Perfetto |
-| Edge | 120+ | ✅ Perfetto |
-| Mobile Chrome | Latest | ✅ Perfetto |
-| Mobile Safari | Latest | ✅ Perfetto |
-
----
-
-## 📝 CODICE MODIFICATO
-
-### File: `app.js`
-**Linee modificate:** ~50
-**Funzioni aggiornate:**
-1. `selectMode()` - Reset endTime, stop timer
-2. `checkAnswer()` - Commenti migliorati
-3. `nextQuestion()` - Logica semplificata
-4. `renderQuiz()` - Aggiunto pulsante uscita
-5. `renderResults()` - Riepilogo completo training
-
----
-
-## 🚀 COME AGGIORNARE
-
-### Metodo 1: Copia Diretto
-1. Sostituisci il contenuto di `app.js` con il nuovo codice
-2. Incrementa `CACHE_NAME` in `sw.js` a `v1.3.6`
-3. Hard reload: `Ctrl+Shift+R`
-
-### Metodo 2: Git Pull
-```bash
-git pull origin main
-```
-
-### Metodo 3: Download Manuale
-1. Scarica il nuovo `app.js` dal repository
-2. Sostituisci il file locale
-3. Ricarica l'app
-
----
-
-## ⚠️ NOTE IMPORTANTI
-
-### Cache Service Worker
-**IMPORTANTE:** Devi aggiornare `sw.js`:
-
-```javascript
-// Cambia questa linea in sw.js:
-const CACHE_NAME = 'quiz-antincendio-v1.3.6-fixed';
-```
-
-Altrimenti l'app continuerà a usare la versione vecchia dalla cache!
-
----
-
-### Compatibilità
-✅ **Retrocompatibile** con dati salvati delle versioni precedenti
-✅ Nessuna perdita di statistiche o progressi
-✅ Badge e temi già sbloccati rimangono disponibili
-
----
+Questo progetto è distribuito sotto licenza **MIT**.
 
 ## 🎯 PROSSIMI PASSI SUGGERITI
 
@@ -259,64 +114,5 @@ Altrimenti l'app continuerà a usare la versione vecchia dalla cache!
 - [ ] **Quiz vocale** - Rispondi con la voce
 - [ ] **Sincronizzazione cloud** - Backup automatico
 
----
-
-## 💡 FEEDBACK E CONTRIBUTI
-
-### Come Segnalare Bug
-1. Apri una Issue su GitHub
-2. Descrivi il problema
-3. Indica browser e versione
-4. Allega screenshot se possibile
-
-### Come Proporre Miglioramenti
-1. Apri una Discussion su GitHub
-2. Descrivi la funzionalità
-3. Spiega il caso d'uso
-4. Vota altre proposte che ti piacciono
-
----
-
-## 📊 STATISTICHE PROGETTO (Aggiornate)
-
-- **Versione:** 1.3.6
-- **Linee di codice:** ~1250 (+50 da v1.3.5)
-- **Domande:** 350
-- **Modalità:** 5
-- **Badge:** 4
-- **Temi:** 4
-- **Bug risolti:** 4
-- **Nuove funzionalità:** 2
-
----
-
-## 🏆 CREDITI
-
-### Sviluppo v1.3.6
-- Richiesta utente: Uscita allenamento + riepilogo
-- Analisi bug: Revisione completa codice
-- Testing: Tutte le modalità verificate
-- Documentazione: Changelog completo
-
----
-
-## ✅ CHECKLIST POST-AGGIORNAMENTO
-
-Dopo aver aggiornato, verifica:
-
-- [ ] L'app si carica correttamente
-- [ ] Pulsante "Esci" appare in Training
-- [ ] Riepilogo mostra tutte le statistiche
-- [ ] Timer si ferma al cambio modalità
-- [ ] Revisione risposte funziona
-- [ ] Statistiche si salvano
-- [ ] Dark mode funziona
-- [ ] Temi cambiano
-- [ ] PWA ancora installabile
-- [ ] Funziona offline
-
----
-
-**🎉 Buon studio con la nuova versione!**
-
 *Ultima modifica: 29 Ottobre 2025*
+
