@@ -1,5 +1,5 @@
-// Quiz Antincendio - Progressive Web App v1.3.5 FIXED
-// Versione corretta con tutte le anomalie risolte
+// Quiz Antincendio - Progressive Web App v1.3.6 FIXED
+// Versione corretta con uscita allenamento e riepilogo completo
 
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -170,7 +170,7 @@ class QuizApp {
             return;
         }
 
-        // FIX: Stop timer when selecting a new mode
+        // FIX v1.3.6: Stop timer when selecting a new mode
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
@@ -180,6 +180,7 @@ class QuizApp {
         this.incorrectCount = 0;
         this.answeredQuestions = [];
         this.startTime = Date.now();
+        this.endTime = null; // FIX v1.3.6: Reset endTime
         this.questionStartTime = Date.now();
 
         switch (mode) {
@@ -297,26 +298,20 @@ class QuizApp {
     }
 
     checkAnswer(qnum, selectedLabel) {
-        // Impedisce di rispondere se siamo in modalità 'review' o se la risposta è già stata data
         if (this.mode === 'review' || this.selectedAnswer !== null) return;
 
         this.selectedAnswer = selectedLabel;
         const currentQ = this.selectedQuestions[this.currentQuestionIndex];
         const isCorrect = (currentQ.correct_label === selectedLabel);
 
-        // Nel TimeChallenge l'errore non deve terminare il quiz, ma si può contare (o ignorare, a discrezione).
-        // Manteniamo il conteggio degli errori per consistenza, ma non ne impedisce l'avanzamento.
         if (!isCorrect) {
             this.incorrectCount++;
         }
 
         const timeSpent = (Date.now() - this.questionStartTime) / 1000;
 
-        // --- Logica Unificata ---
-        // Aggiungi la domanda all'array delle risposte per la revisione finale.
         this.answeredQuestions.push({ question: currentQ, isCorrect, selectedLabel, timeSpent });
 
-        // Aggiungi l'evento alla cronologia statistica
         this.history.push({
             qnum: currentQ.qnum,
             isCorrect: isCorrect,
@@ -325,49 +320,37 @@ class QuizApp {
             timeSpent: timeSpent,
         });
 
-        // Aggiorna le statistiche globali
         this.stats.totalAttempts++;
         if (isCorrect) {
             this.stats.totalCorrect++;
         }
         this.stats.totalTime += timeSpent;
 
-        // Aggiorna gli obiettivi
         this.dailyGoal.completedToday += 1;
         
-        // Salva, controlla i badge e aggiorna il rendering
         this.savePersistentData();
         this.checkBadges();
 
-        // RENDERIZZAZIONE
-        // Nella modalità 'training', l'utente vede il feedback ma deve cliccare "Prossima Domanda".
-        // Nelle modalità a tempo (exam, timeChallenge, smartReview, errorsOnly), 
-        // l'avanzamento avviene con nextQuestion().
-        
         this.render();
     }
 
     nextQuestion() {
         if (this.quizState !== 'quiz') return;
 
-        // FIX: Gestione semplificata della modalita training
         if (this.mode === 'training') {
             this.selectedAnswer = null;
         }
 
-        // FIX: In review mode possiamo sempre andare avanti
         if (this.mode === 'review') {
             this.currentQuestionIndex++;
             this.questionStartTime = Date.now();
 
             if (this.currentQuestionIndex >= this.selectedQuestions.length) {
-                // Fine revisione, torna ai risultati
                 this.quizState = 'results';
                 this.render();
                 return;
             }
 
-            // Carica la risposta data per la prossima domanda
             const currentAnswered = this.answeredQuestions[this.currentQuestionIndex];
             if (currentAnswered) {
                 this.selectedAnswer = currentAnswered.selectedLabel;
@@ -376,7 +359,6 @@ class QuizApp {
             return;
         }
 
-        // Per altre modalita, verifica che sia stata data una risposta
         if (this.mode !== 'training' && this.selectedAnswer === null) return;
 
         this.currentQuestionIndex++;
@@ -392,7 +374,6 @@ class QuizApp {
     }
 
     endQuiz() {
-        // FIX: Ferma sempre il timer
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
@@ -408,7 +389,6 @@ class QuizApp {
             }
         }
 
-        // Lo stato è sempre 'results' alla fine di ogni quiz.
         this.quizState = 'results';
 
         this.savePersistentData();
@@ -416,7 +396,6 @@ class QuizApp {
     }
 
     reviewAnswers() {
-        // FIX: Ferma il timer se esiste
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
@@ -428,7 +407,6 @@ class QuizApp {
         this.currentQuestionIndex = 0;
         this.showFeedback = true;
 
-        // FIX: Carica la risposta data per la prima domanda
         if (this.answeredQuestions.length > 0) {
             this.selectedAnswer = this.answeredQuestions[0].selectedLabel;
         } else {
@@ -650,18 +628,15 @@ class QuizApp {
             `;
         }
 
-        // FIX: Gestione migliorata della risposta in review mode
         const isReviewMode = this.mode === 'review';
         const currentAnswered = isReviewMode ? this.answeredQuestions[this.currentQuestionIndex] : null;
         const userAnswer = isReviewMode && currentAnswered ? currentAnswered.selectedLabel : this.selectedAnswer;
 
-        // FIX: Add exit button for training mode
         const exitButtonHTML = this.mode === 'training' ? `
             <button onclick="window.quizApp.endQuiz()" class="w-full bg-gray-500 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition mt-4">
                 🚪 Esci dall'Allenamento
             </button>
         ` : '';
-
 
         return `
             ${timerHTML}
@@ -684,7 +659,6 @@ class QuizApp {
                         const isCorrect = currentQ.correct_label === label;
                         let buttonClass = 'bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500';
 
-                        // FIX: Logica semplificata per i colori
                         if (userAnswer && this.showFeedback) {
                             if (isCorrect) {
                                 buttonClass = 'bg-green-500 text-white';
@@ -733,53 +707,65 @@ class QuizApp {
     }
 
     renderResults() {
-        // Calcola le metriche per il riepilogo
         const totalQuestionsAnswered = this.answeredQuestions.length;
         const correctCount = this.answeredQuestions.filter(q => q.isCorrect).length;
         const incorrectCount = totalQuestionsAnswered - correctCount;
         const percentage = totalQuestionsAnswered > 0 ? ((correctCount / totalQuestionsAnswered) * 100).toFixed(1) : 0;
         const totalTime = ((this.endTime - this.startTime) / 1000).toFixed(0);
 
-        // FIX: Determina il risultato per l'esame
         const isExam = this.mode === 'exam';
         const examPassed = isExam ? this.incorrectCount <= 5 : false;
-        const resultTitle = isExam ? (examPassed ? '✅ Complimenti!' : '❌ Non Superato') : 'Riepilogo'; // Titolo generico per altre modalità
-        const titleColor = isExam ? (examPassed ? 'text-green-600' : 'text-red-600') : 'text-blue-600';
-
+        
+        let resultTitle = 'Riepilogo';
+        let titleColor = 'text-blue-600';
+        
+        if (isExam) {
+            resultTitle = examPassed ? '✅ Esame Superato!' : '❌ Esame Non Superato';
+            titleColor = examPassed ? 'text-green-600' : 'text-red-600';
+        } else if (this.mode === 'training') {
+            resultTitle = '📚 Riepilogo Allenamento';
+            titleColor = 'text-blue-600';
+        } else if (this.mode === 'timeChallenge') {
+            resultTitle = '⚡ Risultato Sfida 60s';
+            titleColor = 'text-purple-600';
+        } else if (this.mode === 'smartReview') {
+            resultTitle = '🧠 Revisione Completata';
+            titleColor = 'text-blue-600';
+        } else if (this.mode === 'errorsOnly') {
+            resultTitle = '❌ Recupero Errori';
+            titleColor = 'text-red-600';
+        }
 
         const renderStatsGrid = () => {
-            // Calcola le metriche (le ho spostate all'inizio per chiarezza)
-            const totalQuestionsAnswered = this.answeredQuestions.length;
-            const correctCount = this.answeredQuestions.filter(q => q.isCorrect).length;
-            const incorrectCount = totalQuestionsAnswered - correctCount;
-            const percentage = totalQuestionsAnswered > 0 ? ((correctCount / totalQuestionsAnswered) * 100).toFixed(1) : 0;
-            const totalTime = ((this.endTime - this.startTime) / 1000).toFixed(0);
-            const isExam = this.mode === 'exam'; // Già definito nella funzione chiamante, ma meglio averlo qui per riferimento
-
             if (this.mode === 'training') {
                 return `
-                     <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
                             <p class="text-3xl font-bold text-blue-600">${totalQuestionsAnswered}</p>
                             <p class="text-sm dark:text-gray-300">Domande Risposte</p>
                         </div>
-                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
+                        <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
                             <p class="text-3xl font-bold text-green-600">${correctCount}</p>
                             <p class="text-sm dark:text-gray-300">Corrette</p>
                         </div>
-                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
+                        <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
                             <p class="text-3xl font-bold text-red-600">${incorrectCount}</p>
                             <p class="text-sm dark:text-gray-300">Sbagliate</p>
                         </div>
-                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
+                        <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
                             <p class="text-3xl font-bold text-purple-600">${totalTime}s</p>
                             <p class="text-sm dark:text-gray-300">Tempo Totale</p>
                         </div>
-                     </div>
-                `; // <-- Ritorna e finisce qui per il 'training' mode
-            } else { // Modalità non-training (es. 'exam', 'timeChallenge', ecc.)
+                    </div>
+                    <div class="bg-blue-100 dark:bg-blue-900 p-4 rounded-lg mb-4">
+                        <p class="text-2xl font-bold text-blue-800 dark:text-blue-200">
+                            Accuratezza: ${percentage}%
+                        </p>
+                    </div>
+                `;
+            } else {
                 let html = `
-                     <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg">
                             <p class="text-3xl font-bold text-blue-600">${percentage}%</p>
                             <p class="text-sm dark:text-gray-300">Accuratezza</p>
@@ -791,17 +777,16 @@ class QuizApp {
                     </div>
                 `;
 
-                // Aggiungi il blocco 'isExam' se necessario
                 if (isExam) {
                     html += `
                         <div class="bg-gray-100 dark:bg-gray-600 p-4 rounded-lg mb-6">
-                             <p class="text-3xl font-bold ${incorrectCount <= 5 ? 'text-green-600' : 'text-red-600'}">${incorrectCount}</p>
-                             <p class="text-sm dark:text-gray-300">Errori (${incorrectCount <= 5 ? 'Max 5' : 'Troppi!'})</p>
-                         </div>
+                            <p class="text-3xl font-bold ${incorrectCount <= 5 ? 'text-green-600' : 'text-red-600'}">${incorrectCount}</p>
+                            <p class="text-sm dark:text-gray-300">Errori (${incorrectCount <= 5 ? 'Max 5 ✓' : 'Troppi!'})</p>
+                        </div>
                     `;
                 }
                 
-                return html; // <-- Ritorna la stringa finale per le altre modalità
+                return html;
             }
         };
 
@@ -819,16 +804,15 @@ class QuizApp {
         };
 
         const renderReviewButton = () => {
-            if (this.answeredQuestions.length > 0) {
+            if (this.answeredQuestions.length > 0 && this.mode !== 'review') {
                 return `
-                     <button onclick="window.quizApp.reviewAnswers()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition">
-                         🔍 Rivedi Risposte ${this.mode === 'training' ? 'Allenamento' : ''}
-                     </button>
-                 `;
+                    <button onclick="window.quizApp.reviewAnswers()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition">
+                        🔍 Rivedi Risposte
+                    </button>
+                `;
             }
             return '';
         };
-
 
         return `
             <div class="bg-white dark:bg-gray-700 rounded-xl p-8 shadow-lg text-center mb-20">
@@ -848,7 +832,6 @@ class QuizApp {
             </div>
         `;
     }
-
 
     renderStats() {
         const avgAccuracy = this.stats.totalAttempts > 0 ?
@@ -950,7 +933,6 @@ class QuizApp {
             `;
         };
 
-
         return `
             <div class="mb-20">
                 <h1 class="text-3xl font-extrabold text-center mb-6 text-[var(--theme-color)]">📊 Statistiche</h1>
@@ -1005,7 +987,6 @@ class QuizApp {
                         </div>
                     </div>
                 </div>
-
             `;
         };
 
@@ -1034,7 +1015,7 @@ class QuizApp {
                 <div class="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-lg">
                     <h3 class="text-xl font-bold mb-4 dark:text-white">ℹ️ Informazioni</h3>
                     <div class="space-y-2 text-sm dark:text-gray-300">
-                        <p><strong>Versione:</strong> 1.3.5 Fixed</p>
+                        <p><strong>Versione:</strong> 1.3.6 Fixed</p>
                         <p><strong>Domande:</strong> ${this.stats.totalQuestions}</p>
                         <p><strong>Tipo:</strong> Quiz Antincendio Livello 3</p>
                         <p><strong>PWA:</strong> Supporto Offline Completo</p>
@@ -1042,7 +1023,6 @@ class QuizApp {
                 </div>
             `;
         };
-
 
         return `
             <div class="mb-20">
